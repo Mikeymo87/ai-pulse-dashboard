@@ -7,6 +7,7 @@ const CATEGORY_CONFIG = {
   ADOPTION:   { color: '#59BEC9', bg: 'rgba(89,190,201,0.12)',  icon: '◎' },
   RISK:       { color: '#E5554F', bg: 'rgba(229,85,79,0.12)',   icon: '◉' },
   MOMENTUM:   { color: '#2EA84A', bg: 'rgba(46,168,74,0.12)',   icon: '◆' },
+  READINESS:  { color: '#b388ff', bg: 'rgba(179,136,255,0.12)', icon: '◇' },
 };
 
 // ─── Skeleton card ────────────────────────────────────────────────────────────
@@ -209,6 +210,22 @@ export default function OpportunitySpotlight({ transforms }) {
         .slice(0, 5)
         .map(b => ({ barrier: b.barrier, s1: b.s1.pct, s2: b.s2.pct, s3: b.s3.pct }));
 
+      const roleBreakdown = (transforms.byRole ?? []).map(r => ({
+        role: r.role,
+        n: r.count,
+        confidenceAvg: r.confidenceAvg,
+        importanceAvg: r.importanceAvg,
+        familiarityAvg: r.familiarityAvg,
+      }));
+
+      const functionBreakdown = (transforms.byFunction ?? []).map(f => ({
+        function: f.function,
+        n: f.count,
+        confidenceAvg: f.confidenceAvg,
+        importanceAvg: f.importanceAvg,
+        familiarityAvg: f.familiarityAvg,
+      }));
+
       const ctx = {
         totalResponses: 292,
         surveys: [
@@ -245,16 +262,19 @@ export default function OpportunitySpotlight({ transforms }) {
         ownPocket: { yesPct: ownPocketS3.yesPct, note: 'S3 only — % paying out of pocket for AI tools' },
         momentum: momentumS3.slice(0, 4),
         topBenefits: benefitsS3.slice(0, 3),
+        teamReadiness: {
+          note: 'Survey 3 only — role and function data not collected in S1/S2',
+          byRole: roleBreakdown,
+          byFunction: functionBreakdown,
+        },
       };
 
       // ── API call ──────────────────────────────────────────────────────────
-      const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY;
-      console.log('OpportunitySpotlight: key defined?', !!apiKey, '| first 8 chars:', apiKey?.slice(0, 8));
       try {
         const res = await fetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
           headers: {
-            'x-api-key': apiKey,
+            'x-api-key': import.meta.env.VITE_ANTHROPIC_API_KEY,
             'anthropic-version': '2023-06-01',
             'anthropic-dangerous-direct-browser-access': 'true',
             'content-type': 'application/json',
@@ -264,17 +284,20 @@ export default function OpportunitySpotlight({ transforms }) {
             max_tokens: 1024,
             system: `You are a strategic advisor for Baptist Health's Marketing & Communications department.
 You will receive structured survey data from 3 pulse surveys (Jan–Feb 2025, Aug–Sep 2025, Mar 2026)
-covering AI adoption across the department (292 total responses).
-Return ONLY a valid JSON array of exactly 4 insight objects. No explanation, no markdown, no wrapper text.
+covering AI adoption across the department (292 total responses). The data also includes a team readiness
+breakdown by role and function from Survey 3.
+Return ONLY a valid JSON array of exactly 5 insight objects. No explanation, no markdown, no wrapper text.
 Each object must have: { "category": string, "headline": string, "body": string, "action": string, "stat": string }
-category must be one of: ENABLEMENT, ADOPTION, RISK, MOMENTUM
+category must be one of: ENABLEMENT, ADOPTION, RISK, MOMENTUM, READINESS
+The 5th card must use category READINESS and focus specifically on which roles or functions show the highest
+and lowest readiness (confidence + importance scores), and what leadership should do to close the gaps.
 headline: 8–12 words, punchy, declarative, present-tense
 body: 2–3 sentences describing what the data shows — grounded strictly in the numbers provided, no invented figures
 action: 1–2 sentences with a specific, actionable recommendation for department leadership — what to do next based on this insight
 stat: one key supporting data point as a short string, e.g. "↑ 34% daily use in Survey 3"`,
             messages: [{
               role: 'user',
-              content: `Here is the structured survey data. Generate 4 insight cards — one per category (ENABLEMENT, ADOPTION, RISK, MOMENTUM):\n\n${JSON.stringify(ctx, null, 2)}`,
+              content: `Here is the structured survey data. Generate 5 insight cards — one each for ENABLEMENT, ADOPTION, RISK, MOMENTUM, and READINESS:\n\n${JSON.stringify(ctx, null, 2)}`,
             }],
           }),
         });
@@ -290,7 +313,7 @@ stat: one key supporting data point as a short string, e.g. "↑ 34% daily use i
         // Strip markdown code fences if present (```json ... ``` or ``` ... ```)
         const text = rawText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
         const parsed = JSON.parse(text);
-        if (!Array.isArray(parsed) || parsed.length !== 4) throw new Error('Unexpected response shape');
+        if (!Array.isArray(parsed) || parsed.length < 4) throw new Error('Unexpected response shape');
         setCards(parsed);
       } catch (err) {
         console.error('OpportunitySpotlight error:', err);
@@ -356,12 +379,11 @@ stat: one key supporting data point as a short string, e.g. "↑ 34% daily use i
 
       {/* Card grid */}
       {loading && (
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(460px, 1fr))',
-          gap: 24,
-        }}>
-          {[0, 1, 2, 3].map(i => <SkeletonCard key={i} delay={i * 0.2} />)}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(460px, 1fr))', gap: 24 }}>
+            {[0, 1, 2, 3].map(i => <SkeletonCard key={i} delay={i * 0.2} />)}
+          </div>
+          <SkeletonCard delay={0.8} />
         </div>
       )}
 
@@ -381,14 +403,15 @@ stat: one key supporting data point as a short string, e.g. "↑ 34% daily use i
       )}
 
       {cards && !error && (
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(460px, 1fr))',
-          gap: 24,
-        }}>
-          {cards.map((card, i) => (
-            <InsightCard key={card.category} card={card} index={i} />
-          ))}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+          {/* First 4 cards — 2×2 grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(460px, 1fr))', gap: 24 }}>
+            {cards.slice(0, 4).map((card, i) => (
+              <InsightCard key={card.category} card={card} index={i} />
+            ))}
+          </div>
+          {/* 5th card — full width */}
+          {cards[4] && <InsightCard card={cards[4]} index={4} />}
         </div>
       )}
     </section>
