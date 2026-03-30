@@ -265,6 +265,7 @@ export default function TrendCharts({ transforms }) {
 
   // ── 7. Top 5 Barriers ────────────────────────────────────────────────────
   const barriersData = [...barriersTrend]
+    .filter(b => b.barrier !== 'No barriers')
     .sort((a, b) => (b.s3.pct - a.s3.pct) || (b.s2.pct - a.s2.pct) || (b.s1.pct - a.s1.pct))
     .slice(0, 5)
     .map(b => ({
