@@ -110,9 +110,33 @@ function InsightCard({ card, index }) {
         {card.body}
       </p>
 
+      {/* recommendation */}
+      {card.action && (
+        <div style={{
+          background: `${cfg.color}0f`,
+          border: `1px solid ${cfg.color}25`,
+          borderRadius: 10,
+          padding: '10px 14px',
+          display: 'flex',
+          gap: 8,
+          alignItems: 'flex-start',
+        }}>
+          <span style={{ color: cfg.color, fontSize: 12, fontWeight: 700, flexShrink: 0, paddingTop: 1 }}>→</span>
+          <p style={{
+            margin: 0,
+            fontFamily: 'Inter, sans-serif',
+            fontSize: 12.5,
+            fontWeight: 500,
+            color: '#d0d8e0',
+            lineHeight: 1.55,
+          }}>
+            {card.action}
+          </p>
+        </div>
+      )}
+
       {/* supporting stat */}
       <div style={{
-        marginTop: 4,
         paddingTop: 14,
         borderTop: '1px solid rgba(255,255,255,0.07)',
         fontFamily: 'Inter, sans-serif',
@@ -236,14 +260,15 @@ export default function OpportunitySpotlight({ transforms }) {
           body: JSON.stringify({
             model: 'claude-sonnet-4-6',
             max_tokens: 1024,
-            system: `You are a data analyst for Baptist Health's Marketing & Communications department.
+            system: `You are a strategic advisor for Baptist Health's Marketing & Communications department.
 You will receive structured survey data from 3 pulse surveys (Jan–Feb 2025, Aug–Sep 2025, Mar 2026)
 covering AI adoption across the department (292 total responses).
 Return ONLY a valid JSON array of exactly 4 insight objects. No explanation, no markdown, no wrapper text.
-Each object must have: { "category": string, "headline": string, "body": string, "stat": string }
+Each object must have: { "category": string, "headline": string, "body": string, "action": string, "stat": string }
 category must be one of: ENABLEMENT, ADOPTION, RISK, MOMENTUM
 headline: 8–12 words, punchy, declarative, present-tense
-body: 2–3 sentences grounded strictly in the data provided — no invented numbers, no extrapolation
+body: 2–3 sentences describing what the data shows — grounded strictly in the numbers provided, no invented figures
+action: 1–2 sentences with a specific, actionable recommendation for department leadership — what to do next based on this insight
 stat: one key supporting data point as a short string, e.g. "↑ 34% daily use in Survey 3"`,
             messages: [{
               role: 'user',
@@ -252,14 +277,21 @@ stat: one key supporting data point as a short string, e.g. "↑ 34% daily use i
           }),
         });
 
-        if (!res.ok) throw new Error(`API error ${res.status}`);
+        if (!res.ok) {
+          const errBody = await res.text();
+          console.error('OpportunitySpotlight API error', res.status, errBody);
+          throw new Error(`API error ${res.status}`);
+        }
         const data = await res.json();
-        const text = data.content?.[0]?.text ?? '';
+        const rawText = data.content?.[0]?.text ?? '';
+        console.log('OpportunitySpotlight raw response:', rawText);
+        // Strip markdown code fences if present (```json ... ``` or ``` ... ```)
+        const text = rawText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
         const parsed = JSON.parse(text);
         if (!Array.isArray(parsed) || parsed.length !== 4) throw new Error('Unexpected response shape');
         setCards(parsed);
       } catch (err) {
-        console.error('OpportunitySpotlight API error:', err);
+        console.error('OpportunitySpotlight error:', err);
         setError(true);
       } finally {
         setLoading(false);
