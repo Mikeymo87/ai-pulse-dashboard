@@ -3,6 +3,7 @@ import { useSurveyData } from './hooks/useSurveyData';
 import Nav from './components/Nav';
 import Hero from './components/Hero';
 import GrowthStory from './components/GrowthStory';
+import TrendCharts from './components/TrendCharts';
 
 export default function App() {
   const { transforms, loading, error } = useSurveyData();
@@ -53,7 +54,7 @@ export default function App() {
       <Nav />
       <Hero transforms={transforms} />
       <GrowthStory transforms={transforms} />
-      {/* More sections will be added in Phase 3+ */}
+      <TrendCharts transforms={transforms} />
     </div>
   );
 }
