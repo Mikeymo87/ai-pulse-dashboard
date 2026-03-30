@@ -5,9 +5,10 @@ import Hero from './components/Hero';
 import GrowthStory from './components/GrowthStory';
 import TrendCharts from './components/TrendCharts';
 import OpportunitySpotlight from './components/OpportunitySpotlight';
+import DeepDive from './components/DeepDive';
 
 export default function App() {
-  const { transforms, loading, error } = useSurveyData();
+  const { surveys, transforms, loading, error } = useSurveyData();
 
   if (loading) return (
     <div
@@ -57,6 +58,7 @@ export default function App() {
       <GrowthStory transforms={transforms} />
       <TrendCharts transforms={transforms} />
       <OpportunitySpotlight transforms={transforms} />
+      <DeepDive surveys={surveys} transforms={transforms} />
     </div>
   );
 }
