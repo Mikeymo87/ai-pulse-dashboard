@@ -96,6 +96,9 @@ export default function Hero({ transforms }) {
   const s1Pos   = posRow?.s1?.pct ?? 0;
   const s3Pos   = posRow?.s3?.pct ?? 0;
 
+  const ownPocketPct = transforms.ownPocketS3?.yesPct ?? 0;
+  const acceleratingPct = transforms.momentumS3?.find(m => m.label === 'Accelerating')?.pct ?? 0;
+
   const stats = [
     { value: totalResponses, label: 'Total Responses', accentColor: '#7DE69B' },
     { value: 3,              label: 'Pulse Surveys',   accentColor: '#59BEC9' },
@@ -232,7 +235,7 @@ export default function Hero({ transforms }) {
           transition={{ duration: 0.6, delay: 0.85 }}
           style={{
             marginTop: 40,
-            maxWidth: 720,
+            maxWidth: 780,
             width: '100%',
             background: 'rgba(29,77,82,0.28)',
             border: '1px solid rgba(125,230,155,0.15)',
@@ -257,22 +260,57 @@ export default function Hero({ transforms }) {
           </div>
           <p style={{
             fontSize: 15,
-            lineHeight: 1.8,
-            color: 'rgba(255,255,255,0.78)',
+            lineHeight: 1.85,
+            color: 'rgba(255,255,255,0.82)',
             fontFamily: 'Inter, sans-serif',
             margin: 0,
           }}>
-            Daily AI usage grew from{' '}
+            Fourteen months ago, we asked a simple question: <em style={{ color: '#7DE69B', fontStyle: 'italic' }}>Is this team ready for AI?</em>{' '}
+            The answer is no longer in doubt.
+          </p>
+          <p style={{
+            fontSize: 15,
+            lineHeight: 1.85,
+            color: 'rgba(255,255,255,0.78)',
+            fontFamily: 'Inter, sans-serif',
+            margin: 0,
+            marginTop: 14,
+          }}>
+            Daily AI usage surged from{' '}
             <span style={{ color: '#7DE69B', fontWeight: 700 }}>{s1Daily}%</span>
             {' '}to{' '}
             <span style={{ color: '#7DE69B', fontWeight: 700 }}>{s3Daily}%</span>
-            {' '}over 14 months — a{' '}
-            <span style={{ color: '#7DE69B', fontWeight: 700 }}>{s3Daily - s1Daily}-point surge</span>.
-            {' '}Positive sentiment climbed from{' '}
+            {' '} — a{' '}
+            <span style={{ color: '#7DE69B', fontWeight: 700 }}>{s3Daily - s1Daily}-point leap</span>{' '}
+            that turned occasional experimentation into an everyday operating rhythm. Positive sentiment climbed from{' '}
             <span style={{ color: '#7DE69B', fontWeight: 700 }}>{s1Pos}%</span>
             {' '}to{' '}
-            <span style={{ color: '#7DE69B', fontWeight: 700 }}>{s3Pos}%</span>.
-            {' '}The team has moved decisively from curiosity to daily integration — and the data shows no signs of slowing down.
+            <span style={{ color: '#7DE69B', fontWeight: 700 }}>{s3Pos}%</span>,
+            {' '}and confidence in using these tools continues to rise with each wave.
+          </p>
+          <p style={{
+            fontSize: 15,
+            lineHeight: 1.85,
+            color: 'rgba(255,255,255,0.78)',
+            fontFamily: 'Inter, sans-serif',
+            margin: 0,
+            marginTop: 14,
+          }}>
+            But the most telling signal comes from Wave 3's newest metrics:{' '}
+            <span style={{ color: '#7DE69B', fontWeight: 700 }}>{ownPocketPct}%</span>
+            {' '}of the team is paying out of their own pocket for AI tools — investing personal dollars because the impact on their work is that clear. And when asked about the department's trajectory,{' '}
+            <span style={{ color: '#7DE69B', fontWeight: 700 }}>{acceleratingPct}%</span>
+            {' '}say momentum is <em style={{ color: '#7DE69B', fontStyle: 'italic' }}>accelerating</em>.
+          </p>
+          <p style={{
+            fontSize: 15,
+            lineHeight: 1.85,
+            color: 'rgba(255,255,255,0.82)',
+            fontFamily: 'Inter, sans-serif',
+            margin: 0,
+            marginTop: 14,
+          }}>
+            This isn't a pilot program anymore. This is a team that has embraced transformation — and the data says they're just getting started.
           </p>
         </motion.div>
       </div>

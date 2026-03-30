@@ -95,8 +95,8 @@ function StatPill({ value, label, accentColor, delta }) {
     <div style={{
       background: `rgba(${hexToRgb(accentColor)},0.08)`,
       border: `1px solid rgba(${hexToRgb(accentColor)},0.2)`,
-      borderRadius: 12,
-      padding: '16px 20px',
+      borderRadius: 14,
+      padding: '20px 22px',
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'space-between',
@@ -104,44 +104,42 @@ function StatPill({ value, label, accentColor, delta }) {
       boxSizing: 'border-box',
     }}>
       <div style={{
-        fontSize: 28,
-        fontWeight: 800,
-        color: accentColor,
-        lineHeight: 1,
-        letterSpacing: '-0.01em',
-        fontFamily: 'Inter, sans-serif',
+        display: 'flex',
+        alignItems: 'baseline',
+        gap: 8,
       }}>
-        {value}
+        <div style={{
+          fontSize: 40,
+          fontWeight: 900,
+          color: accentColor,
+          lineHeight: 1,
+          letterSpacing: '-0.02em',
+          fontFamily: 'Inter, sans-serif',
+        }}>
+          {value}
+        </div>
+        {delta !== null && delta !== undefined && (
+          <span style={{
+            fontSize: 13,
+            fontWeight: 700,
+            color: delta >= 0 ? '#2EA84A' : '#E5554F',
+            fontFamily: 'Inter, sans-serif',
+            whiteSpace: 'nowrap',
+          }}>
+            {delta >= 0 ? '↑' : '↓'}{Math.abs(delta)}%
+          </span>
+        )}
       </div>
       <div style={{
-        fontSize: 11,
+        fontSize: 10,
         color: 'var(--text-support)',
         textTransform: 'uppercase',
         letterSpacing: '0.08em',
-        marginTop: 6,
+        marginTop: 8,
         fontFamily: 'Inter, sans-serif',
       }}>
         {label}
       </div>
-      {delta !== null && delta !== undefined && (
-        <div style={{
-          marginTop: 8,
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 3,
-          fontSize: 11,
-          fontWeight: 600,
-          color: delta >= 0 ? '#2EA84A' : '#E5554F',
-          background: delta >= 0 ? 'rgba(46,168,74,0.1)' : 'rgba(229,85,79,0.1)',
-          border: `1px solid ${delta >= 0 ? 'rgba(46,168,74,0.2)' : 'rgba(229,85,79,0.2)'}`,
-          borderRadius: 4,
-          padding: '2px 7px',
-          width: 'fit-content',
-          fontFamily: 'Inter, sans-serif',
-        }}>
-          {delta >= 0 ? '↑' : '↓'} {Math.abs(delta)}pp
-        </div>
-      )}
     </div>
   );
 }
@@ -171,6 +169,9 @@ export default function GrowthStory({ transforms }) {
   const posPcts   = [positive?.s1?.pct ?? 0, positive?.s2?.pct ?? 0, positive?.s3?.pct ?? 0];
   const dailyPcts = [0, 1, 2].map(i => frequency[i]?.distribution?.find(d => d.label === 'Daily')?.pct ?? 0);
 
+  const ownPocketPct = transforms.ownPocketS3?.yesPct ?? 0;
+  const acceleratingPct = transforms.momentumS3?.find(m => m.label === 'Accelerating')?.pct ?? 0;
+
   function getStats(i) {
     const accent      = WAVE_ACCENT[i];
     const n           = responseCounts[i]?.n ?? 0;
@@ -182,12 +183,21 @@ export default function GrowthStory({ transforms }) {
     const dailyPct    = dailyPcts[i];
     const dailyDelta  = i > 0 ? dailyPcts[i] - dailyPcts[i - 1] : null;
 
-    return [
+    const base = [
       { value: n,              label: 'Responses',          accentColor: accent, delta: null      },
       { value: `${posPct}%`,   label: 'Positive Sentiment', accentColor: accent, delta: posDelta  },
       { value: `${confPct}%`,  label: 'Confident or Above', accentColor: accent, delta: confDelta },
       { value: `${dailyPct}%`, label: 'Daily Usage',        accentColor: accent, delta: dailyDelta},
     ];
+
+    if (i === 2) {
+      base.push(
+        { value: `${ownPocketPct}%`, label: 'Paying Out of Pocket', accentColor: accent, delta: null },
+        { value: `${acceleratingPct}%`, label: 'See Accelerating Momentum', accentColor: accent, delta: null },
+      );
+    }
+
+    return base;
   }
 
   return (
@@ -335,7 +345,7 @@ export default function GrowthStory({ transforms }) {
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(2, 1fr)',
-                gridTemplateRows: 'repeat(2, 1fr)',
+                gridTemplateRows: `repeat(${Math.ceil(stats.length / 2)}, auto)`,
                 gap: 12,
                 minWidth: 300,
                 flexShrink: 0,
