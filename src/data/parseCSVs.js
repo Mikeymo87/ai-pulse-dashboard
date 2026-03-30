@@ -109,17 +109,17 @@ const BARRIER_CATEGORIES = [
   {
     label: 'Lack of training',
     exact: ['Lack of understanding or training'],
-    keywords: ['lack of understanding', 'lack of training', 'lack of knowledge', 'need.*training', 'need.*education'],
+    keywords: ['lack of understanding', 'lack of training', 'lack of knowledge', 'need.*training', 'need.*education', 'fully understanding', 'improper training', 'better trained'],
   },
   {
     label: 'Limited access',
     exact: ['Limited access to AI tools'],
-    keywords: ['limited access', 'access to ai tools', 'gaining access', 'access to certain tools'],
+    keywords: ['limited access', 'access to ai tools', 'gain access', 'access to certain tools', 'cost of.*tools', 'pay for.*tools'],
   },
   {
     label: 'Accuracy concerns',
     exact: ['Concerns about accuracy or reliability', 'IP concerns'],
-    keywords: ['accuracy', 'reliability', 'accurate', 'reliable', 'ip concern', 'not 100%'],
+    keywords: ['accuracy', 'reliability', 'accurate', 'reliable', 'ip concern', 'not 100%', 'human judgment'],
   },
   {
     label: 'Fear of mistakes',
@@ -140,7 +140,7 @@ const BARRIER_CATEGORIES = [
       'I am not ready to make that kind of change to my workflow',
       'Unsure of the best way to integrate AI into my workflow',
     ],
-    keywords: ['not ready.*change', 'change to my workflow', 'unsure of the best way', 'integrate ai into my workflow'],
+    keywords: ['not ready.*change', 'change to my workflow', 'unsure of the best way', 'integrate ai into my workflow', 'hesitation', 'adoption.*team'],
   },
   {
     label: 'Old habits',
@@ -149,8 +149,11 @@ const BARRIER_CATEGORIES = [
   },
   {
     label: 'Not relevant',
-    exact: ["I don't see AI as relevant to my work"],
-    keywords: ['not relevant', "don't see ai as relevant"],
+    exact: [
+      "I don't see AI as relevant to my work",       // straight apostrophe
+      "I don\u2019t see AI as relevant to my work",  // curly apostrophe (Google Forms export)
+    ],
+    keywords: ['not relevant', "don't see ai as relevant", "don\u2019t see ai as relevant"],
   },
   {
     label: 'Unaware of permissions',
@@ -163,7 +166,7 @@ const BARRIER_CATEGORIES = [
     keywords: [
       'lack of time', 'competing priorities', 'not enough time', 'too busy',
       'limited time', 'making the time', 'time to learn', 'time to really',
-      'time to focus', 'finding time',
+      'time to focus', 'finding time', 'requires time',
     ],
   },
   {
@@ -174,7 +177,7 @@ const BARRIER_CATEGORIES = [
   {
     label: 'Too many tools',
     exact: ['Too many tools/not sure which to use'],
-    keywords: ['too many tools', 'not sure which tool', 'which tool to use', 'too many options', 'overwhelm.*tool'],
+    keywords: ['too many tools', 'not sure which tool', 'which tool to use', 'too many options', 'overwhelm.*tool', 'grow too rapid', 'tools grow'],
   },
   {
     label: 'IT / access blocks',
@@ -189,7 +192,7 @@ const BARRIER_CATEGORIES = [
   {
     label: 'Unclear guidelines',
     exact: ["Unclear guidelines on what's allowed (policy/guardrails)"],
-    keywords: ['unclear guidelines', 'guardrail', 'what.*allowed', 'legalities', 'company policy', 'bh rules'],
+    keywords: ['unclear guidelines', 'guardrail', 'what.*allowed', 'legalities', 'company policy', 'bh rules', 'figuring out when', 'when to use', 'to what extent'],
   },
 ];
 

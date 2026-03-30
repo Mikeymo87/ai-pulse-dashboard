@@ -264,7 +264,10 @@ export default function TrendCharts({ transforms }) {
     .reduce((sum, e) => sum + e.s3.pct, 0);
 
   // ── 7. Top 5 Barriers ────────────────────────────────────────────────────
-  const barriersData = barriersTrend.slice(0, 5).map(b => ({
+  const barriersData = [...barriersTrend]
+    .sort((a, b) => (b.s3.pct - a.s3.pct) || (b.s2.pct - a.s2.pct) || (b.s1.pct - a.s1.pct))
+    .slice(0, 5)
+    .map(b => ({
     barrier: b.barrier,
     'Survey 1 (Jan–Feb 2025)': b.s1.pct,
     'Survey 2 (Aug–Sep 2025)': b.s2.pct,
@@ -499,8 +502,14 @@ export default function TrendCharts({ transforms }) {
           delay={0.6}
           insight={topBarrier ? `"${topBarrier.barrier}" remains the #1 barrier, cited by ${topBarrier['Survey 3 (Mar 2026)']}% in Survey 3${topBarrier['Survey 1 (Jan–Feb 2025)'] !== topBarrier['Survey 3 (Mar 2026)'] ? ` vs. ${topBarrier['Survey 1 (Jan–Feb 2025)']}% in Survey 1` : ' — unchanged since Survey 1'}. These are solvable organizational problems. Targeted enablement can directly move the needle.` : ''}
         >
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={barriersData} layout="vertical" margin={{ top: 4, right: 8, bottom: 0, left: 4 }}>
+          <ResponsiveContainer width="100%" height={360}>
+            <BarChart
+              data={barriersData}
+              layout="vertical"
+              barSize={10}
+              barCategoryGap="25%"
+              margin={{ top: 4, right: 8, bottom: 0, left: 4 }}
+            >
               <CartesianGrid {...gridStyle} horizontal={false} />
               <YAxis
                 dataKey="barrier"
