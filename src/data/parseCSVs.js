@@ -290,6 +290,18 @@ function normalizeFunction(v) {
   return v;
 }
 
+// ─── Data sources ────────────────────────────────────────────────────────────
+// S1: local CSV — the Google Sheet has extra rows not in the original 97-response export.
+//     Keep as local file to preserve the verified 97-response dataset.
+// S2: live Google Sheet — 106 responses, matches verified count.
+// S3: live Google Sheet — auto-updates as new responses come in; no file management needed.
+
+const DATA_SOURCES = {
+  s1: '/data/survey1.csv',
+  s2: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSB9O1TzD7Ipk50nBG2wHFLlVytf1aaEgcWYeEMLuyAUTF4aXMFU8ByFfFHGP74QzbyOJOaSZqaBHUK/pub?gid=1201512326&single=true&output=csv',
+  s3: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQUECRMQEP6QtXVcxHz7JyQ00KBIkzk6O0fkEZYcS4JiLfx4WpITntvj8yu4j1FbOulU_sbKyftd3E1/pub?gid=220500472&single=true&output=csv',
+};
+
 // ─── CSV fetch ──────────────────────────────────────────────────────────────
 
 function fetchParsed(url) {
@@ -404,9 +416,9 @@ function mapS3(raw) {
 
 export async function parseAllSurveys() {
   const [raw1, raw2, raw3] = await Promise.all([
-    fetchParsed('/data/survey1.csv'),
-    fetchParsed('/data/survey2.csv'),
-    fetchParsed('/data/survey3.csv'),
+    fetchParsed(DATA_SOURCES.s1),
+    fetchParsed(DATA_SOURCES.s2),
+    fetchParsed(DATA_SOURCES.s3),
   ]);
 
   const survey1 = mapS1(raw1);
