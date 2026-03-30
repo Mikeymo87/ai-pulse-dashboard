@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 
-export default function Nav() {
+export default function Nav({ onOpenChat }) {
   return (
     <div style={{
       position: 'sticky',
@@ -18,7 +18,6 @@ export default function Nav() {
     }}>
       {/* Left — brand */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
-        {/* Glowing green dot */}
         <motion.div
           animate={{ opacity: [0.7, 1, 0.7] }}
           transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
@@ -61,8 +60,8 @@ export default function Nav() {
         </span>
       </div>
 
-      {/* Right — survey label */}
-      <div style={{ marginLeft: 'auto' }}>
+      {/* Right — Ask AI button + survey label */}
+      <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 16 }}>
         <span style={{
           fontSize: 11,
           color: '#797D80',
@@ -72,6 +71,39 @@ export default function Nav() {
         }}>
           AI Engagement Pulse Survey
         </span>
+
+        <motion.button
+          onClick={onOpenChat}
+          whileHover={{ scale: 1.04 }}
+          whileTap={{ scale: 0.96 }}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 7,
+            padding: '6px 14px',
+            background: 'rgba(46,168,74,0.15)',
+            border: '1px solid rgba(125,230,155,0.35)',
+            borderRadius: 20,
+            cursor: 'pointer',
+            fontFamily: 'Inter, sans-serif',
+            fontSize: 12,
+            fontWeight: 600,
+            color: '#7DE69B',
+            letterSpacing: '0.01em',
+            transition: 'background 0.2s',
+          }}
+          onMouseEnter={e => e.currentTarget.style.background = 'rgba(46,168,74,0.25)'}
+          onMouseLeave={e => e.currentTarget.style.background = 'rgba(46,168,74,0.15)'}
+        >
+          <motion.span
+            animate={{ opacity: [0.6, 1, 0.6] }}
+            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+            style={{ fontSize: 10 }}
+          >
+            ●
+          </motion.span>
+          Ask AI
+        </motion.button>
       </div>
     </div>
   );

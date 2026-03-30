@@ -119,6 +119,99 @@ ${topFunctions || 'No function data'}
 --- END DATA ---`;
 }
 
+// ─── Markdown renderer ────────────────────────────────────────────────────────
+function inlineFormat(text, key) {
+  const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`)/);
+  return (
+    <span key={key}>
+      {parts.map((part, i) => {
+        if (part.startsWith('**') && part.endsWith('**'))
+          return <strong key={i} style={{ color: '#e8f5ec', fontWeight: 700 }}>{part.slice(2, -2)}</strong>;
+        if (part.startsWith('*') && part.endsWith('*'))
+          return <em key={i} style={{ color: '#c8e0d0' }}>{part.slice(1, -1)}</em>;
+        if (part.startsWith('`') && part.endsWith('`'))
+          return <code key={i} style={{ background: 'rgba(125,230,155,0.1)', borderRadius: 4, padding: '1px 5px', fontSize: 11, color: '#7DE69B', fontFamily: 'monospace' }}>{part.slice(1, -1)}</code>;
+        return part;
+      })}
+    </span>
+  );
+}
+
+function renderMarkdown(text) {
+  const lines = text.split('\n');
+  const elements = [];
+  let i = 0;
+
+  while (i < lines.length) {
+    const line = lines[i];
+
+    // Skip blank lines between blocks
+    if (!line.trim()) { i++; continue; }
+
+    // Heading (## or ###)
+    if (/^#{2,3}\s/.test(line)) {
+      const content = line.replace(/^#{2,3}\s/, '');
+      elements.push(
+        <p key={i} style={{ margin: '10px 0 4px', fontWeight: 800, fontSize: 13, color: '#e8f5ec', letterSpacing: '0.01em' }}>
+          {inlineFormat(content, 0)}
+        </p>
+      );
+      i++; continue;
+    }
+
+    // Bullet list — collect consecutive bullet lines
+    if (/^[-•*]\s/.test(line)) {
+      const items = [];
+      while (i < lines.length && /^[-•*]\s/.test(lines[i])) {
+        items.push(lines[i].replace(/^[-•*]\s/, ''));
+        i++;
+      }
+      elements.push(
+        <ul key={`ul-${i}`} style={{ margin: '6px 0', paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 4 }}>
+          {items.map((item, j) => (
+            <li key={j} style={{ fontSize: 13, color: '#c8d8d0', lineHeight: 1.55, listStyleType: 'none', display: 'flex', gap: 8 }}>
+              <span style={{ color: '#7DE69B', flexShrink: 0, marginTop: 1 }}>›</span>
+              <span>{inlineFormat(item, j)}</span>
+            </li>
+          ))}
+        </ul>
+      );
+      continue;
+    }
+
+    // Numbered list — collect consecutive numbered lines
+    if (/^\d+\.\s/.test(line)) {
+      const items = [];
+      let num = 1;
+      while (i < lines.length && /^\d+\.\s/.test(lines[i])) {
+        items.push(lines[i].replace(/^\d+\.\s/, ''));
+        i++;
+      }
+      elements.push(
+        <ol key={`ol-${i}`} style={{ margin: '6px 0', paddingLeft: 0, display: 'flex', flexDirection: 'column', gap: 4, listStyle: 'none' }}>
+          {items.map((item, j) => (
+            <li key={j} style={{ fontSize: 13, color: '#c8d8d0', lineHeight: 1.55, display: 'flex', gap: 8 }}>
+              <span style={{ color: '#7DE69B', fontWeight: 700, flexShrink: 0, minWidth: 16 }}>{j + 1}.</span>
+              <span>{inlineFormat(item, j)}</span>
+            </li>
+          ))}
+        </ol>
+      );
+      continue;
+    }
+
+    // Regular paragraph
+    elements.push(
+      <p key={i} style={{ margin: '0 0 6px', fontSize: 13, color: '#c8d8d0', lineHeight: 1.6 }}>
+        {inlineFormat(line, 0)}
+      </p>
+    );
+    i++;
+  }
+
+  return <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>{elements}</div>;
+}
+
 // ─── Typing indicator ─────────────────────────────────────────────────────────
 function TypingIndicator() {
   return (
@@ -150,26 +243,24 @@ function Message({ msg }) {
       }}
     >
       <div style={{
-        maxWidth: '82%',
-        padding: '9px 13px',
+        maxWidth: '86%',
+        padding: '10px 14px',
         borderRadius: isUser ? '14px 14px 4px 14px' : '14px 14px 14px 4px',
-        background: isUser ? 'rgba(125,230,155,0.18)' : 'rgba(29,77,82,0.6)',
+        background: isUser ? 'rgba(125,230,155,0.18)' : 'rgba(29,77,82,0.55)',
         border: isUser ? '1px solid rgba(125,230,155,0.3)' : '1px solid rgba(125,230,155,0.1)',
         fontFamily: 'Inter, sans-serif',
-        fontSize: 13,
-        lineHeight: 1.55,
-        color: isUser ? '#e0f5e8' : '#d0d8e0',
-        whiteSpace: 'pre-wrap',
       }}>
-        {msg.content}
+        {isUser
+          ? <p style={{ margin: 0, fontSize: 13, lineHeight: 1.55, color: '#e0f5e8' }}>{msg.content}</p>
+          : renderMarkdown(msg.content)
+        }
       </div>
     </motion.div>
   );
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
-export default function ChatPanel({ transforms }) {
-  const [open, setOpen] = useState(false);
+export default function ChatPanel({ transforms, open, setOpen }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [thinking, setThinking] = useState(false);

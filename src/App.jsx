@@ -1,4 +1,5 @@
 import './index.css';
+import { useState } from 'react';
 import { useSurveyData } from './hooks/useSurveyData';
 import Nav from './components/Nav';
 import Hero from './components/Hero';
@@ -10,6 +11,7 @@ import DeepDive from './components/DeepDive';
 
 export default function App() {
   const { surveys, transforms, loading, error } = useSurveyData();
+  const [chatOpen, setChatOpen] = useState(false);
 
   if (loading) return (
     <div
@@ -54,13 +56,13 @@ export default function App() {
 
   return (
     <div style={{ background: '#1a1d1e', minHeight: '100vh' }}>
-      <Nav />
+      <Nav onOpenChat={() => setChatOpen(true)} />
       <Hero transforms={transforms} />
       <GrowthStory transforms={transforms} />
       <TrendCharts transforms={transforms} />
       <DeepDive surveys={surveys} transforms={transforms} />
       <OpportunitySpotlight transforms={transforms} />
-      <ChatPanel transforms={transforms} />
+      <ChatPanel transforms={transforms} open={chatOpen} setOpen={setChatOpen} />
     </div>
   );
 }
