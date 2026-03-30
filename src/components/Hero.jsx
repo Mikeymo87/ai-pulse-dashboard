@@ -322,46 +322,34 @@ export default function Hero({ transforms }) {
             {' '}<span style={{ color: 'rgba(255,255,255,0.85)', fontWeight: 600 }}>The team is ready. The data proves it.</span>
           </p>
         </motion.div>
-      </div>
 
-      {/* Scroll hint — outer div centers, inner motion.div only animates */}
-      <div style={{
-        position: 'absolute',
-        bottom: 40,
-        left: 0,
-        right: 0,
-        display: 'flex',
-        justifyContent: 'center',
-      }}>
+        {/* Scroll hint — in flow, below exec summary, never overlaps */}
         <motion.div
-          animate={{ y: [0, 6, 0] }}
-          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: 6,
-          }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 1.2 }}
+          style={{ marginTop: 40, display: 'flex', justifyContent: 'center' }}
         >
-          <div style={{
-            fontSize: 11,
-            color: 'rgba(125,230,155,0.55)',
-            letterSpacing: '0.12em',
-            textTransform: 'uppercase',
-            fontFamily: 'Inter, sans-serif',
-          }}>
-            Scroll to explore
-          </div>
-          <svg width="16" height="10" viewBox="0 0 16 10" fill="none" style={{ opacity: 0.65 }}>
-            <path
-              d="M1 1L8 8L15 1"
-              stroke="#7DE69B"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          <motion.div
+            animate={{ y: [0, 6, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}
+          >
+            <div style={{
+              fontSize: 11,
+              color: 'rgba(125,230,155,0.55)',
+              letterSpacing: '0.12em',
+              textTransform: 'uppercase',
+              fontFamily: 'Inter, sans-serif',
+            }}>
+              Scroll to explore
+            </div>
+            <svg width="16" height="10" viewBox="0 0 16 10" fill="none" style={{ opacity: 0.65 }}>
+              <path d="M1 1L8 8L15 1" stroke="#7DE69B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </motion.div>
         </motion.div>
+
       </div>
     </div>
   );

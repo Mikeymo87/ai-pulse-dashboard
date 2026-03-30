@@ -11,6 +11,12 @@ const CHIPS = [
   "What tools is the team actually using?",
 ];
 
+const FOLLOW_UP_CHIPS = [
+  "Give me a deeper analysis on that",
+  "What should leadership do with this?",
+  "Break that down by role or function",
+];
+
 // ─── Build system prompt from live transforms ────────────────────────────────
 function buildSystemPrompt(transforms) {
   const {
@@ -297,7 +303,7 @@ export default function ChatPanel({ transforms, open, setOpen }) {
         },
         body: JSON.stringify({
           model: 'claude-sonnet-4-6',
-          max_tokens: 512,
+          max_tokens: 1024,
           system: buildSystemPrompt(transforms),
           messages: newMessages.map(m => ({ role: m.role, content: m.content })),
         }),
@@ -454,7 +460,48 @@ export default function ChatPanel({ transforms, open, setOpen }) {
                 </div>
               )}
 
-              {messages.map((msg, i) => <Message key={i} msg={msg} />)}
+              {messages.map((msg, i) => (
+                <div key={i}>
+                  <Message msg={msg} />
+                  {/* Follow-up chips after last assistant message when not thinking */}
+                  {msg.role === 'assistant' && i === messages.length - 1 && !thinking && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, delay: 0.2 }}
+                      style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 10, paddingLeft: 4 }}
+                    >
+                      <span style={{ fontSize: 10, color: '#797D80', fontFamily: 'Inter, sans-serif', letterSpacing: '0.06em' }}>
+                        Want to go deeper?
+                      </span>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                        {FOLLOW_UP_CHIPS.map(chip => (
+                          <button
+                            key={chip}
+                            onClick={() => sendMessage(chip)}
+                            style={{
+                              background: 'rgba(125,230,155,0.06)',
+                              border: '1px solid rgba(125,230,155,0.18)',
+                              borderRadius: 20,
+                              padding: '4px 11px',
+                              cursor: 'pointer',
+                              fontFamily: 'Inter, sans-serif',
+                              fontSize: 11,
+                              color: '#7DE69B',
+                              whiteSpace: 'nowrap',
+                              transition: 'background 0.15s',
+                            }}
+                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(125,230,155,0.14)'}
+                            onMouseLeave={e => e.currentTarget.style.background = 'rgba(125,230,155,0.06)'}
+                          >
+                            {chip}
+                          </button>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </div>
+              ))}
               {thinking && (
                 <div style={{
                   display: 'flex',
