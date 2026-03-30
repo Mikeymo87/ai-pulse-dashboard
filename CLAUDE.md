@@ -1,121 +1,117 @@
 # AI Pulse Survey Dashboard — Claude Code Session File
 
 > This file auto-loads at the start of every Claude Code session when opened from this folder.
-> Full master plan lives at: /Users/michaelmora/Desktop/Claude/AI Pulse Survey Dashboard Plan.md
+> Full master plan lives at: /Users/michaelmora/Desktop/Claude/AI Pulse Survey Data/Handoff/AI Pulse Survey Dashboard Plan.md
 > Keep BOTH files updated at the end of every phase.
 
 ---
 
 ## Project Summary
-Dashboard showing 14 months of AI adoption data across 3 pulse surveys (290 responses) for the Baptist Health Marketing & Communications department. Built in React + Vite, deployed via GitHub → Replit.
+Dashboard showing 14 months of AI adoption data across 3 pulse surveys for the Baptist Health Marketing & Communications department. Built in React + Vite, deployed via GitHub → Replit.
 
 - **User:** Michael Mora — not a coder; plain English only
 - **GitHub:** https://github.com/Mikeymo87/ai-pulse-dashboard
 - **Project folder:** `/Users/michaelmora/Desktop/Claude/ai-pulse-dashboard/`
-- **Survey CSVs:** `public/data/survey1.csv` (97), `survey2.csv` (106), `survey3.csv` (89 as of Mar 30 2026)
-- **⚠️ Survey 3 is still in progress** — replace CSV when final version is ready; no code changes needed
+- **Survey data:** S1 local CSV (97), S2+S3 live Google Sheets (auto-update on page load)
+- **⚠️ Survey 3 is still in progress** — Google Sheet auto-updates; no code changes needed
 
 ## Tech Stack
 React + Vite · Tailwind CSS · Recharts · Framer Motion · Papa Parse · Claude API (claude-sonnet-4-6)
 
+---
+
 ## Current Phase Status
 
 ### ✅ Phase 0 — Setup (COMPLETE)
-GitHub repo created, React app scaffolded, all dependencies installed, CSVs copied to `public/data/`, pushed to GitHub, imported into Replit.
+GitHub repo, React app, all dependencies, CSVs in `public/data/`, pushed to GitHub, imported into Replit.
 
 ### ✅ Phase 1 — Data Layer (COMPLETE)
-Files built: `src/data/parseCSVs.js`, `src/data/transforms.js`, `src/data/themes.js`, `src/hooks/useSurveyData.js`
-
-Critical implementation notes:
-- S3 struggle column uses curly apostrophe `\u2019` (Google Forms export) — must keep exact string in mapS3
-- Barriers use 3-pass fuzzy matching (exact → prefix → keyword) so S1/S2/S3 wording variants all map correctly
-- All blank responses excluded per-field from averages/distributions — no skew
-- Confidence scale differs: S1 max=5 "Very Confident", S2+S3 max=5 "Extremely Confident" (Very=4)
-- Open-ended text preserved on every row for Claude API (Phases 4+7)
+Files: `src/data/parseCSVs.js`, `src/data/transforms.js`, `src/data/themes.js`, `src/hooks/useSurveyData.js`
+- S3 struggle column uses curly apostrophe `\u2019` — must keep exact string in mapS3
+- Barriers use 3-pass fuzzy matching (exact → prefix → keyword)
+- Confidence scale differs: S1 max=5 "Very Confident", S2+S3 max=5 "Extremely Confident"
 - `useSurveyData()` returns `{ surveys, transforms, loading, error }`
-- Verified: S1=97 · S2=106 · S3=89 · Total=292
 
 ### ✅ Phase 2 — Hero + Growth Story (COMPLETE)
 Files: `src/components/Hero.jsx`, `src/components/GrowthStory.jsx`, `src/components/Nav.jsx`
-
-Key details:
-- Hero: pulsing BH-green ambient glow, staggered headline animation, 3 animated count-up stat cards, 3-paragraph politician-style exec summary with dynamic own-pocket (coral) + benefit data
-- GrowthStory: cinematic 3-wave scroll, 44px/900-weight number stat pills, inline delta badges (% not pp), Wave 3 gets 2 extra pills — "Paying Own Pocket" (coral) + "See Momentum Accelerating" (mint)
-- Nav: sticky top nav with section anchor links
-- index.css: BH brand CSS variables added under `:root`, background `#1a1d1e`
-- Color rule enforced: coral = negative/warning ONLY, yellow = stable, green/mint = positive, turquoise = neutral
+- Hero: ambient glow, count-up stat cards, 3-paragraph exec summary, scroll hint in content flow (not absolute)
+- GrowthStory: cinematic 3-wave scroll, stat pills with delta badges
+- Nav: sticky, "Ask AI" pill button right side opens ChatPanel, pulsing dot
+- Color rule: coral=negative ONLY, yellow=stable, green/mint=positive, turquoise=neutral
 
 ### ✅ Phase 3 — Trend Line Charts (COMPLETE)
-Files: `src/components/TrendCharts.jsx`, `src/data/parseCSVs.js`
-
+File: `src/components/TrendCharts.jsx`
 - 7 charts: Sentiment, Familiarity, Frequency, Importance, Confidence, Journey Stage, Top 5 Barriers
-- Custom two-line XAxis tick: "Survey N" bold + "(date)" gray; `interval={0}` forces all 3 labels
-- Auto-padded Y-axis via `autoDomain(values, pad, clampMin, clampMax)` helper
-- All 7 insight callouts are fully data-driven (live % from transforms, not hardcoded)
-- Barrier normalization fixes: curly apostrophe `\u2019` bug on "Not relevant"; 12+ new write-in keywords; filter "No barriers" from chart; sort by S3 % descending
-- `barSize={10}`, `barCategoryGap="25%"`, height 360px on horizontal barriers chart
-- Stage chart uses `barriersTrend` filtered to actual blockers only
+- Custom two-line XAxis tick; `interval={0}` forces all 3 labels; `autoDomain()` helper for Y-axis
+- All insight callouts data-driven; barrier normalization with curly apostrophe fix
 
 ### ✅ Phase 4 — Opportunity Spotlight (Claude API, COMPLETE)
-Files: `src/components/OpportunitySpotlight.jsx`, `src/App.jsx`
-
-- Section id="spotlight", tag "AI-POWERED INSIGHTS", H2 "Where the Opportunity Lives"
-- 4 Claude-generated cards in 2×2 grid — categories: ENABLEMENT, ADOPTION, RISK, MOMENTUM
-- Each card: category badge, bold headline, 2–3 sentence insight body, → recommendation block, supporting stat
-- Model: `claude-sonnet-4-6`, key: `import.meta.env.VITE_ANTHROPIC_API_KEY`
-- Direct browser fetch to Anthropic API; header `anthropic-dangerous-direct-browser-access: true`
-- Called once on mount via `useEffect([], [])` — result stored in `useState`, never re-called
-- Prompt passes pre-computed stats JSON → Claude returns `[{category, headline, body, action, stat}]` × 4
-- Response parsing strips markdown code fences before `JSON.parse()` — handles Claude wrapping output in ```json
-- Loading state: 4 pulsing skeleton cards (Framer Motion opacity loop)
-- Error state: single fallback card with retry message
+File: `src/components/OpportunitySpotlight.jsx`
+- 5 Claude-generated cards: ENABLEMENT, ADOPTION, RISK, MOMENTUM (2×2 grid) + READINESS (full-width)
+- Each card: category badge, headline, insight body, → recommendation, supporting stat
+- fetchedRef guard prevents React StrictMode double-invoke; max_tokens=1800
+- Spinner + "Try again" retry button on error; strips markdown code fences before JSON.parse()
 
 ### ✅ Phase 5 — Scatter Plot + Deep Dive (COMPLETE)
-Files: `src/components/DeepDive.jsx`, `src/App.jsx`
-
-- Section id="deepdive", tag "SURVEY 3 DEEP DIVE", H2 "Who's Ready, Who Needs Support"
-- Confidence × Importance scatter plot — one dot per S3 respondent, colored by role, deterministic jitter prevents stacking on integer grid
-- Four quadrant labels: Ready to Lead (green) / Needs Support (coral) / Quiet Users (yellow) / Not Engaged (gray)
-- ReferenceLine at x=3 and y=3 draws quadrant dividers; role legend below chart
-- Role & Function toggle breakdown — animated metric bars per group (Confidence=yellow, Importance=mint, Familiarity=turquoise)
-- Moved above OpportunitySpotlight — both sections are real-time (live Google Sheet, Claude re-called on every page load)
-- DeepDive data passed to OpportunitySpotlight prompt as `teamReadiness` context for READINESS card
+File: `src/components/DeepDive.jsx`
+- Confidence × Importance scatter (S3), colored by role, deterministic jitter, 4 quadrant labels
+- Role & Function toggle breakdown with animated metric bars
+- byRole/byFunction also passed to OpportunitySpotlight as `teamReadiness` context
 
 ### ✅ Phase 6 — Tool Ecosystem Bubble Chart (COMPLETE)
-Integrated into DeepDive section (not standalone — dashboard is getting long).
-
-- "What Tools Are They Using?" subsection added to bottom of DeepDive
-- S2/S3 toggle — Survey 3 is the default; S2=all tools structured list, S3=personal free-text tools
-- Bubbles sized by respondent count, colored by vendor category (Microsoft, Google, OpenAI, Anthropic, Adobe, Image/Video, Writing AI, Research AI, Other)
-- Hover tooltip: tool name, count, %, category
-- Filters count < 2 to remove single-mention noise
-- Tool category detection via keyword matching in `getToolCategory()`
+Integrated into DeepDive as third subsection "What Tools Are They Using?"
+- S2/S3 toggle (Survey 3 default); bubbles sized by count, colored by vendor category
+- Hover tooltip; filters count < 2; tool category detection via keyword matching
 
 ### ✅ Phase 7 — Claude Chat Panel (Claude API, COMPLETE)
 File: `src/components/ChatPanel.jsx`
+- open/setOpen lifted to App.jsx — Nav "Ask AI" button + floating bottom-right button both control it
+- 6 pre-loaded prompt chips on first open; full multi-turn conversation history
+- Markdown renderer: bold, italic, bullet lists, numbered lists, inline code, headings
+- Follow-up chips after every response: "Give me a deeper analysis", "What should leadership do?", "Break down by role/function"
+- System prompt built from live transforms — all key stats; strict no-invention rule
+- Model: claude-sonnet-4-6, max_tokens: 1024
 
-- Floating green button fixed bottom-right; click to open/close (turns red X when open)
-- Panel: 380px wide × 520px tall, slides in with Framer Motion AnimatePresence
-- Header: "Ask the Data" + "Answers grounded in survey data only" subtitle
-- 6 pre-loaded prompt chips shown when no messages yet
-- User messages: right-aligned mint bubbles; Claude responses: left-aligned dark cards
-- Animated typing indicator (3 pulsing dots) while Claude thinks
-- Enter to send, Shift+Enter for newline; send button activates when input is non-empty
-- System prompt built dynamically from live transforms — includes all key stats
-- Strict rules in system prompt: only cite provided numbers, never invent figures, concise executive tone
-- Conversation history passed on every turn (full multi-turn context)
-- Model: claude-sonnet-4-6, max_tokens: 512
+---
 
-### 🔲 Phase 8 — Presentation Mode + Polish + Deploy (NEXT UP)
+## 🔲 Phase 8 — Presentation Mode + Polish (NEXT UP)
 
-### ⚠️ Post-Phase-8 Cleanup Note
-Dashboard needs restructuring after all phases are complete:
-- Dashboard is too long as a single scroll — convert to tabbed deep-dive sections
-- Suggested tab structure: Overview (Hero + Growth Story) | Trends | Team (DeepDive) | Insights (Spotlight) | Chat
-- Each survey could also have its own drill-down tab
-### 🔲 Phase 6 — Tool Ecosystem Bubble Chart
-### 🔲 Phase 7 — Claude Chat Panel (Claude API)
-### 🔲 Phase 8 — Presentation Mode + Deploy
+**Goal:** Press `P` anywhere to enter a fullscreen, slide-by-slide presentation mode for live AI Council/leadership presentations.
+
+**What to build:**
+- `P` key toggles presentation mode on/off
+- Each "slide" = one major section (Hero, Growth Story, Trends, Deep Dive, Spotlight)
+- Arrow keys (← →) or on-screen buttons to advance slides
+- Slide counter (e.g. "3 / 5") bottom center
+- Minimal chrome in presentation mode — hide nav, hide chat button, dark overlay frame
+- Smooth slide transition (Framer Motion)
+- `ESC` to exit
+
+**Polish pass (same phase):**
+- Review all sections for visual consistency
+- Ensure Replit deploy is clean and stable
+- Test on a large screen (presentation context)
+
+---
+
+## ⚠️ Post-Phase-8 — Tab Restructure (AFTER Phase 8)
+
+Dashboard is too long as a single scroll. After Phase 8, convert to tabbed navigation:
+
+**Proposed tab structure:**
+| Tab | Contents |
+|---|---|
+| Overview | Hero + Growth Story (the big story) |
+| Trends | TrendCharts (7 charts across 3 surveys) |
+| Team | DeepDive (scatter + breakdown + tools) |
+| Insights | OpportunitySpotlight (5 Claude cards) |
+
+- Tabs in Nav bar replace current anchor links
+- Each tab is a single viewport — no long scroll
+- Chat panel floats on all tabs
+- Presentation mode works per-tab
+
+---
 
 ## To Continue
 Say: **"Continue the build — pick up where we left off"**
