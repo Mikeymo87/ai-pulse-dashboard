@@ -5,6 +5,7 @@ import Hero from './components/Hero';
 import GrowthStory from './components/GrowthStory';
 import TrendCharts from './components/TrendCharts';
 import OpportunitySpotlight from './components/OpportunitySpotlight';
+import ChatPanel from './components/ChatPanel';
 import DeepDive from './components/DeepDive';
 
 export default function App() {
@@ -59,6 +60,7 @@ export default function App() {
       <TrendCharts transforms={transforms} />
       <DeepDive surveys={surveys} transforms={transforms} />
       <OpportunitySpotlight transforms={transforms} />
+      <ChatPanel transforms={transforms} />
     </div>
   );
 }

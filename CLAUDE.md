@@ -91,7 +91,22 @@ Integrated into DeepDive section (not standalone — dashboard is getting long).
 - Filters count < 2 to remove single-mention noise
 - Tool category detection via keyword matching in `getToolCategory()`
 
-### 🔲 Phase 7 — Claude Chat Panel (Claude API, NEXT UP)
+### ✅ Phase 7 — Claude Chat Panel (Claude API, COMPLETE)
+File: `src/components/ChatPanel.jsx`
+
+- Floating green button fixed bottom-right; click to open/close (turns red X when open)
+- Panel: 380px wide × 520px tall, slides in with Framer Motion AnimatePresence
+- Header: "Ask the Data" + "Answers grounded in survey data only" subtitle
+- 6 pre-loaded prompt chips shown when no messages yet
+- User messages: right-aligned mint bubbles; Claude responses: left-aligned dark cards
+- Animated typing indicator (3 pulsing dots) while Claude thinks
+- Enter to send, Shift+Enter for newline; send button activates when input is non-empty
+- System prompt built dynamically from live transforms — includes all key stats
+- Strict rules in system prompt: only cite provided numbers, never invent figures, concise executive tone
+- Conversation history passed on every turn (full multi-turn context)
+- Model: claude-sonnet-4-6, max_tokens: 512
+
+### 🔲 Phase 8 — Presentation Mode + Polish + Deploy (NEXT UP)
 
 ### ⚠️ Post-Phase-8 Cleanup Note
 Dashboard needs restructuring after all phases are complete:
