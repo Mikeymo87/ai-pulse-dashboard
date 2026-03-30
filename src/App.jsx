@@ -4,6 +4,7 @@ import Nav from './components/Nav';
 import Hero from './components/Hero';
 import GrowthStory from './components/GrowthStory';
 import TrendCharts from './components/TrendCharts';
+import OpportunitySpotlight from './components/OpportunitySpotlight';
 
 export default function App() {
   const { transforms, loading, error } = useSurveyData();
@@ -55,6 +56,7 @@ export default function App() {
       <Hero transforms={transforms} />
       <GrowthStory transforms={transforms} />
       <TrendCharts transforms={transforms} />
+      <OpportunitySpotlight transforms={transforms} />
     </div>
   );
 }
