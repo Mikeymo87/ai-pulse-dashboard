@@ -81,8 +81,17 @@ Files: `src/components/DeepDive.jsx`, `src/App.jsx`
 - Moved above OpportunitySpotlight — both sections are real-time (live Google Sheet, Claude re-called on every page load)
 - DeepDive data passed to OpportunitySpotlight prompt as `teamReadiness` context for READINESS card
 
-### 🔲 Phase 6 — Tool Ecosystem Bubble Chart (NEXT UP)
-Integrate into DeepDive section (not a new standalone section — dashboard is getting long).
+### ✅ Phase 6 — Tool Ecosystem Bubble Chart (COMPLETE)
+Integrated into DeepDive section (not standalone — dashboard is getting long).
+
+- "What Tools Are They Using?" subsection added to bottom of DeepDive
+- S2/S3 toggle — Survey 3 is the default; S2=all tools structured list, S3=personal free-text tools
+- Bubbles sized by respondent count, colored by vendor category (Microsoft, Google, OpenAI, Anthropic, Adobe, Image/Video, Writing AI, Research AI, Other)
+- Hover tooltip: tool name, count, %, category
+- Filters count < 2 to remove single-mention noise
+- Tool category detection via keyword matching in `getToolCategory()`
+
+### 🔲 Phase 7 — Claude Chat Panel (Claude API, NEXT UP)
 
 ### ⚠️ Post-Phase-8 Cleanup Note
 Dashboard needs restructuring after all phases are complete:

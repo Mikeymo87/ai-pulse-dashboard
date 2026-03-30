@@ -294,7 +294,7 @@ function ToolBubbles({ tools, totalN }) {
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function DeepDive({ surveys, transforms }) {
   const [groupBy, setGroupBy] = useState('role');
-  const [toolSurvey, setToolSurvey] = useState('s2');
+  const [toolSurvey, setToolSurvey] = useState('s3');
 
   const s3Rows = surveys?.survey3 ?? [];
   const { byRole, byFunction, toolsS2, toolsS3 } = transforms;
