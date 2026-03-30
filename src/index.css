@@ -1,12 +1,37 @@
 @import "tailwindcss";
 
+:root {
+  /* Baptist Health brand colors */
+  --bh-green:      #2EA84A;
+  --bh-mint:       #7DE69B;
+  --bh-black:      #25282A;
+  --bh-coral:      #E5554F;
+  --bh-yellow:     #FFCD00;
+  --bh-turquoise:  #59BEC9;
+  --bh-dark-blue:  #005776;
+  --bh-deep-blue:  #1D4A5E;
+  --bh-deep-green: #1D4D52;
+  --bh-gray-mid:   #797D80;
+  --bh-off-white:  #EFE7DD;
+  --bh-white:      #FFFFFF;
+
+  /* Site palette */
+  --bg:            #1a1d1e;
+  --surface-green: rgba(29,77,82,0.35);
+  --surface-blue:  rgba(29,74,94,0.35);
+  --border:        rgba(125,230,155,0.15);
+  --text-primary:  #FFFFFF;
+  --text-support:  #797D80;
+  --highlight:     #7DE69B;
+}
+
 *, *::before, *::after { box-sizing: border-box; }
 
 body {
   margin: 0;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  background: #06060f;
-  color: #e2e8f0;
+  background: var(--bg);
+  color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
