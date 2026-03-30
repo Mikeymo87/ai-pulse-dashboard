@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 
 // ─── Category config ──────────────────────────────────────────────────────────
@@ -152,14 +152,42 @@ function InsightCard({ card, index }) {
   );
 }
 
+// ─── Spinner ──────────────────────────────────────────────────────────────────
+function Spinner() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, padding: '12px 0 28px' }}>
+      <motion.div
+        animate={{ rotate: 360 }}
+        transition={{ repeat: Infinity, duration: 1.1, ease: 'linear' }}
+        style={{
+          width: 32,
+          height: 32,
+          borderRadius: '50%',
+          border: '3px solid rgba(125,230,155,0.15)',
+          borderTopColor: '#7DE69B',
+        }}
+      />
+      <p style={{
+        margin: 0,
+        fontFamily: 'Inter, sans-serif',
+        fontSize: 13,
+        color: '#797D80',
+      }}>
+        Claude is analyzing 14 months of survey data…
+      </p>
+    </div>
+  );
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function OpportunitySpotlight({ transforms }) {
   const [cards, setCards] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+  const fetchedRef = useRef(false);
 
-  useEffect(() => {
-    async function fetchInsights() {
+  const fetchInsights = useCallback(async () => {
       const {
         sentimentTrend,
         familiarityTrend,
@@ -281,7 +309,7 @@ export default function OpportunitySpotlight({ transforms }) {
           },
           body: JSON.stringify({
             model: 'claude-sonnet-4-6',
-            max_tokens: 1024,
+            max_tokens: 1800,
             system: `You are a strategic advisor for Baptist Health's Marketing & Communications department.
 You will receive structured survey data from 3 pulse surveys (Jan–Feb 2025, Aug–Sep 2025, Mar 2026)
 covering AI adoption across the department (292 total responses). The data also includes a team readiness
@@ -321,10 +349,21 @@ stat: one key supporting data point as a short string, e.g. "↑ 34% daily use i
       } finally {
         setLoading(false);
       }
-    }
+  }, [transforms]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Guard against React StrictMode double-invoke in dev
+  useEffect(() => {
+    if (fetchedRef.current) return;
+    fetchedRef.current = true;
     fetchInsights();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  function retry() {
+    setCards(null);
+    setError(false);
+    setLoading(true);
+    fetchInsights();
+  }
 
   return (
     <section
@@ -380,6 +419,7 @@ stat: one key supporting data point as a short string, e.g. "↑ 34% daily use i
       {/* Card grid */}
       {loading && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+          <Spinner />
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(460px, 1fr))', gap: 24 }}>
             {[0, 1, 2, 3].map(i => <SkeletonCard key={i} delay={i * 0.2} />)}
           </div>
@@ -392,13 +432,33 @@ stat: one key supporting data point as a short string, e.g. "↑ 34% daily use i
           background: 'rgba(29,77,82,0.25)',
           border: '1px solid rgba(125,230,155,0.1)',
           borderRadius: 16,
-          padding: '32px 28px',
-          color: '#797D80',
+          padding: '36px 28px',
           fontFamily: 'Inter, sans-serif',
-          fontSize: 14,
           textAlign: 'center',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 16,
         }}>
-          Insights unavailable — check your API key in <code style={{ color: '#7DE69B', fontSize: 12 }}>.env</code> or refresh to try again.
+          <p style={{ margin: 0, color: '#797D80', fontSize: 14 }}>
+            Insights couldn't load — the API may be busy or the key needs checking.
+          </p>
+          <button
+            onClick={retry}
+            style={{
+              background: 'rgba(125,230,155,0.12)',
+              border: '1px solid rgba(125,230,155,0.3)',
+              borderRadius: 8,
+              padding: '8px 20px',
+              color: '#7DE69B',
+              fontFamily: 'Inter, sans-serif',
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            Try again
+          </button>
         </div>
       )}
 
