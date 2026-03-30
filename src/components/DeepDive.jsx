@@ -5,6 +5,30 @@ import {
   Tooltip, ResponsiveContainer, ReferenceLine,
 } from 'recharts';
 
+// ─── Tool category detection ─────────────────────────────────────────────────
+const TOOL_CATEGORIES = {
+  'Microsoft':    { color: '#59BEC9', keywords: ['copilot', 'microsoft', 'bing', 'azure'] },
+  'Google':       { color: '#7DE69B', keywords: ['gemini', 'google', 'notebooklm', 'bard'] },
+  'OpenAI':       { color: '#2EA84A', keywords: ['chatgpt', 'openai', 'dall-e', 'dall·e', 'sora'] },
+  'Anthropic':    { color: '#b388ff', keywords: ['claude', 'anthropic'] },
+  'Adobe':        { color: '#ffab40', keywords: ['adobe', 'firefly'] },
+  'Image/Video':  { color: '#f48fb1', keywords: ['midjourney', 'stable diffusion', 'ideogram', 'runway', 'heygen', 'synthesia', 'invideo', 'luma'] },
+  'Writing AI':   { color: '#FFCD00', keywords: ['grammarly', 'jasper', 'copy.ai', 'writesonic', 'rytr', 'wordtune'] },
+  'Research AI':  { color: '#80deea', keywords: ['perplexity', 'you.com', 'consensus', 'elicit', 'answerthepublic'] },
+};
+
+function getToolCategory(name) {
+  const n = name.toLowerCase();
+  for (const [cat, { keywords }] of Object.entries(TOOL_CATEGORIES)) {
+    if (keywords.some(k => n.includes(k))) return cat;
+  }
+  return 'Other';
+}
+function getToolColor(name) {
+  const cat = getToolCategory(name);
+  return TOOL_CATEGORIES[cat]?.color ?? '#797D80';
+}
+
 // ─── Color palette for roles ──────────────────────────────────────────────────
 const ROLE_PALETTE = [
   '#7DE69B', '#59BEC9', '#FFCD00', '#2EA84A',
@@ -138,12 +162,150 @@ function GroupCard({ name, data, color, index }) {
   );
 }
 
+// ─── Tool bubble chart ────────────────────────────────────────────────────────
+function ToolBubbles({ tools, totalN }) {
+  const [hovered, setHovered] = useState(null);
+  const max = tools[0]?.count || 1;
+  const MIN_SIZE = 52;
+  const MAX_SIZE = 128;
+
+  return (
+    <div>
+      {/* Bubble field */}
+      <div style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '24px 0 16px',
+        minHeight: 180,
+      }}>
+        {tools.map((tool, i) => {
+          const size = Math.round(MIN_SIZE + ((tool.count / max) * (MAX_SIZE - MIN_SIZE)));
+          const color = getToolColor(tool.label);
+          const isHovered = hovered === tool.label;
+          const pct = totalN ? Math.round((tool.count / totalN) * 100) : tool.pct;
+          const showLabel = size >= 72;
+          return (
+            <motion.div
+              key={tool.label}
+              initial={{ opacity: 0, scale: 0.6 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: i * 0.04 }}
+              onMouseEnter={() => setHovered(tool.label)}
+              onMouseLeave={() => setHovered(null)}
+              style={{
+                position: 'relative',
+                width: size,
+                height: size,
+                borderRadius: '50%',
+                background: isHovered ? `${color}30` : `${color}18`,
+                border: `2px solid ${color}${isHovered ? 'cc' : '55'}`,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'default',
+                transition: 'background 0.2s, border-color 0.2s',
+                flexShrink: 0,
+              }}
+            >
+              {showLabel ? (
+                <>
+                  <span style={{
+                    fontFamily: 'Inter, sans-serif',
+                    fontSize: Math.max(9, Math.min(12, size / 9)),
+                    fontWeight: 700,
+                    color,
+                    textAlign: 'center',
+                    lineHeight: 1.2,
+                    padding: '0 6px',
+                    wordBreak: 'break-word',
+                  }}>
+                    {tool.label}
+                  </span>
+                  <span style={{
+                    fontFamily: 'Inter, sans-serif',
+                    fontSize: Math.max(9, Math.min(11, size / 10)),
+                    fontWeight: 500,
+                    color: '#797D80',
+                    marginTop: 2,
+                  }}>
+                    {pct}%
+                  </span>
+                </>
+              ) : (
+                <span style={{
+                  fontFamily: 'Inter, sans-serif',
+                  fontSize: 9,
+                  fontWeight: 700,
+                  color,
+                  textAlign: 'center',
+                  padding: '0 4px',
+                  lineHeight: 1.2,
+                  wordBreak: 'break-word',
+                }}>
+                  {tool.label.split(' ')[0]}
+                </span>
+              )}
+
+              {/* Hover tooltip */}
+              {isHovered && (
+                <div style={{
+                  position: 'absolute',
+                  bottom: size / 2 + 12,
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  background: '#1e2425',
+                  border: `1px solid ${color}40`,
+                  borderRadius: 8,
+                  padding: '8px 12px',
+                  whiteSpace: 'nowrap',
+                  zIndex: 10,
+                  fontFamily: 'Inter, sans-serif',
+                  fontSize: 12,
+                  pointerEvents: 'none',
+                }}>
+                  <div style={{ fontWeight: 700, color, marginBottom: 2 }}>{tool.label}</div>
+                  <div style={{ color: '#b0b8c0' }}>{tool.count} respondents · {pct}%</div>
+                  <div style={{ color: '#797D80', fontSize: 10, marginTop: 2 }}>{getToolCategory(tool.label)}</div>
+                </div>
+              )}
+            </motion.div>
+          );
+        })}
+      </div>
+
+      {/* Category legend */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 16px', marginTop: 8, justifyContent: 'center' }}>
+        {[...new Set(tools.map(t => getToolCategory(t.label)))].map(cat => (
+          <div key={cat} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <div style={{ width: 7, height: 7, borderRadius: '50%', background: TOOL_CATEGORIES[cat]?.color ?? '#797D80', flexShrink: 0 }} />
+            <span style={{ fontSize: 10, color: '#797D80', fontFamily: 'Inter, sans-serif' }}>{cat}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function DeepDive({ surveys, transforms }) {
   const [groupBy, setGroupBy] = useState('role');
+  const [toolSurvey, setToolSurvey] = useState('s2');
 
   const s3Rows = surveys?.survey3 ?? [];
-  const { byRole, byFunction } = transforms;
+  const { byRole, byFunction, toolsS2, toolsS3 } = transforms;
+
+  // ── Tool data ─────────────────────────────────────────────────────────────
+  // S2: all tools used (structured multi-select, n=106)
+  // S3: personal/non-endorsed tools only (free-text, n=89) — filter count >= 2
+  const s2Tools = (toolsS2 ?? []).filter(t => t.count >= 2).slice(0, 20);
+  const s3Tools = (toolsS3 ?? []).filter(t => t.count >= 2).slice(0, 20);
+  const activeTools = toolSurvey === 's2' ? s2Tools : s3Tools;
+  const activeN = toolSurvey === 's2' ? 106 : 89;
 
   // ── Scatter data ─────────────────────────────────────────────────────────
   const allRoles = useMemo(() => {
@@ -373,6 +535,69 @@ export default function DeepDive({ surveys, transforms }) {
           ))}
         </div>
       </div>
+
+      {/* ── Tool Ecosystem ────────────────────────────────────────────────── */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5 }}
+        style={{ marginTop: 48 }}
+      >
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 24 }}>
+          <div>
+            <p style={{ margin: '0 0 2px', fontSize: 16, fontWeight: 800, color: '#f0f2f4' }}>
+              What Tools Are They Using?
+            </p>
+            <p style={{ margin: 0, fontSize: 13, color: '#797D80' }}>
+              {toolSurvey === 's2'
+                ? 'Survey 2 — all AI tools used at work (structured list, 106 respondents)'
+                : 'Survey 3 — personal & non-endorsed tools only (free-text, 89 respondents)'}
+            </p>
+          </div>
+          <div style={{
+            display: 'flex',
+            background: 'rgba(255,255,255,0.05)',
+            border: '1px solid rgba(125,230,155,0.12)',
+            borderRadius: 10,
+            padding: 3,
+            gap: 2,
+          }}>
+            {[{ key: 's2', label: 'Survey 2' }, { key: 's3', label: 'Survey 3' }].map(opt => (
+              <button
+                key={opt.key}
+                onClick={() => setToolSurvey(opt.key)}
+                style={{
+                  padding: '6px 18px',
+                  borderRadius: 8,
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontFamily: 'Inter, sans-serif',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  transition: 'all 0.2s',
+                  background: toolSurvey === opt.key ? 'rgba(125,230,155,0.15)' : 'transparent',
+                  color: toolSurvey === opt.key ? '#7DE69B' : '#797D80',
+                }}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div style={{
+          background: 'rgba(29,77,82,0.35)',
+          border: '1px solid rgba(125,230,155,0.15)',
+          borderRadius: 16,
+          padding: '20px 24px 24px',
+        }}>
+          {activeTools.length > 0
+            ? <ToolBubbles tools={activeTools} totalN={activeN} />
+            : <p style={{ textAlign: 'center', color: '#797D80', fontFamily: 'Inter, sans-serif', fontSize: 13, padding: '32px 0' }}>No tool data available for this survey.</p>
+          }
+        </div>
+      </motion.div>
     </section>
   );
 }

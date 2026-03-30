@@ -82,6 +82,13 @@ Files: `src/components/DeepDive.jsx`, `src/App.jsx`
 - DeepDive data passed to OpportunitySpotlight prompt as `teamReadiness` context for READINESS card
 
 ### 🔲 Phase 6 — Tool Ecosystem Bubble Chart (NEXT UP)
+Integrate into DeepDive section (not a new standalone section — dashboard is getting long).
+
+### ⚠️ Post-Phase-8 Cleanup Note
+Dashboard needs restructuring after all phases are complete:
+- Dashboard is too long as a single scroll — convert to tabbed deep-dive sections
+- Suggested tab structure: Overview (Hero + Growth Story) | Trends | Team (DeepDive) | Insights (Spotlight) | Chat
+- Each survey could also have its own drill-down tab
 ### 🔲 Phase 6 — Tool Ecosystem Bubble Chart
 ### 🔲 Phase 7 — Claude Chat Panel (Claude API)
 ### 🔲 Phase 8 — Presentation Mode + Deploy
