@@ -248,11 +248,13 @@ export default function OpportunitySpotlight({ transforms }) {
       };
 
       // ── API call ──────────────────────────────────────────────────────────
+      const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY;
+      console.log('OpportunitySpotlight: key defined?', !!apiKey, '| first 8 chars:', apiKey?.slice(0, 8));
       try {
         const res = await fetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
           headers: {
-            'x-api-key': import.meta.env.VITE_ANTHROPIC_API_KEY,
+            'x-api-key': apiKey,
             'anthropic-version': '2023-06-01',
             'anthropic-dangerous-direct-browser-access': 'true',
             'content-type': 'application/json',
