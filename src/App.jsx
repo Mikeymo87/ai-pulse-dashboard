@@ -57,8 +57,8 @@ export default function App() {
       <Hero transforms={transforms} />
       <GrowthStory transforms={transforms} />
       <TrendCharts transforms={transforms} />
-      <OpportunitySpotlight transforms={transforms} />
       <DeepDive surveys={surveys} transforms={transforms} />
+      <OpportunitySpotlight transforms={transforms} />
     </div>
   );
 }
