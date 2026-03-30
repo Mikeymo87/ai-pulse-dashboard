@@ -35,8 +35,25 @@ Critical implementation notes:
 - `useSurveyData()` returns `{ surveys, transforms, loading, error }`
 - Verified: S1=97 · S2=106 · S3=89 · Total=292
 
-### 🔲 Phase 2 — Hero + Growth Story (NEXT UP)
-### 🔲 Phase 3 — Trend Line Charts
+### ✅ Phase 2 — Hero + Growth Story (COMPLETE)
+Files: `src/components/Hero.jsx`, `src/components/GrowthStory.jsx`, `src/components/Nav.jsx`
+
+Key details:
+- Hero: pulsing BH-green ambient glow, staggered headline animation, 3 animated count-up stat cards, 3-paragraph politician-style exec summary with dynamic own-pocket (coral) + benefit data
+- GrowthStory: cinematic 3-wave scroll, 44px/900-weight number stat pills, inline delta badges (% not pp), Wave 3 gets 2 extra pills — "Paying Own Pocket" (coral) + "See Momentum Accelerating" (mint)
+- Nav: sticky top nav with section anchor links
+- index.css: BH brand CSS variables added under `:root`, background `#1a1d1e`
+- Color rule enforced: coral = negative/warning ONLY, yellow = stable, green/mint = positive, turquoise = neutral
+
+### 🔲 Phase 3 — Trend Line Charts (NEXT UP)
+Build `src/components/TrendCharts.jsx` and add to `App.jsx` after `<GrowthStory />`.
+Full spec in master plan. 4 charts in a 2×2 grid:
+1. Sentiment Shift — LineChart (Positive=bh-green, Mixed=yellow, Negative=coral)
+2. AI Familiarity — AreaChart gradient turquoise, Y-axis 1–5
+3. Frequency of Use — LineChart (Daily %=mint solid, Never %=coral dashed)
+4. Importance to Role — AreaChart gradient bh-green, Y-axis 1–5
+Section id="trends", tag "14-MONTH TREND", H2 "The Trend Lines Tell the Story"
+
 ### 🔲 Phase 4 — Opportunity Spotlight (Claude API)
 ### 🔲 Phase 5 — Scatter Plot + Deep Dive
 ### 🔲 Phase 6 — Tool Ecosystem Bubble Chart
