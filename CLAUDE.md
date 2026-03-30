@@ -70,7 +70,18 @@ Files: `src/components/OpportunitySpotlight.jsx`, `src/App.jsx`
 - Loading state: 4 pulsing skeleton cards (Framer Motion opacity loop)
 - Error state: single fallback card with retry message
 
-### 🔲 Phase 5 — Scatter Plot + Deep Dive (NEXT UP)
+### ✅ Phase 5 — Scatter Plot + Deep Dive (COMPLETE)
+Files: `src/components/DeepDive.jsx`, `src/App.jsx`
+
+- Section id="deepdive", tag "SURVEY 3 DEEP DIVE", H2 "Who's Ready, Who Needs Support"
+- Confidence × Importance scatter plot — one dot per S3 respondent, colored by role, deterministic jitter prevents stacking on integer grid
+- Four quadrant labels: Ready to Lead (green) / Needs Support (coral) / Quiet Users (yellow) / Not Engaged (gray)
+- ReferenceLine at x=3 and y=3 draws quadrant dividers; role legend below chart
+- Role & Function toggle breakdown — animated metric bars per group (Confidence=yellow, Importance=mint, Familiarity=turquoise)
+- Moved above OpportunitySpotlight — both sections are real-time (live Google Sheet, Claude re-called on every page load)
+- DeepDive data passed to OpportunitySpotlight prompt as `teamReadiness` context for READINESS card
+
+### 🔲 Phase 6 — Tool Ecosystem Bubble Chart (NEXT UP)
 ### 🔲 Phase 6 — Tool Ecosystem Bubble Chart
 ### 🔲 Phase 7 — Claude Chat Panel (Claude API)
 ### 🔲 Phase 8 — Presentation Mode + Deploy
