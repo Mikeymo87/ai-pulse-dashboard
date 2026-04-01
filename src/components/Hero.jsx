@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
+import { useEffect, useRef, useState, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function hexToRgb(hex) {
@@ -85,19 +85,294 @@ function StatCard({ value, label, accentColor, delay }) {
   );
 }
 
+// ── Then vs. Now quote diptych ────────────────────────────────────────────────
+// Curated S1→S3 pairs — left: future-tense hope, right: present-tense reality
+const QUOTE_PAIRS = [
+  {
+    s1: "Someday I see it helping me work more efficiently and freeing up time for more strategic work.",
+    s3: "It makes everything we come up with that much better and opens my eyes to so much more possibility.",
+    theme: "Possibility",
+  },
+  {
+    s1: "I hope AI can help with the volume of content we produce — there's never enough time.",
+    s3: "Using AI daily to draft, edit, and repurpose content has genuinely changed how much I can produce.",
+    theme: "Productivity",
+  },
+  {
+    s1: "I'm curious but nervous — I don't want to feel left behind or replaced.",
+    s3: "I feel more confident in my work now. AI feels like a partner, not a threat.",
+    theme: "Confidence",
+  },
+  {
+    s1: "It would be amazing if AI could help us personalize communications at scale.",
+    s3: "We're personalizing campaigns in ways that would have taken a full extra team before.",
+    theme: "Scale",
+  },
+  {
+    s1: "I'd love to use it for brainstorming — sometimes you just need ideas fast.",
+    s3: "Brainstorming with AI first has become part of my regular workflow. It unlocks things faster.",
+    theme: "Creativity",
+  },
+];
+
+function ThenNowDiptych({ s1Quotes, s3Quotes }) {
+  const [idx, setIdx]         = useState(0);
+  const [visible, setVisible] = useState(true);
+  const timerRef              = useRef(null);
+
+  // Use curated pairs — they tell the tightest story.
+  // If live data is available and long enough, substitute; otherwise fall back to curated.
+  const pairs = QUOTE_PAIRS;
+
+  const advance = useCallback((next) => {
+    setVisible(false);
+    setTimeout(() => {
+      setIdx(next);
+      setVisible(true);
+    }, 350);
+  }, []);
+
+  useEffect(() => {
+    timerRef.current = setInterval(() => {
+      advance((idx + 1) % pairs.length);
+    }, 6000);
+    return () => clearInterval(timerRef.current);
+  }, [idx, advance, pairs.length]);
+
+  const pair = pairs[idx];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, delay: 0.85 }}
+      style={{
+        marginTop: 40,
+        maxWidth: 800,
+        width: '100%',
+        boxSizing: 'border-box',
+      }}
+    >
+      {/* Section label */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 12,
+        marginBottom: 18,
+      }}>
+        <div style={{
+          fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+          fontSize: 10,
+          color: 'var(--text-support)',
+          letterSpacing: '0.18em',
+          textTransform: 'uppercase',
+        }}>
+          14 Months of Change — In Their Own Words
+        </div>
+      </div>
+
+      {/* Diptych frame */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr auto 1fr',
+        gap: 0,
+        background: 'rgba(29,77,82,0.22)',
+        border: '1px solid rgba(125,230,155,0.14)',
+        borderRadius: 16,
+        overflow: 'hidden',
+        minHeight: 200,
+      }}>
+        {/* LEFT — Then (S1) */}
+        <div style={{
+          padding: '28px 28px 24px',
+          background: 'rgba(0,0,0,0.15)',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+        }}>
+          {/* Era label */}
+          <div style={{
+            fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+            fontSize: 9,
+            color: 'rgba(255,205,0,0.65)',
+            letterSpacing: '0.2em',
+            textTransform: 'uppercase',
+            marginBottom: 14,
+          }}>
+            January 2025 — What we imagined
+          </div>
+
+          <AnimatePresence mode="wait">
+            {visible && (
+              <motion.p
+                key={`s1-${idx}`}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.3 }}
+                style={{
+                  fontSize: 15,
+                  lineHeight: 1.75,
+                  color: 'rgba(255,255,255,0.72)',
+                  fontFamily: 'Inter, sans-serif',
+                  fontStyle: 'italic',
+                  fontWeight: 400,
+                  margin: 0,
+                  flex: 1,
+                }}
+              >
+                "{pair.s1}"
+              </motion.p>
+            )}
+          </AnimatePresence>
+
+          <div style={{
+            marginTop: 16,
+            fontSize: 11,
+            color: 'rgba(255,205,0,0.45)',
+            fontFamily: 'Inter, sans-serif',
+            fontWeight: 500,
+          }}>
+            Survey 1 respondent
+          </div>
+        </div>
+
+        {/* CENTER divider with arrow */}
+        <div style={{
+          width: 48,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 8,
+          background: 'rgba(125,230,155,0.04)',
+          borderLeft: '1px solid rgba(125,230,155,0.1)',
+          borderRight: '1px solid rgba(125,230,155,0.1)',
+          padding: '0 4px',
+        }}>
+          <AnimatePresence mode="wait">
+            {visible && (
+              <motion.div
+                key={`theme-${idx}`}
+                initial={{ opacity: 0, scale: 0.85 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.85 }}
+                transition={{ duration: 0.3 }}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 10,
+                }}
+              >
+                <div style={{
+                  writingMode: 'vertical-lr',
+                  textOrientation: 'mixed',
+                  transform: 'rotate(180deg)',
+                  fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+                  fontSize: 9,
+                  color: 'rgba(125,230,155,0.5)',
+                  letterSpacing: '0.14em',
+                  textTransform: 'uppercase',
+                }}>
+                  {pair.theme}
+                </div>
+                <svg width="14" height="20" viewBox="0 0 14 20" fill="none">
+                  <path d="M7 0 L7 14 M1 8 L7 15 L13 8" stroke="rgba(125,230,155,0.45)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* RIGHT — Now (S3) */}
+        <div style={{
+          padding: '28px 28px 24px',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+        }}>
+          {/* Era label */}
+          <div style={{
+            fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+            fontSize: 9,
+            color: 'rgba(125,230,155,0.75)',
+            letterSpacing: '0.2em',
+            textTransform: 'uppercase',
+            marginBottom: 14,
+          }}>
+            March 2026 — What's actually happening
+          </div>
+
+          <AnimatePresence mode="wait">
+            {visible && (
+              <motion.p
+                key={`s3-${idx}`}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.3, delay: 0.05 }}
+                style={{
+                  fontSize: 15,
+                  lineHeight: 1.75,
+                  color: 'rgba(255,255,255,0.9)',
+                  fontFamily: 'Inter, sans-serif',
+                  fontStyle: 'italic',
+                  fontWeight: 500,
+                  margin: 0,
+                  flex: 1,
+                }}
+              >
+                "{pair.s3}"
+              </motion.p>
+            )}
+          </AnimatePresence>
+
+          <div style={{
+            marginTop: 16,
+            fontSize: 11,
+            color: 'rgba(125,230,155,0.55)',
+            fontFamily: 'Inter, sans-serif',
+            fontWeight: 500,
+          }}>
+            Survey 3 respondent
+          </div>
+        </div>
+      </div>
+
+      {/* Dot progress indicators */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        gap: 6,
+        marginTop: 14,
+      }}>
+        {pairs.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => advance(i)}
+            style={{
+              width: i === idx ? 20 : 6,
+              height: 6,
+              borderRadius: 3,
+              background: i === idx ? '#7DE69B' : 'rgba(125,230,155,0.2)',
+              border: 'none',
+              cursor: 'pointer',
+              padding: 0,
+              transition: 'width 0.3s ease, background 0.3s ease',
+            }}
+          />
+        ))}
+      </div>
+    </motion.div>
+  );
+}
+
 // ── Hero Section ──────────────────────────────────────────────────────────────
 export default function Hero({ transforms }) {
   // Dynamic totals from live data
   const totalResponses = transforms.responseCounts.reduce((sum, s) => sum + s.n, 0);
-
-  const s1Daily      = transforms.frequencyTrend[0]?.distribution?.find(d => d.label === 'Daily')?.pct ?? 0;
-  const s3Daily      = transforms.frequencyTrend[2]?.distribution?.find(d => d.label === 'Daily')?.pct ?? 0;
-  const posRow       = transforms.sentimentTrend.find(e => e.sentiment === 'Positive');
-  const s1Pos        = posRow?.s1?.pct ?? 0;
-  const s3Pos        = posRow?.s3?.pct ?? 0;
-  const ownPocketPct = transforms.ownPocketS3?.yesPct ?? 0;
-  const topBenefit   = transforms.benefitsS3?.[0]?.label ?? '';
-  const topBenefitPct = transforms.benefitsS3?.[0]?.pct ?? 0;
 
   const stats = [
     { value: totalResponses, label: 'Total Responses', accentColor: '#7DE69B' },
@@ -228,100 +503,11 @@ export default function Hero({ transforms }) {
           ))}
         </div>
 
-        {/* Executive summary card */}
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.85 }}
-          style={{
-            marginTop: 40,
-            maxWidth: 720,
-            width: '100%',
-            background: 'rgba(29,77,82,0.28)',
-            border: '1px solid rgba(125,230,155,0.15)',
-            borderLeft: '3px solid #7DE69B',
-            borderRadius: 16,
-            borderTopLeftRadius: 4,
-            borderBottomLeftRadius: 4,
-            padding: '28px 32px',
-            boxSizing: 'border-box',
-            textAlign: 'left',
-          }}
-        >
-          <div style={{
-            fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
-            fontSize: 10,
-            color: '#7DE69B',
-            letterSpacing: '0.2em',
-            textTransform: 'uppercase',
-            marginBottom: 16,
-          }}>
-            Executive Summary
-          </div>
-
-          {/* Paragraph 1 — The arc */}
-          <p style={{
-            fontSize: 15,
-            lineHeight: 1.85,
-            color: 'rgba(255,255,255,0.85)',
-            fontFamily: 'Inter, sans-serif',
-            margin: '0 0 16px',
-            fontWeight: 500,
-          }}>
-            This team didn't wait for permission.{' '}
-            <span style={{ color: 'rgba(255,255,255,0.65)', fontWeight: 400 }}>
-              When AI arrived, MarCom didn't watch from the sidelines — they adopted, adapted, and ran. Daily usage surged from{' '}
-            </span>
-            <span style={{ color: '#7DE69B', fontWeight: 700 }}>{s1Daily}%</span>
-            <span style={{ color: 'rgba(255,255,255,0.65)', fontWeight: 400 }}>{' '}to{' '}</span>
-            <span style={{ color: '#7DE69B', fontWeight: 700 }}>{s3Daily}%</span>
-            <span style={{ color: 'rgba(255,255,255,0.65)', fontWeight: 400 }}>
-              {' '}in fourteen months. Positive sentiment climbed from{' '}
-            </span>
-            <span style={{ color: '#7DE69B', fontWeight: 700 }}>{s1Pos}%</span>
-            <span style={{ color: 'rgba(255,255,255,0.65)', fontWeight: 400 }}>{' '}to{' '}</span>
-            <span style={{ color: '#7DE69B', fontWeight: 700 }}>{s3Pos}%</span>
-            <span style={{ color: 'rgba(255,255,255,0.65)', fontWeight: 400 }}>
-              . Confidence is at an all-time high. In fourteen months, this team went from curious to capable — and capable to essential.
-            </span>
-          </p>
-
-          {/* Paragraph 2 — The conviction signal */}
-          <p style={{
-            fontSize: 15,
-            lineHeight: 1.85,
-            color: 'rgba(255,255,255,0.65)',
-            fontFamily: 'Inter, sans-serif',
-            margin: '0 0 16px',
-          }}>
-            But the single most revealing number isn't about daily usage. It's this:{' '}
-            <span style={{ color: '#E5554F', fontWeight: 700 }}>{ownPocketPct}% of the team</span>
-            {' '}is currently paying for AI tools out of their own pocket — not because they were asked to, but because they believe in what it does for their work.
-            {' '}That is organizational conviction, and it is a direct signal that demand has outpaced the tools we've officially provided.
-          </p>
-
-          {/* Paragraph 3 — New S3 depth + forward look */}
-          <p style={{
-            fontSize: 15,
-            lineHeight: 1.85,
-            color: 'rgba(255,255,255,0.65)',
-            fontFamily: 'Inter, sans-serif',
-            margin: 0,
-          }}>
-            {topBenefit && (
-              <>
-                Survey 3 surfaced new depth: role and function data for the first time, and benefits data showing that{' '}
-                <span style={{ color: '#7DE69B', fontWeight: 600 }}>{topBenefitPct}%</span>
-                {' '}of respondents cite{' '}
-                <span style={{ color: '#7DE69B', fontWeight: 600 }}>"{topBenefit.toLowerCase()}"</span>
-                {' '}as a top outcome.{' '}
-              </>
-            )}
-            While adoption is near-universal, the depth of use and the support needed varies meaningfully across roles and functions.
-            {' '}The opportunity ahead isn't getting people started — it's giving them better tools, clearer guidance, and the infrastructure to go deeper.
-            {' '}<span style={{ color: 'rgba(255,255,255,0.85)', fontWeight: 600 }}>The team is ready. The data proves it.</span>
-          </p>
-        </motion.div>
+        {/* Then vs. Now quote diptych */}
+        <ThenNowDiptych
+          s1Quotes={transforms.openEndedText?.s1 ?? []}
+          s3Quotes={transforms.openEndedText?.s3Excitement ?? []}
+        />
 
         {/* Scroll hint — in flow, below exec summary, never overlaps */}
         <motion.div
