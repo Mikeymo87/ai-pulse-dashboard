@@ -166,7 +166,8 @@ function ConnectorLine() {
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
-export default function GrowthStory({ transforms }) {
+// presentationWave: when 0/1/2, show only that chapter (no section header)
+export default function GrowthStory({ transforms, presentationWave }) {
   const positive       = transforms.sentimentTrend.find(e => e.sentiment === 'Positive');
   const confidence     = transforms.confidenceTrend;
   const frequency      = transforms.frequencyTrend;
@@ -222,50 +223,58 @@ export default function GrowthStory({ transforms }) {
     return base;
   }
 
+  // In presentation mode, show only the requested wave; otherwise show all.
+  const indicesToShow = (presentationWave !== undefined && presentationWave !== null)
+    ? [presentationWave]
+    : [0, 1, 2];
+
   return (
     <section style={{
-      padding: '80px 48px',
+      padding: presentationWave !== undefined && presentationWave !== null ? '48px 48px' : '80px 48px',
       maxWidth: 1100,
       margin: '0 auto',
       boxSizing: 'border-box',
       width: '100%',
     }}>
-      {/* Section header */}
-      <div style={{ textAlign: 'center', marginBottom: 80 }}>
-        <div style={{
-          fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
-          fontSize: 11,
-          color: '#7DE69B',
-          letterSpacing: '0.22em',
-          textTransform: 'uppercase',
-          marginBottom: 16,
-        }}>
-          01  —  The Journey
+      {/* Section header — hidden in presentation mode (single-wave slides) */}
+      {(presentationWave === undefined || presentationWave === null) && (
+        <div style={{ textAlign: 'center', marginBottom: 80 }}>
+          <div style={{
+            fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+            fontSize: 11,
+            color: '#7DE69B',
+            letterSpacing: '0.22em',
+            textTransform: 'uppercase',
+            marginBottom: 16,
+          }}>
+            01  —  The Journey
+          </div>
+          <h2 style={{
+            fontSize: 40,
+            fontWeight: 800,
+            color: '#ffffff',
+            letterSpacing: '-0.02em',
+            margin: 0,
+            fontFamily: 'Inter, sans-serif',
+          }}>
+            Three Waves, One Story
+          </h2>
+          <p style={{
+            color: 'var(--text-support)',
+            fontSize: 15,
+            marginTop: 12,
+            fontFamily: 'Inter, sans-serif',
+          }}>
+            How AI adoption evolved across Baptist Health MarCom
+          </p>
         </div>
-        <h2 style={{
-          fontSize: 40,
-          fontWeight: 800,
-          color: '#ffffff',
-          letterSpacing: '-0.02em',
-          margin: 0,
-          fontFamily: 'Inter, sans-serif',
-        }}>
-          Three Waves, One Story
-        </h2>
-        <p style={{
-          color: 'var(--text-support)',
-          fontSize: 15,
-          marginTop: 12,
-          fontFamily: 'Inter, sans-serif',
-        }}>
-          How AI adoption evolved across Baptist Health MarCom
-        </p>
-      </div>
+      )}
 
       {/* Wave chapters */}
-      {CHAPTERS.map((chapter, i) => {
-        const accent = WAVE_ACCENT[i];
-        const stats  = getStats(i);
+      {indicesToShow.map((i) => {
+        const chapter = CHAPTERS[i];
+        const accent  = WAVE_ACCENT[i];
+        const stats   = getStats(i);
 
         return (
           <div key={chapter.waveLabel}>
@@ -386,8 +395,8 @@ export default function GrowthStory({ transforms }) {
               </div>
             </motion.div>
 
-            {/* Connector between chapters */}
-            {i < CHAPTERS.length - 1 && <ConnectorLine />}
+            {/* Connector between chapters — only in normal scroll mode */}
+            {(presentationWave === undefined || presentationWave === null) && i < CHAPTERS.length - 1 && <ConnectorLine />}
           </div>
         );
       })}

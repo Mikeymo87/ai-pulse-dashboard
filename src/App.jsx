@@ -1,5 +1,6 @@
 import './index.css';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { AnimatePresence } from 'framer-motion';
 import { useSurveyData } from './hooks/useSurveyData';
 import Nav from './components/Nav';
 import Hero from './components/Hero';
@@ -8,10 +9,24 @@ import TrendCharts from './components/TrendCharts';
 import OpportunitySpotlight from './components/OpportunitySpotlight';
 import ChatPanel from './components/ChatPanel';
 import DeepDive from './components/DeepDive';
+import PresentationMode from './components/PresentationMode';
 
 export default function App() {
   const { surveys, transforms, loading, error } = useSurveyData();
-  const [chatOpen, setChatOpen] = useState(false);
+  const [chatOpen, setChatOpen]       = useState(false);
+  const [presentMode, setPresentMode] = useState(false);
+
+  // P key toggles presentation mode
+  useEffect(() => {
+    function onKey(e) {
+      const tag = e.target?.tagName;
+      // Don't hijack P when user is typing in an input/textarea
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if (e.key === 'p' || e.key === 'P') setPresentMode(v => !v);
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   if (loading) return (
     <div
@@ -56,13 +71,24 @@ export default function App() {
 
   return (
     <div style={{ background: '#1a1d1e', minHeight: '100vh' }}>
-      <Nav onOpenChat={() => setChatOpen(true)} />
+      <Nav onOpenChat={() => setChatOpen(true)} onPresent={() => setPresentMode(true)} />
       <Hero transforms={transforms} />
       <GrowthStory transforms={transforms} />
       <TrendCharts transforms={transforms} />
       <DeepDive surveys={surveys} transforms={transforms} />
       <OpportunitySpotlight transforms={transforms} />
       <ChatPanel transforms={transforms} open={chatOpen} setOpen={setChatOpen} />
+
+      {/* Presentation mode overlay */}
+      <AnimatePresence>
+        {presentMode && (
+          <PresentationMode
+            transforms={transforms}
+            surveys={surveys}
+            onClose={() => setPresentMode(false)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

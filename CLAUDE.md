@@ -74,7 +74,7 @@ File: `src/components/ChatPanel.jsx`
 
 ---
 
-## 🔲 Phase 8 — Presentation Mode + Polish (NEXT UP)
+## ✅ Phase 8 — Presentation Mode + Polish (COMPLETE)
 
 **Goal:** Press `P` anywhere to enter a fullscreen, slide-by-slide presentation mode for live AI Council/leadership presentations.
 

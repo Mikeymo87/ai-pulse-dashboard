@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 
-export default function Nav({ onOpenChat }) {
+export default function Nav({ onOpenChat, onPresent }) {
   return (
     <div style={{
       position: 'sticky',
@@ -71,6 +71,34 @@ export default function Nav({ onOpenChat }) {
         }}>
           AI Engagement Pulse Survey
         </span>
+
+        {/* Present button */}
+        <motion.button
+          onClick={onPresent}
+          whileHover={{ scale: 1.04 }}
+          whileTap={{ scale: 0.96 }}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '6px 14px',
+            background: 'rgba(99,102,241,0.12)',
+            border: '1px solid rgba(99,102,241,0.3)',
+            borderRadius: 20,
+            cursor: 'pointer',
+            fontFamily: 'Inter, sans-serif',
+            fontSize: 12,
+            fontWeight: 600,
+            color: '#a5b4fc',
+            letterSpacing: '0.01em',
+            transition: 'background 0.2s',
+          }}
+          onMouseEnter={e => e.currentTarget.style.background = 'rgba(99,102,241,0.22)'}
+          onMouseLeave={e => e.currentTarget.style.background = 'rgba(99,102,241,0.12)'}
+        >
+          <span style={{ fontSize: 11 }}>⊞</span>
+          Present
+        </motion.button>
 
         <motion.button
           onClick={onOpenChat}
