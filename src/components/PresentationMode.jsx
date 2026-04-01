@@ -1,18 +1,20 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Hero from './Hero';
-import GrowthStory from './GrowthStory';
-import TrendCharts from './TrendCharts';
-import DeepDive from './DeepDive';
-import OpportunitySpotlight from './OpportunitySpotlight';
+import SlideOverview  from './slides/SlideOverview';
+import SlideWave      from './slides/SlideWave';
+import SlideTrends    from './slides/SlideTrends';
+import SlideTeam      from './slides/SlideTeam';
+import SlideSpotlight from './slides/SlideSpotlight';
 
 const SLIDES = [
-  { id: 'hero',   label: 'Overview' },
-  { id: 'wave-0', label: 'Wave 01 — The Baseline' },
-  { id: 'wave-1', label: 'Wave 02 — The Momentum' },
-  { id: 'wave-2', label: 'Wave 03 — The New Normal' },
-  { id: 'trends', label: 'Trend Charts' },
-  { id: 'team',   label: 'Team Deep Dive' },
+  { id: 'overview',  label: 'Overview' },
+  { id: 'wave-0',    label: 'Wave 01 — The Baseline' },
+  { id: 'wave-1',    label: 'Wave 02 — The Momentum' },
+  { id: 'wave-2',    label: 'Wave 03 — The New Normal' },
+  { id: 'trends-a',  label: 'Trends — Adoption' },
+  { id: 'trends-b',  label: 'Trends — Readiness' },
+  { id: 'trends-c',  label: 'Trends — Landscape' },
+  { id: 'team',      label: 'Team Readiness' },
   { id: 'spotlight', label: 'Opportunity Spotlight' },
 ];
 
@@ -34,7 +36,7 @@ export default function PresentationMode({ transforms, surveys, onClose }) {
 
   useEffect(() => {
     function onKey(e) {
-      if (e.key === 'Escape')     { onClose(); return; }
+      if (e.key === 'Escape')                               { onClose(); return; }
       if (e.key === 'ArrowRight' || e.key === 'ArrowDown')  goTo(current + 1);
       if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')    goTo(current - 1);
     }
@@ -43,16 +45,18 @@ export default function PresentationMode({ transforms, surveys, onClose }) {
   }, [current, goTo, onClose]);
 
   function renderSlide(id) {
-    if (id === 'hero')      return <Hero transforms={transforms} />;
-    if (id === 'wave-0')    return <GrowthStory transforms={transforms} presentationWave={0} />;
-    if (id === 'wave-1')    return <GrowthStory transforms={transforms} presentationWave={1} />;
-    if (id === 'wave-2')    return <GrowthStory transforms={transforms} presentationWave={2} />;
-    if (id === 'trends')    return <TrendCharts transforms={transforms} />;
-    if (id === 'team')      return <DeepDive surveys={surveys} transforms={transforms} />;
-    if (id === 'spotlight') return <OpportunitySpotlight transforms={transforms} />;
+    if (id === 'overview')  return <SlideOverview  transforms={transforms} />;
+    if (id === 'wave-0')    return <SlideWave       transforms={transforms} wave={0} />;
+    if (id === 'wave-1')    return <SlideWave       transforms={transforms} wave={1} />;
+    if (id === 'wave-2')    return <SlideWave       transforms={transforms} wave={2} />;
+    if (id === 'trends-a')  return <SlideTrends     transforms={transforms} charts={['sentiment','frequency']} />;
+    if (id === 'trends-b')  return <SlideTrends     transforms={transforms} charts={['familiarity','confidence']} />;
+    if (id === 'trends-c')  return <SlideTrends     transforms={transforms} charts={['journey','barriers']} />;
+    if (id === 'team')      return <SlideTeam        transforms={transforms} surveys={surveys} />;
+    if (id === 'spotlight') return <SlideSpotlight  transforms={transforms} />;
   }
 
-  const slide = SLIDES[current];
+  const slide  = SLIDES[current];
   const atStart = current === 0;
   const atEnd   = current === SLIDES.length - 1;
 
@@ -82,34 +86,23 @@ export default function PresentationMode({ transforms, surveys, onClose }) {
         borderBottom: '1px solid rgba(125,230,155,0.08)',
         flexShrink: 0,
         gap: 14,
+        boxSizing: 'border-box',
       }}>
         {/* Brand */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
           <motion.div
             animate={{ opacity: [0.7, 1, 0.7] }}
             transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-            style={{
-              width: 7,
-              height: 7,
-              borderRadius: '50%',
-              background: '#2EA84A',
-              boxShadow: '0 0 8px rgba(46,168,74,0.8)',
-              flexShrink: 0,
-            }}
+            style={{ width: 7, height: 7, borderRadius: '50%', background: '#2EA84A', boxShadow: '0 0 8px rgba(46,168,74,0.8)', flexShrink: 0 }}
           />
-          <span style={{ fontSize: 13, fontWeight: 700, color: '#fff', marginLeft: 9 }}>
-            Baptist Health
-          </span>
-          <span style={{ color: 'rgba(125,230,155,0.2)', fontSize: 18, margin: '0 10px', fontWeight: 300 }}>
-            |
-          </span>
-          <span style={{ fontSize: 12, fontWeight: 500, color: '#7DE69B' }}>
-            AI Pulse
-          </span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: '#fff', marginLeft: 9 }}>Baptist Health</span>
+          <span style={{ color: 'rgba(125,230,155,0.2)', fontSize: 18, margin: '0 10px', fontWeight: 300 }}>|</span>
+          <span style={{ fontSize: 12, fontWeight: 500, color: '#7DE69B' }}>AI Pulse</span>
         </div>
 
-        {/* Slide label */}
         <div style={{ width: 1, height: 20, background: 'rgba(125,230,155,0.1)' }} />
+
+        {/* Slide label */}
         <span style={{
           fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
           fontSize: 10,
@@ -154,7 +147,6 @@ export default function PresentationMode({ transforms, surveys, onClose }) {
             {current + 1} / {SLIDES.length}
           </span>
 
-          {/* ESC hint */}
           <span style={{
             fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
             fontSize: 10,
@@ -164,23 +156,18 @@ export default function PresentationMode({ transforms, surveys, onClose }) {
             ESC to exit
           </span>
 
-          {/* Close ✕ */}
+          {/* Close × */}
           <button
             onClick={onClose}
             style={{
-              width: 28,
-              height: 28,
+              width: 28, height: 28,
               borderRadius: '50%',
               border: '1px solid rgba(125,230,155,0.2)',
               background: 'rgba(125,230,155,0.06)',
               color: '#7DE69B',
               cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 16,
-              lineHeight: 1,
-              flexShrink: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 16, lineHeight: 1, flexShrink: 0,
             }}
           >
             ×
@@ -188,7 +175,7 @@ export default function PresentationMode({ transforms, surveys, onClose }) {
         </div>
       </div>
 
-      {/* ── Slide content ────────────────────────────────────────────────────── */}
+      {/* ── Slide content — hard-clipped, no scrollbar ever ──────────────────── */}
       <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
         <AnimatePresence custom={direction} mode="wait">
           <motion.div
@@ -202,8 +189,7 @@ export default function PresentationMode({ transforms, surveys, onClose }) {
             style={{
               position: 'absolute',
               inset: 0,
-              overflowY: 'auto',
-              overflowX: 'hidden',
+              overflow: 'hidden',   // hard clip — slides must fit, no scrollbar
             }}
           >
             {renderSlide(slide.id)}
@@ -225,24 +211,17 @@ export default function PresentationMode({ transforms, surveys, onClose }) {
           onClick={() => goTo(current - 1)}
           disabled={atStart}
           style={{
-            width: 40,
-            height: 40,
-            borderRadius: '50%',
+            width: 40, height: 40, borderRadius: '50%',
             border: `1px solid ${atStart ? 'rgba(125,230,155,0.08)' : 'rgba(125,230,155,0.22)'}`,
             background: atStart ? 'transparent' : 'rgba(125,230,155,0.07)',
             color: atStart ? 'rgba(125,230,155,0.2)' : '#7DE69B',
             cursor: atStart ? 'default' : 'pointer',
             fontSize: 18,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
             transition: 'all 0.2s ease',
           }}
-        >
-          ←
-        </button>
+        >←</button>
 
-        {/* Keyboard hint */}
         <span style={{
           fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
           fontSize: 10,
@@ -257,22 +236,16 @@ export default function PresentationMode({ transforms, surveys, onClose }) {
           onClick={() => goTo(current + 1)}
           disabled={atEnd}
           style={{
-            width: 40,
-            height: 40,
-            borderRadius: '50%',
+            width: 40, height: 40, borderRadius: '50%',
             border: `1px solid ${atEnd ? 'rgba(125,230,155,0.08)' : 'rgba(125,230,155,0.22)'}`,
             background: atEnd ? 'transparent' : 'rgba(125,230,155,0.07)',
             color: atEnd ? 'rgba(125,230,155,0.2)' : '#7DE69B',
             cursor: atEnd ? 'default' : 'pointer',
             fontSize: 18,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
             transition: 'all 0.2s ease',
           }}
-        >
-          →
-        </button>
+        >→</button>
       </div>
     </motion.div>
   );
