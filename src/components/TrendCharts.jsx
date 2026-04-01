@@ -6,6 +6,8 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Legend,
 } from 'recharts';
+import StruggleMap from './StruggleMap';
+import AdoptionCurve from './AdoptionCurve';
 
 // ─── Shared style constants ───────────────────────────────────────────────────
 const axisStyle = { fill: '#797D80', fontSize: 11, fontFamily: 'Inter, sans-serif' };
@@ -184,15 +186,6 @@ function ChartCard({ title, subtitle, question, tag, tagColor, insight, children
   );
 }
 
-// ─── Stage label shortener ────────────────────────────────────────────────────
-const STAGE_SHORT = {
-  Curiosity: 'Curiosity',
-  Understanding: 'Understanding',
-  Experimentation: 'Experiment.',
-  Integration: 'Integration',
-  Transformation: 'Transform.',
-};
-
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function TrendCharts({ transforms }) {
   const {
@@ -201,8 +194,6 @@ export default function TrendCharts({ transforms }) {
     frequencyTrend,
     importanceTrend,
     confidenceTrend,
-    stageTrend,
-    barriersTrend,
   } = transforms;
 
   // ── 1. Sentiment ─────────────────────────────────────────────────────────
@@ -248,33 +239,6 @@ export default function TrendCharts({ transforms }) {
     confidenceData.map(d => d['Confident or Higher']),
     5, 0, 100
   );
-
-  // ── 6. Journey Stage (S2 vs S3 only) ─────────────────────────────────────
-  const stageData = stageTrend.map(e => ({
-    stage: STAGE_SHORT[e.stage] || e.stage,
-    'Survey 2 (Aug–Sep 2025)': e.s2.pct,
-    'Survey 3 (Mar 2026)': e.s3.pct,
-  }));
-  const advancedStages = ['Experimentation', 'Integration', 'Transformation'];
-  const s2AdvancedPct = stageTrend
-    .filter(e => advancedStages.includes(e.stage))
-    .reduce((sum, e) => sum + e.s2.pct, 0);
-  const s3AdvancedPct = stageTrend
-    .filter(e => advancedStages.includes(e.stage))
-    .reduce((sum, e) => sum + e.s3.pct, 0);
-
-  // ── 7. Top 5 Barriers ────────────────────────────────────────────────────
-  const barriersData = [...barriersTrend]
-    .filter(b => b.barrier !== 'No barriers')
-    .sort((a, b) => (b.s3.pct - a.s3.pct) || (b.s2.pct - a.s2.pct) || (b.s1.pct - a.s1.pct))
-    .slice(0, 5)
-    .map(b => ({
-    barrier: b.barrier,
-    'Survey 1 (Jan–Feb 2025)': b.s1.pct,
-    'Survey 2 (Aug–Sep 2025)': b.s2.pct,
-    'Survey 3 (Mar 2026)': b.s3.pct,
-  }));
-  const topBarrier = barriersData[0];
 
   // ── Computed insight values ────────────────────────────────────────────────
   const s1PosPct   = sentimentData[0]?.['Positive'] ?? 0;
@@ -472,72 +436,29 @@ export default function TrendCharts({ transforms }) {
           </ResponsiveContainer>
         </ChartCard>
 
-        {/* ── 6. AI Journey Stage Shift ─────────────────────────────────── */}
-        <ChartCard
-          title="AI Journey Stage Shift"
-          subtitle="Survey 2 vs. Survey 3 — S1 did not include this question"
-          question="Which stage best describes your current progress on the AI journey?"
-          tag="JOURNEY STAGE"
-          delay={0.5}
-          insight={`${s3AdvancedPct}% of respondents are now at the Experimentation stage or beyond — up from ${s2AdvancedPct}% in Survey 2. The team isn't just learning about AI anymore. They are building it into how they work.`}
-        >
-          <ResponsiveContainer width="100%" height={230}>
-            <BarChart data={stageData} margin={{ top: 4, right: 8, bottom: 4, left: -10 }}>
-              <CartesianGrid {...gridStyle} vertical={false} />
-              <XAxis dataKey="stage" tick={{ ...axisStyle, fontSize: 10 }} tickLine={false} axisLine={false} />
-              <YAxis tick={axisStyle} tickLine={false} axisLine={false} tickFormatter={v => `${v}%`} />
-              <Tooltip content={<ChartTooltip />} />
-              <Legend wrapperStyle={{ fontSize: 11, fontFamily: 'Inter, sans-serif', color: '#797D80', paddingTop: 8 }} />
-              <Bar dataKey="Survey 2 (Aug–Sep 2025)" fill="#59BEC9" radius={[3, 3, 0, 0]} />
-              <Bar dataKey="Survey 3 (Mar 2026)" fill="#7DE69B" radius={[3, 3, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </ChartCard>
-
-        {/* ── 7. Top 5 Barriers ─────────────────────────────────────────── */}
-        <ChartCard
-          title="Top 5 Barriers"
-          subtitle="What's blocking AI adoption — and is it improving?"
-          question="What do you think are the biggest barriers to using AI effectively in your role?"
-          tag="BARRIERS"
-          delay={0.6}
-          insight={topBarrier ? `"${topBarrier.barrier}" remains the #1 barrier, cited by ${topBarrier['Survey 3 (Mar 2026)']}% in Survey 3${topBarrier['Survey 1 (Jan–Feb 2025)'] !== topBarrier['Survey 3 (Mar 2026)'] ? ` vs. ${topBarrier['Survey 1 (Jan–Feb 2025)']}% in Survey 1` : ' — unchanged since Survey 1'}. These are solvable organizational problems. Targeted enablement can directly move the needle.` : ''}
-        >
-          <ResponsiveContainer width="100%" height={360}>
-            <BarChart
-              data={barriersData}
-              layout="vertical"
-              barSize={10}
-              barCategoryGap="25%"
-              margin={{ top: 4, right: 8, bottom: 0, left: 4 }}
-            >
-              <CartesianGrid {...gridStyle} horizontal={false} />
-              <YAxis
-                dataKey="barrier"
-                type="category"
-                tick={{ ...axisStyle, fontSize: 10 }}
-                tickLine={false}
-                axisLine={false}
-                width={140}
-              />
-              <XAxis
-                type="number"
-                tick={axisStyle}
-                tickLine={false}
-                axisLine={false}
-                tickFormatter={v => `${v}%`}
-                domain={[0, 'auto']}
-              />
-              <Tooltip content={<ChartTooltip />} />
-              <Legend wrapperStyle={{ fontSize: 11, fontFamily: 'Inter, sans-serif', color: '#797D80', paddingTop: 8 }} />
-              <Bar dataKey="Survey 1 (Jan–Feb 2025)" fill="#797D80" radius={[0, 3, 3, 0]} />
-              <Bar dataKey="Survey 2 (Aug–Sep 2025)" fill="#59BEC9" radius={[0, 3, 3, 0]} />
-              <Bar dataKey="Survey 3 (Mar 2026)" fill="#7DE69B" radius={[0, 3, 3, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </ChartCard>
 
       </div>
+
+      {/* ── Adoption Bell Curve (S1 → S2 → S3, shifting left) ───────────── */}
+      <motion.div
+        initial={{ opacity: 0, y: 28 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.55, delay: 0.1, ease: 'easeOut' }}
+        style={{
+          background: 'rgba(29,77,82,0.35)',
+          border: '1px solid rgba(125,230,155,0.15)',
+          borderRadius: 16,
+          padding: '28px 32px 24px',
+          marginTop: 20,
+        }}
+      >
+        <AdoptionCurve familiarityTrend={familiarityTrend} />
+      </motion.div>
+
+      {/* ── Struggle Map (full-width, below the stage flow) ──────────────── */}
+      <StruggleMap transforms={transforms} />
+
     </section>
   );
 }

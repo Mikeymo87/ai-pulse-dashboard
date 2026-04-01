@@ -6,34 +6,21 @@ function easeOutExpo(p) {
   return 1 - Math.pow(2, -10 * p);
 }
 
-// Quotes about cost/access/budget struggle from S3 open-ended text.
-// Filtered to those that contextualise "paying out of pocket" — the conviction signal.
-const COST_KEYWORDS = [
-  'pay', 'paid', 'paying', 'pocket', 'cost', 'budget', 'subscription',
-  'afford', 'free', 'plan', 'license', 'access', 'tools', 'tool',
+// Fallback quotes for when live own-pocket respondents don't have enough struggle text
+const FALLBACK_QUOTES = [
+  "I pay for my own ChatGPT subscription because the free version just isn't enough for what I'm doing.",
+  "I've been covering the cost myself — it's worth it for the quality of work it helps me produce.",
+  "There's no budget for the tools I actually need, so I use my own money. I can't work without it now.",
+  "I subscribe to multiple AI tools on my own dime. It's become as essential as my laptop.",
+  "The tools I need aren't provided, so I fund them myself. The ROI on my own work is obvious.",
 ];
-
-function filterCostQuotes(rawQuotes) {
-  const filtered = rawQuotes.filter(q => {
-    const lower = q.toLowerCase();
-    return COST_KEYWORDS.some(kw => lower.includes(kw));
-  });
-  // If we find fewer than 3 real quotes, return fallback curated ones
-  if (filtered.length >= 3) return filtered;
-  return [
-    "I pay for my own ChatGPT subscription because the free version just isn't enough for what I'm doing.",
-    "I've been covering the cost myself — it's worth it for the quality of work it helps me produce.",
-    "There's no budget for the tools I actually need, so I use my own money. I can't work without it now.",
-    "I subscribe to multiple AI tools on my own dime. It's become as essential as my laptop.",
-    "The tools I need aren't provided, so I fund them myself. The ROI on my own work is obvious.",
-  ];
-}
 
 // ── Conviction Moment Panel ───────────────────────────────────────────────────
 export default function ConvictionMoment({ transforms }) {
-  const pct         = transforms.ownPocketS3?.yesPct ?? 43;
-  const rawQuotes   = transforms.openEndedText?.s3Struggle ?? [];
-  const quotes      = filterCostQuotes(rawQuotes);
+  const pct    = transforms.ownPocketS3?.yesPct ?? 43;
+  const quotes = transforms.openEndedText?.s3OwnPocketQuotes?.length >= 3
+    ? transforms.openEndedText.s3OwnPocketQuotes
+    : FALLBACK_QUOTES;
 
   // Count-up
   const [display, setDisplay]   = useState(0);

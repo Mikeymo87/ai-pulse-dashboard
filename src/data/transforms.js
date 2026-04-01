@@ -299,12 +299,18 @@ export function buildTransforms({ survey1, survey2, survey3 }) {
   const s3StruggleN = survey3.filter(r => r.struggle && !/^n\/?a$|^none$|^no\b/i.test(r.struggle.trim())).length;
 
   const struggleThemesS3 = STRUGGLE_THEMES.map(({ key, label }) => {
-    const count = survey3.filter(r => r.struggleThemes?.includes(key)).length;
+    const matching = survey3.filter(r => r.struggleThemes?.includes(key));
+    const count = matching.length;
+    const quotes = matching
+      .map(r => (r.struggle || '').trim())
+      .filter(q => q.length > 15 && !/^n\/?a$|^none$|^no\b/i.test(q))
+      .slice(0, 3);
     return {
       key,
       label,
       count,
       pct: s3StruggleN ? Math.round((count / s3StruggleN) * 100) : 0,
+      quotes,
     };
   }).filter(t => t.count > 0).sort((a, b) => b.count - a.count);
 
@@ -313,12 +319,18 @@ export function buildTransforms({ survey1, survey2, survey3 }) {
   const s3ExcitementN = survey3.filter(r => r.excitement && r.excitement.trim()).length;
 
   const excitementThemesS3 = EXCITEMENT_THEMES.map(({ key, label }) => {
-    const count = survey3.filter(r => r.excitementThemes?.includes(key)).length;
+    const matching = survey3.filter(r => r.excitementThemes?.includes(key));
+    const count = matching.length;
+    const quotes = matching
+      .map(r => (r.excitement || '').trim())
+      .filter(q => q.length > 15)
+      .slice(0, 3);
     return {
       key,
       label,
       count,
       pct: s3ExcitementN ? Math.round((count / s3ExcitementN) * 100) : 0,
+      quotes,
     };
   }).filter(t => t.count > 0).sort((a, b) => b.count - a.count);
 
@@ -328,6 +340,15 @@ export function buildTransforms({ survey1, survey2, survey3 }) {
     s2: survey2.filter(r => r.openEnded).map(r => r.openEnded),
     s3Struggle:   survey3.filter(r => r.struggle).map(r => r.struggle),
     s3Excitement: survey3.filter(r => r.excitement).map(r => r.excitement),
+    // Struggle text from own-pocket respondents that specifically mentions paying/purchasing
+    s3OwnPocketQuotes: (() => {
+      const payKeywords = ['pay', 'paid', 'paying', 'pocket', 'cost', 'subscription',
+        'afford', 'budget', 'purchase', 'fund', 'money', 'personal', 'own', 'expense', 'dime'];
+      return survey3
+        .filter(r => r.ownPocket === true && r.struggle && r.struggle.trim().length > 15)
+        .map(r => r.struggle.trim())
+        .filter(q => payKeywords.some(kw => q.toLowerCase().includes(kw)));
+    })(),
   };
 
   return {
