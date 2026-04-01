@@ -9,6 +9,7 @@ import TrendCharts from './components/TrendCharts';
 import OpportunitySpotlight from './components/OpportunitySpotlight';
 import ChatPanel from './components/ChatPanel';
 import DeepDive from './components/DeepDive';
+import ConvictionMoment from './components/ConvictionMoment';
 import PresentationMode from './components/PresentationMode';
 
 export default function App() {
@@ -74,6 +75,7 @@ export default function App() {
       <Nav onOpenChat={() => setChatOpen(true)} onPresent={() => setPresentMode(true)} />
       <Hero transforms={transforms} />
       <GrowthStory transforms={transforms} />
+      <ConvictionMoment transforms={transforms} />
       <TrendCharts transforms={transforms} />
       <DeepDive surveys={surveys} transforms={transforms} />
       <OpportunitySpotlight transforms={transforms} />
