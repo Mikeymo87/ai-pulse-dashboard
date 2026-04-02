@@ -1,12 +1,34 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // ─── Card dimensions ──────────────────────────────────────────────────────────
-const CARD_W = 200;
-const CARD_H = 320;
+const CARD_W = 260;
+const CARD_H = 450;
 
-// ─── Archetype static definitions ────────────────────────────────────────────
-// Internal _adoptionScore: 1–5 — for classification only, never rendered.
+// ─── Arc layout: outer cards tilt outward and dip lower, center stands upright ─
+const ARC_CONFIG = [
+  { rotate: -10, dip: 40 },
+  { rotate: -5,  dip: 15 },
+  { rotate:  0,  dip:  0 },
+  { rotate:  5,  dip: 15 },
+  { rotate: 10,  dip: 40 },
+];
+
+// ─── Oracle readings (live count + pct injected) ──────────────────────────────
+const ORACLE_LINES = {
+  'confident-bystander': (n, pct) =>
+    `${n} teammates — ${pct}% of your team — are ready. They just haven't had their first meaningful AI experience yet.`,
+  'thoughtful-skeptic': (n, pct) =>
+    `${n} teammates (${pct}%) are your most valuable critics. Earn their trust and the rest of the org follows.`,
+  'blocked-believer': (n, pct) =>
+    `${n} teammates (${pct}%) are being held back by systems, not their own will. One policy change unlocks this entire group.`,
+  'experimenter': (n, pct) =>
+    `${n} teammates (${pct}%) are actively in motion. The right training converts them into your next Multipliers.`,
+  'multiplier': (n, pct) =>
+    `${n} teammates — ${pct}% of your team — are already building with AI. Protect their time and amplify their reach.`,
+};
+
+// ─── Archetype static definitions — rainbow spectrum I→V (cool → warm) ────────
 const ARCHETYPE_DEFS = [
   {
     key: 'confident-bystander',
@@ -17,13 +39,7 @@ const ARCHETYPE_DEFS = [
     tagline: 'Nothing stopping them. Nothing moving them.',
     description:
       'High self-reported confidence, no listed barriers, but monthly or less frequency and no own-pocket investment. The behavior doesn\'t match the self-assessment — not because they\'re misleading, but because they haven\'t yet done the work that would make it true.',
-    accentColor: '#797D80',
-    pills: [
-      { label: 'Measured pace', type: 'yellow' },
-      { label: 'No barriers listed', type: 'yellow' },
-      { label: 'Building confidence', type: 'yellow' },
-      { label: 'Clear runway ahead', type: 'yellow' },
-    ],
+    accentColor: '#A78BFA',
     tension: 'Untapped potential',
   },
   {
@@ -35,13 +51,7 @@ const ARCHETYPE_DEFS = [
     tagline: 'Not resistant because they don\'t understand — because they do.',
     description:
       'Mixed or cautious sentiment paired with real use. They have earned concerns: accuracy, human oversight, workflow disruption. Their open-text responses are the most detailed in the dataset. They are not against AI. They have good questions worth taking seriously.',
-    accentColor: '#59BEC9',
-    pills: [
-      { label: 'Thoughtful evaluator', type: 'yellow' },
-      { label: 'Calibrated expectations', type: 'yellow' },
-      { label: 'Weekly to monthly use', type: 'yellow' },
-      { label: 'Most detailed open-text', type: 'green' },
-    ],
+    accentColor: '#60A5FA',
     tension: 'Earned skepticism — not fear',
   },
   {
@@ -54,12 +64,6 @@ const ARCHETYPE_DEFS = [
     description:
       'Positive sentiment, high importance ratings, active weekly use — but something in the system is in the way. IT access, unclear guidelines, or tool costs are the friction. This is not a motivation problem. It is an infrastructure problem.',
     accentColor: '#59BEC9',
-    pills: [
-      { label: 'Positive sentiment', type: 'green' },
-      { label: 'High importance (4–5)', type: 'green' },
-      { label: 'System friction ahead', type: 'yellow' },
-      { label: 'Weekly, not daily', type: 'yellow' },
-    ],
     tension: 'Enthusiastic people failed by the system',
   },
   {
@@ -71,13 +75,7 @@ const ARCHETYPE_DEFS = [
     tagline: 'Curious, multi-tool, moveable — highest training ROI.',
     description:
       'Still in the Experimentation stage, trying 2–3 tools, learning what works. The barrier is the learning curve, not the will. The right training or tool access could convert them into the most advanced users faster than anyone else in the department.',
-    accentColor: '#FFCD00',
-    pills: [
-      { label: '2+ tools tried', type: 'green' },
-      { label: 'Stage: Experimentation', type: 'yellow' },
-      { label: 'Learning fast', type: 'yellow' },
-      { label: 'High training ROI potential', type: 'green' },
-    ],
+    accentColor: '#7DE69B',
     tension: 'Motion without traction — for now',
   },
   {
@@ -89,19 +87,12 @@ const ARCHETYPE_DEFS = [
     tagline: 'Pulling the department forward — with or without a mandate.',
     description:
       'Daily users building with AI, not just using it. They design workflows, build agents, create custom tools, and think about AI as infrastructure. They pay out of pocket, rate importance at 5/5, and operate at Integration or Transformation stage. These are your internal champions.',
-    accentColor: '#7DE69B',
-    pills: [
-      { label: 'Daily use', type: 'green' },
-      { label: 'Building agents + workflows', type: 'green' },
-      { label: 'Paying own pocket', type: 'green' },
-      { label: 'Voluntary commitment', type: 'yellow' },
-    ],
+    accentColor: '#FFCD00',
     tension: 'Voluntary commitment, not compliance',
   },
 ];
 
 // ─── Pill component ───────────────────────────────────────────────────────────
-
 function Pill({ label, type }) {
   const colors = {
     green:  { bg: 'rgba(125,230,155,0.12)', border: 'rgba(125,230,155,0.35)', text: '#7DE69B' },
@@ -113,21 +104,21 @@ function Pill({ label, type }) {
       display: 'inline-block',
       padding: '3px 10px',
       borderRadius: 20,
-      fontSize: 11,
+      fontSize: 10,
       fontWeight: 600,
       letterSpacing: '0.03em',
       background: c.bg,
       border: `1px solid ${c.border}`,
       color: c.text,
       whiteSpace: 'nowrap',
+      fontFamily: 'DM Sans, sans-serif',
     }}>
       {label}
     </span>
   );
 }
 
-// ─── Card Back ────────────────────────────────────────────────────────────────
-
+// ─── Card Back — ornate tarot back with accent-colored mandala ────────────────
 function CardBack({ accentColor }) {
   const radials = [0, 30, 60, 90, 120, 150].map(deg => {
     const rad = (Math.PI * deg) / 180;
@@ -140,43 +131,43 @@ function CardBack({ accentColor }) {
   return (
     <div style={{
       width: '100%', height: '100%',
-      background: 'linear-gradient(135deg, #0b1316 0%, #1a2428 50%, #0b1316 100%)',
-      borderRadius: 12,
+      background: 'linear-gradient(160deg, #0b1316 0%, #141e22 40%, #0e1a1e 70%, #0b1316 100%)',
+      borderRadius: 16,
       position: 'relative',
       overflow: 'hidden',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      boxShadow: `0 0 40px ${accentColor}18`,
+      boxShadow: `0 0 60px ${accentColor}22, inset 0 0 80px rgba(0,0,0,0.4)`,
     }}>
       {/* Outer ornate border */}
       <div style={{
         position: 'absolute', inset: 8,
         border: `1px solid ${accentColor}55`,
-        borderRadius: 8,
-        boxShadow: `inset 0 0 24px ${accentColor}0a`,
+        borderRadius: 10,
+        boxShadow: `inset 0 0 40px ${accentColor}0c`,
       }} />
       {/* Inner border */}
       <div style={{
-        position: 'absolute', inset: 13,
+        position: 'absolute', inset: 14,
         border: `1px solid ${accentColor}28`,
-        borderRadius: 5,
+        borderRadius: 7,
       }} />
 
-      {/* Corner diamonds — all 4 corners */}
+      {/* Corner diamonds */}
       {[
-        { top: 6, left: 6 },
-        { top: 6, right: 6 },
-        { bottom: 6, left: 6 },
-        { bottom: 6, right: 6 },
+        { top: 5, left: 5 },
+        { top: 5, right: 5 },
+        { bottom: 5, left: 5 },
+        { bottom: 5, right: 5 },
       ].map((pos, i) => (
         <div key={i} style={{
           position: 'absolute', ...pos,
-          width: 10, height: 10,
+          width: 14, height: 14,
           background: accentColor,
           transform: 'rotate(45deg)',
-          opacity: 0.75,
+          opacity: 0.7,
         }} />
       ))}
 
@@ -187,7 +178,7 @@ function CardBack({ accentColor }) {
       ].map((s, i) => (
         <div key={i} style={{
           position: 'absolute', ...s,
-          width: 4, height: 14,
+          width: 4, height: 22,
           background: accentColor,
           opacity: 0.4,
           borderRadius: 2,
@@ -199,41 +190,48 @@ function CardBack({ accentColor }) {
       ].map((s, i) => (
         <div key={i} style={{
           position: 'absolute', ...s,
-          width: 14, height: 4,
+          width: 22, height: 4,
           background: accentColor,
           opacity: 0.4,
           borderRadius: 2,
         }} />
       ))}
 
+      {/* Glow orb behind mandala */}
+      <div style={{
+        position: 'absolute',
+        width: 220, height: 220,
+        borderRadius: '50%',
+        background: `radial-gradient(ellipse, ${accentColor}1e 0%, transparent 70%)`,
+        pointerEvents: 'none',
+      }} />
+
       {/* Central mandala SVG */}
-      <svg width="130" height="130" viewBox="0 0 120 120" style={{ opacity: 0.22 }}>
-        <circle cx="60" cy="60" r="55" stroke="#7DE69B" strokeWidth="0.8" fill="none" />
-        <circle cx="60" cy="60" r="44" stroke="#7DE69B" strokeWidth="0.6" fill="none" />
-        <circle cx="60" cy="60" r="32" stroke="#7DE69B" strokeWidth="0.8" fill="none" />
-        <circle cx="60" cy="60" r="20" stroke="#7DE69B" strokeWidth="0.6" fill="none" />
-        <circle cx="60" cy="60" r="8"  stroke="#7DE69B" strokeWidth="1"   fill="none" />
+      <svg width="190" height="190" viewBox="0 0 120 120" style={{ opacity: 0.25 }}>
+        <circle cx="60" cy="60" r="55" stroke={accentColor} strokeWidth="0.8" fill="none" />
+        <circle cx="60" cy="60" r="44" stroke={accentColor} strokeWidth="0.6" fill="none" />
+        <circle cx="60" cy="60" r="32" stroke={accentColor} strokeWidth="0.8" fill="none" />
+        <circle cx="60" cy="60" r="20" stroke={accentColor} strokeWidth="0.6" fill="none" />
+        <circle cx="60" cy="60" r="8"  stroke={accentColor} strokeWidth="1"   fill="none" />
         {radials.map((l, i) => (
           <line key={i} x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2}
-            stroke="#7DE69B" strokeWidth="0.4" />
+            stroke={accentColor} strokeWidth="0.4" />
         ))}
-        {/* Outer star */}
         <polygon
           points="60,8 64,22 78,22 67,31 71,45 60,36 49,45 53,31 42,22 56,22"
-          stroke="#7DE69B" strokeWidth="0.7" fill="none"
+          stroke={accentColor} strokeWidth="0.7" fill="none"
         />
-        {/* Inner star */}
         <polygon
           points="60,40 62,47 70,47 64,52 66,59 60,55 54,59 56,52 50,47 58,47"
-          stroke="#7DE69B" strokeWidth="0.7" fill="none"
+          stroke={accentColor} strokeWidth="0.7" fill="none"
         />
       </svg>
 
       {/* Bottom label */}
       <div style={{
-        position: 'absolute', bottom: 18,
-        fontSize: 8, fontWeight: 700, letterSpacing: '0.22em',
-        color: accentColor, opacity: 0.65, textTransform: 'uppercase',
+        position: 'absolute', bottom: 24,
+        fontSize: 9, fontWeight: 700, letterSpacing: '0.24em',
+        color: accentColor, opacity: 0.6, textTransform: 'uppercase',
         fontFamily: 'DM Sans, sans-serif',
       }}>
         ✦ AI Pulse ✦
@@ -242,16 +240,18 @@ function CardBack({ accentColor }) {
   );
 }
 
-// ─── Card Front ───────────────────────────────────────────────────────────────
-
-function CardFront({ def }) {
+// ─── Card Front — portrait + color overlay + full info panel ──────────────────
+function CardFront({ def, data, dynamicPills, onPortraitClick }) {
   return (
     <div style={{
       width: '100%', height: '100%',
-      borderRadius: 12,
+      borderRadius: 16,
       overflow: 'hidden',
       position: 'relative',
       background: '#0b1316',
+      display: 'flex',
+      flexDirection: 'column',
+      boxShadow: `0 12px 50px ${def.accentColor}28`,
     }}>
       {/* Top accent bar */}
       <div style={{
@@ -260,98 +260,302 @@ function CardFront({ def }) {
         zIndex: 3,
       }} />
 
-      {/* Portrait image */}
-      <img
-        src={def.image}
-        alt={def.name}
-        style={{
-          width: '100%',
-          height: '78%',
-          objectFit: 'cover',
-          objectPosition: 'top center',
-          display: 'block',
-        }}
-      />
-
-      {/* Gradient: image fades into bottom band */}
-      <div style={{
-        position: 'absolute',
-        bottom: '22%', left: 0, right: 0, height: 90,
-        background: 'linear-gradient(to bottom, transparent, #0b1316)',
-        pointerEvents: 'none',
-        zIndex: 1,
-      }} />
-
-      {/* Ornate SVG border frame over everything */}
-      <svg
-        style={{
-          position: 'absolute', inset: 0,
-          width: '100%', height: '100%',
-          pointerEvents: 'none',
-          zIndex: 2,
-        }}
-        viewBox="0 0 200 320"
-        preserveAspectRatio="none"
+      {/* Portrait image — top 45%, clickable to open full-screen */}
+      <div
+        style={{ position: 'relative', height: '45%', overflow: 'hidden', flexShrink: 0, cursor: 'zoom-in' }}
+        onClick={e => { e.stopPropagation(); onPortraitClick(); }}
+        title="Click to view full portrait"
       >
-        {/* Outer frame */}
-        <rect x="5" y="5" width="190" height="310" rx="9"
-          fill="none" stroke={def.accentColor} strokeWidth="1" strokeOpacity="0.55" />
-        {/* Inner frame */}
-        <rect x="9" y="9" width="182" height="302" rx="7"
-          fill="none" stroke={def.accentColor} strokeWidth="0.5" strokeOpacity="0.28" />
-        {/* Corner diamonds */}
-        <rect x="2" y="2" width="8" height="8" fill={def.accentColor} opacity="0.85"
-          transform="rotate(45 6 6)" />
-        <rect x="190" y="2" width="8" height="8" fill={def.accentColor} opacity="0.85"
-          transform="rotate(45 194 6)" />
-        <rect x="2" y="310" width="8" height="8" fill={def.accentColor} opacity="0.85"
-          transform="rotate(45 6 314)" />
-        <rect x="190" y="310" width="8" height="8" fill={def.accentColor} opacity="0.85"
-          transform="rotate(45 194 314)" />
-        {/* Mid-side marks */}
-        <line x1="5" y1="160" x2="13" y2="160"
-          stroke={def.accentColor} strokeWidth="1.2" strokeOpacity="0.5" />
-        <line x1="187" y1="160" x2="195" y2="160"
-          stroke={def.accentColor} strokeWidth="1.2" strokeOpacity="0.5" />
-        {/* Divider line above name band */}
-        <line x1="16" y1="248" x2="184" y2="248"
-          stroke={def.accentColor} strokeWidth="0.5" strokeOpacity="0.3" />
-      </svg>
+        <img
+          src={def.image}
+          alt={def.name}
+          style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center', display: 'block' }}
+        />
+        {/* Accent color tint overlay */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: def.accentColor, opacity: 0.28,
+          mixBlendMode: 'color', pointerEvents: 'none',
+        }} />
+        {/* Gradient fade into info panel */}
+        <div style={{
+          position: 'absolute', bottom: 0, left: 0, right: 0, height: 70,
+          background: 'linear-gradient(to bottom, transparent, #0b1316)',
+          pointerEvents: 'none',
+        }} />
+      </div>
 
-      {/* Bottom name band */}
+      {/* Info panel — bottom 55% */}
       <div style={{
-        position: 'absolute', bottom: 0, left: 0, right: 0,
-        height: '22%',
+        flex: 1,
         display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center',
-        padding: '0 14px',
-        gap: 5,
-        zIndex: 3,
+        padding: '10px 14px 14px',
+        justifyContent: 'space-between',
+        minHeight: 0,
       }}>
-        <div style={{
-          fontSize: 10, fontWeight: 700,
-          color: def.accentColor,
-          letterSpacing: '0.2em',
-          opacity: 0.85,
-          fontFamily: 'DM Sans, sans-serif',
-        }}>
-          {def.roman}
+        {/* Header: roman numeral + count */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{
+            fontSize: 11, fontWeight: 700, color: def.accentColor,
+            letterSpacing: '0.18em', fontFamily: 'DM Sans, sans-serif',
+          }}>
+            {def.roman}
+          </span>
+          <span style={{ fontSize: 10, color: '#797D80', fontFamily: 'DM Sans, sans-serif' }}>
+            <span style={{ fontSize: 22, fontWeight: 900, color: def.accentColor, lineHeight: 1 }}>
+              {data.count}
+            </span>
+            {' '}· {data.pct}% of team
+          </span>
         </div>
+
+        {/* Name */}
         <div style={{
-          fontSize: 10, fontWeight: 800, color: '#ffffff',
-          letterSpacing: '0.1em', textTransform: 'uppercase',
-          textAlign: 'center', lineHeight: 1.25,
+          fontSize: 12, fontWeight: 800, color: '#fff',
+          letterSpacing: '0.07em', textTransform: 'uppercase', lineHeight: 1.2,
           fontFamily: 'DM Sans, sans-serif',
         }}>
           {def.name.replace('The ', '')}
         </div>
+
+        {/* Thin accent divider */}
+        <div style={{ height: 1, background: `${def.accentColor}40` }} />
+
+        {/* Tagline — 2-line clamp */}
+        <p style={{
+          margin: 0, fontSize: 10, fontStyle: 'italic', color: '#aab4bc', lineHeight: 1.5,
+          fontFamily: 'DM Sans, sans-serif',
+          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
+        }}>
+          {def.tagline}
+        </p>
+
+        {/* Dynamic pills */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+          {dynamicPills.map((p, i) => <Pill key={i} label={p.label} type={p.type} />)}
+        </div>
       </div>
+
+      {/* SVG ornate border frame */}
+      <svg
+        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 2 }}
+        viewBox="0 0 260 450"
+        preserveAspectRatio="none"
+      >
+        <rect x="5" y="5" width="250" height="440" rx="13"
+          fill="none" stroke={def.accentColor} strokeWidth="1" strokeOpacity="0.5" />
+        <rect x="9" y="9" width="242" height="432" rx="10"
+          fill="none" stroke={def.accentColor} strokeWidth="0.5" strokeOpacity="0.22" />
+        {/* Corner diamonds */}
+        <rect x="1.5" y="1.5" width="9" height="9" fill={def.accentColor} opacity="0.8"
+          transform="rotate(45 6 6)" />
+        <rect x="249.5" y="1.5" width="9" height="9" fill={def.accentColor} opacity="0.8"
+          transform="rotate(45 254 6)" />
+        <rect x="1.5" y="439.5" width="9" height="9" fill={def.accentColor} opacity="0.8"
+          transform="rotate(45 6 444)" />
+        <rect x="249.5" y="439.5" width="9" height="9" fill={def.accentColor} opacity="0.8"
+          transform="rotate(45 254 444)" />
+        {/* Mid-side marks */}
+        <line x1="5" y1="225" x2="15" y2="225"
+          stroke={def.accentColor} strokeWidth="1.2" strokeOpacity="0.45" />
+        <line x1="245" y1="225" x2="255" y2="225"
+          stroke={def.accentColor} strokeWidth="1.2" strokeOpacity="0.45" />
+      </svg>
     </div>
   );
 }
 
-// ─── Dynamic pills builder ────────────────────────────────────────────────────
+// ─── Oracle text — fades in below card after flip ─────────────────────────────
+function OracleText({ def, data, visible }) {
+  return (
+    <AnimatePresence>
+      {visible && (
+        <motion.p
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.5, delay: 0.65 }}
+          style={{
+            width: CARD_W,
+            margin: '10px 0 0',
+            fontSize: 11,
+            fontStyle: 'italic',
+            color: def.accentColor,
+            lineHeight: 1.55,
+            textAlign: 'center',
+            fontFamily: 'DM Sans, sans-serif',
+          }}
+        >
+          {ORACLE_LINES[def.key]?.(data.count, data.pct)}
+        </motion.p>
+      )}
+    </AnimatePresence>
+  );
+}
 
+// ─── Full-screen portrait modal ───────────────────────────────────────────────
+function FullScreenPortrait({ def, data, dynamicPills, onClose }) {
+  useEffect(() => {
+    const fn = e => e.key === 'Escape' && onClose();
+    window.addEventListener('keydown', fn);
+    return () => window.removeEventListener('keydown', fn);
+  }, [onClose]);
+
+  const quote = data.quotes?.[0];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 9999,
+        background: 'rgba(0,0,0,0.9)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        cursor: 'pointer',
+      }}
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.88, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.88, opacity: 0 }}
+        transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+        onClick={e => e.stopPropagation()}
+        style={{
+          display: 'flex',
+          maxWidth: 880, width: '90vw', maxHeight: '90vh',
+          background: 'rgba(11,19,22,0.98)',
+          border: `1px solid ${def.accentColor}30`,
+          borderRadius: 20, overflow: 'hidden',
+          cursor: 'default',
+        }}
+      >
+        {/* Left: portrait */}
+        <div style={{ flex: '0 0 320px', position: 'relative' }}>
+          <img
+            src={def.image}
+            alt={def.name}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center', display: 'block' }}
+          />
+          <div style={{ position: 'absolute', inset: 0, background: def.accentColor, opacity: 0.25, mixBlendMode: 'color' }} />
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 4, background: def.accentColor }} />
+          {/* Right-edge bleed into content panel */}
+          <div style={{
+            position: 'absolute', top: 0, right: 0, bottom: 0, width: 80,
+            background: 'linear-gradient(to right, transparent, rgba(11,19,22,0.98))',
+            pointerEvents: 'none',
+          }} />
+        </div>
+
+        {/* Right: full profile */}
+        <div style={{
+          flex: 1, padding: '36px 36px 36px 24px',
+          display: 'flex', flexDirection: 'column', gap: 16,
+          overflowY: 'auto', minWidth: 0,
+        }}>
+          {/* Header */}
+          <div>
+            <div style={{
+              fontSize: 11, color: def.accentColor, fontWeight: 700,
+              letterSpacing: '0.18em', marginBottom: 4,
+              fontFamily: 'DM Sans, sans-serif',
+            }}>
+              {def.roman}
+            </div>
+            <h2 style={{
+              margin: 0, fontSize: 26, fontWeight: 900, color: '#fff',
+              letterSpacing: '-0.02em', fontFamily: 'DM Sans, sans-serif',
+            }}>
+              {def.name}
+            </h2>
+            <div style={{
+              marginTop: 6, fontSize: 13, color: '#797D80',
+              fontStyle: 'italic', fontFamily: 'DM Sans, sans-serif',
+            }}>
+              {def.tagline}
+            </div>
+          </div>
+
+          {/* Count callout with oracle */}
+          <div style={{
+            background: `${def.accentColor}12`,
+            border: `1px solid ${def.accentColor}35`,
+            borderRadius: 12, padding: '14px 18px',
+          }}>
+            <span style={{
+              fontSize: 30, fontWeight: 900, color: def.accentColor,
+              lineHeight: 1, fontFamily: 'DM Sans, sans-serif',
+            }}>
+              {data.count}
+            </span>
+            <span style={{ fontSize: 13, color: '#797D80', marginLeft: 10, fontFamily: 'DM Sans, sans-serif' }}>
+              teammates · {data.pct}% of the team
+            </span>
+            <p style={{
+              margin: '8px 0 0', fontSize: 12, fontStyle: 'italic',
+              color: '#b0b8c0', lineHeight: 1.6, fontFamily: 'DM Sans, sans-serif',
+            }}>
+              {ORACLE_LINES[def.key]?.(data.count, data.pct)}
+            </p>
+          </div>
+
+          {/* Description */}
+          <p style={{ margin: 0, fontSize: 13, color: '#b0b8c0', lineHeight: 1.75, fontFamily: 'DM Sans, sans-serif' }}>
+            {def.description}
+          </p>
+
+          {/* Tension callout */}
+          <div style={{
+            borderLeft: `3px solid ${def.accentColor}`,
+            padding: '10px 14px',
+            background: `${def.accentColor}0a`,
+            borderRadius: '0 8px 8px 0',
+          }}>
+            <div style={{
+              fontSize: 10, fontWeight: 700, color: def.accentColor,
+              textTransform: 'uppercase', letterSpacing: '0.06em',
+              fontFamily: 'DM Sans, sans-serif',
+            }}>
+              The tension
+            </div>
+            <p style={{ margin: '3px 0 0', fontSize: 13, color: '#dde4e8', fontStyle: 'italic', fontFamily: 'DM Sans, sans-serif' }}>
+              {def.tension}
+            </p>
+          </div>
+
+          {/* Pills */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+            {dynamicPills.map((p, i) => <Pill key={i} label={p.label} type={p.type} />)}
+          </div>
+
+          {/* Representative quote */}
+          {quote && (
+            <div style={{ borderLeft: '2px solid rgba(125,230,155,0.25)', paddingLeft: 14 }}>
+              <p style={{
+                margin: 0, fontSize: 13, color: '#c8d4db',
+                fontStyle: 'italic', lineHeight: 1.65, fontFamily: 'DM Sans, sans-serif',
+              }}>
+                "{quote}"
+              </p>
+              <span style={{
+                fontSize: 10, color: '#4a5158', marginTop: 4,
+                display: 'block', fontFamily: 'DM Sans, sans-serif',
+              }}>
+                — from the survey data
+              </span>
+            </div>
+          )}
+
+          {/* Close hint */}
+          <div style={{ fontSize: 11, color: '#4a5158', marginTop: 'auto', fontFamily: 'DM Sans, sans-serif' }}>
+            Press ESC or click outside to close
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+// ─── Dynamic pills builder ────────────────────────────────────────────────────
 function buildDynamicPills(key, data) {
   const { stats } = data;
   switch (key) {
@@ -395,187 +599,128 @@ function buildDynamicPills(key, data) {
   }
 }
 
-// ─── Single archetype card ────────────────────────────────────────────────────
-
-function ArchetypeCard({ def, data, index }) {
-  const [flipped, setFlipped]   = useState(false);
-  const [infoOpen, setInfoOpen] = useState(false);
+// ─── Single archetype card — arc position + 3D tilt + flip ───────────────────
+function ArchetypeCard({ def, data, index, revealed, onReveal, onFocus }) {
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const cardRef = useRef(null);
+  const arc = ARC_CONFIG[index] ?? { rotate: 0, dip: 0 };
 
   if (!data) return null;
-
   const dynamicPills = buildDynamicPills(def.key, data);
-  const quote = data.quotes[0];
+
+  function handleMouseMove(e) {
+    if (revealed) return;
+    const rect = cardRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    setTilt({
+      x: ((e.clientX - cx) / (rect.width / 2)) * 12,
+      y: -((e.clientY - cy) / (rect.height / 2)) * 10,
+    });
+  }
+
+  function handleMouseLeave() { setTilt({ x: 0, y: 0 }); }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
-
-      {/* ── 3D flip card ── */}
-      <motion.div
-        initial={{ opacity: 0, y: 32 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: index * 0.1 }}
-        style={{
-          width: CARD_W,
-          height: CARD_H,
-          perspective: 1000,
-          cursor: 'pointer',
-          flexShrink: 0,
-        }}
-        onClick={() => setFlipped(v => !v)}
-        title={flipped ? 'Click to flip back' : `Click to reveal ${def.name}`}
-        whileHover={{ scale: 1.03 }}
-        whileTap={{ scale: 0.98 }}
-      >
-        <motion.div
-          animate={{ rotateY: flipped ? 180 : 0 }}
-          transition={{ duration: 0.7, ease: [0.4, 0, 0.2, 1] }}
-          style={{
-            width: '100%',
-            height: '100%',
-            position: 'relative',
-            transformStyle: 'preserve-3d',
-          }}
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
+      {/* Arc wrapper — positions card in fan spread */}
+      <div style={{
+        transform: `rotate(${arc.rotate}deg) translateY(${arc.dip}px)`,
+        transformOrigin: 'bottom center',
+        transition: 'transform 0.3s ease',
+      }}>
+        {/* Perspective + mouse tracking container */}
+        <div
+          ref={cardRef}
+          style={{ width: CARD_W, height: CARD_H, perspective: 900, cursor: 'pointer' }}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
         >
-          {/* Back face (visible by default) */}
-          <div style={{
-            position: 'absolute', inset: 0,
-            backfaceVisibility: 'hidden',
-            WebkitBackfaceVisibility: 'hidden',
-          }}>
-            <CardBack accentColor={def.accentColor} />
-          </div>
-
-          {/* Front face (visible after flip) */}
-          <div style={{
-            position: 'absolute', inset: 0,
-            backfaceVisibility: 'hidden',
-            WebkitBackfaceVisibility: 'hidden',
-            transform: 'rotateY(180deg)',
-          }}>
-            <CardFront def={def} data={data} />
-          </div>
-        </motion.div>
-      </motion.div>
-
-      {/* ── Expandable info pill below card ── */}
-      <div style={{ width: CARD_W }}>
-        <button
-          onClick={() => setInfoOpen(v => !v)}
-          style={{
-            width: '100%',
-            background: infoOpen ? `${def.accentColor}18` : 'rgba(255,255,255,0.04)',
-            border: `1px solid ${infoOpen ? def.accentColor + '55' : 'rgba(125,230,155,0.12)'}`,
-            borderRadius: 20,
-            padding: '6px 14px',
-            color: infoOpen ? def.accentColor : '#797D80',
-            fontSize: 11,
-            fontWeight: 600,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            transition: 'all 0.2s',
-            fontFamily: 'DM Sans, sans-serif',
-          }}
-        >
-          <span>{def.name.replace('The ', '')} — {data.count} people</span>
-          <motion.span
-            animate={{ rotate: infoOpen ? 180 : 0 }}
-            transition={{ duration: 0.2 }}
-            style={{ display: 'inline-block' }}
+          {/* Tilt layer — tracks mouse in 3D (spring physics) */}
+          <motion.div
+            animate={revealed ? { rotateX: 0, rotateY: 0 } : { rotateX: tilt.y, rotateY: tilt.x }}
+            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+            style={{ width: '100%', height: '100%', transformStyle: 'preserve-3d' }}
           >
-            ▾
-          </motion.span>
-        </button>
-
-        <AnimatePresence>
-          {infoOpen && (
+            {/* Flip layer — card flip on click */}
             <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.25 }}
-              style={{ overflow: 'hidden' }}
+              animate={{ rotateY: revealed ? 180 : 0 }}
+              transition={{ duration: 0.7, ease: [0.4, 0, 0.2, 1] }}
+              onClick={() => onReveal(def.key)}
+              whileHover={{ scale: revealed ? 1 : 1.03 }}
+              style={{ width: '100%', height: '100%', position: 'relative', transformStyle: 'preserve-3d' }}
             >
+              {/* Back face */}
               <div style={{
-                padding: '14px 16px',
-                background: 'rgba(29,77,82,0.25)',
-                border: `1px solid ${def.accentColor}22`,
-                borderRadius: 12,
-                marginTop: 8,
+                position: 'absolute', inset: 0,
+                backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden',
               }}>
-                {/* Pills */}
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginBottom: 12 }}>
-                  {dynamicPills.map((p, i) => <Pill key={i} label={p.label} type={p.type} />)}
-                </div>
-
-                {/* Tagline */}
-                <p style={{ margin: '0 0 10px', fontSize: 12, fontStyle: 'italic', color: '#797D80', lineHeight: 1.5 }}>
-                  {def.tagline}
-                </p>
-
-                {/* Description */}
-                <p style={{ margin: '0 0 12px', fontSize: 12, color: '#b0b8c0', lineHeight: 1.7 }}>
-                  {def.description}
-                </p>
-
-                {/* Tension callout */}
-                <div style={{
-                  padding: '7px 11px',
-                  borderLeft: `3px solid ${def.accentColor}`,
-                  background: `${def.accentColor}0d`,
-                  borderRadius: '0 6px 6px 0',
-                  marginBottom: 12,
-                }}>
-                  <span style={{
-                    fontSize: 10, fontWeight: 700, color: def.accentColor,
-                    textTransform: 'uppercase', letterSpacing: '0.06em',
-                  }}>
-                    The tension:
-                  </span>
-                  <p style={{ margin: '2px 0 0', fontSize: 12, color: '#dde4e8', fontStyle: 'italic' }}>
-                    {def.tension}
-                  </p>
-                </div>
-
-                {/* Representative quote */}
-                {quote && (
-                  <div style={{
-                    padding: '9px 13px',
-                    background: 'rgba(255,255,255,0.04)',
-                    borderRadius: 8,
-                    borderLeft: '2px solid rgba(125,230,155,0.25)',
-                  }}>
-                    <span style={{ fontSize: 10, color: '#797D80', display: 'block', marginBottom: 3 }}>
-                      From the data —
-                    </span>
-                    <p style={{ margin: 0, fontSize: 12, color: '#c8d4db', lineHeight: 1.6, fontStyle: 'italic' }}>
-                      "{quote}"
-                    </p>
-                  </div>
-                )}
+                <CardBack accentColor={def.accentColor} />
+              </div>
+              {/* Front face */}
+              <div style={{
+                position: 'absolute', inset: 0,
+                backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden',
+                transform: 'rotateY(180deg)',
+              }}>
+                <CardFront
+                  def={def}
+                  data={data}
+                  dynamicPills={dynamicPills}
+                  onPortraitClick={() => onFocus(def.key)}
+                />
               </div>
             </motion.div>
-          )}
-        </AnimatePresence>
+          </motion.div>
+        </div>
       </div>
+
+      {/* Oracle text — fades in after flip completes */}
+      <OracleText def={def} data={data} visible={revealed} />
     </div>
   );
 }
 
 // ─── Main Archetypes section ──────────────────────────────────────────────────
-
 export default function Archetypes({ transforms }) {
   const { archetypes } = transforms || {};
+  const [revealedCards, setRevealedCards] = useState(new Set());
+  const [revealing, setRevealing]         = useState(false);
+  const [focusedKey, setFocusedKey]       = useState(null);
+
   if (!archetypes) return null;
 
-  const total = Object.values(archetypes).reduce((s, a) => s + a.count, 0);
+  const total      = Object.values(archetypes).reduce((s, a) => s + a.count, 0);
+  const allRevealed = revealedCards.size === ARCHETYPE_DEFS.length;
+
+  function handleReveal(key) {
+    setRevealedCards(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key); else next.add(key);
+      return next;
+    });
+  }
+
+  function revealAll() {
+    if (revealing) return;
+    setRevealing(true);
+    ARCHETYPE_DEFS.forEach((def, i) => {
+      setTimeout(() => {
+        setRevealedCards(prev => new Set([...prev, def.key]));
+        if (i === ARCHETYPE_DEFS.length - 1) setRevealing(false);
+      }, i * 480);
+    });
+  }
+
+  const focusedDef  = ARCHETYPE_DEFS.find(d => d.key === focusedKey);
+  const focusedData = focusedKey ? archetypes[focusedKey] : null;
 
   return (
-    <section style={{ padding: '64px 24px 80px', maxWidth: 1300, margin: '0 auto' }}>
+    <section style={{ padding: '80px 0 100px', maxWidth: 1400, margin: '0 auto' }}>
 
-      {/* Section header */}
-      <div style={{ marginBottom: 40, maxWidth: 620 }}>
+      {/* ── Section header ── */}
+      <div style={{ padding: '0 40px', marginBottom: 48 }}>
         <div style={{
           display: 'inline-block',
           padding: '4px 12px',
@@ -583,68 +728,106 @@ export default function Archetypes({ transforms }) {
           background: 'rgba(125,230,155,0.1)',
           border: '1px solid rgba(125,230,155,0.25)',
           color: '#7DE69B',
-          fontSize: 11,
-          fontWeight: 700,
-          letterSpacing: '0.1em',
-          textTransform: 'uppercase',
+          fontSize: 11, fontWeight: 700,
+          letterSpacing: '0.1em', textTransform: 'uppercase',
           marginBottom: 16,
+          fontFamily: 'DM Sans, sans-serif',
         }}>
           Team Archetypes
         </div>
 
         <h2 style={{
           margin: '0 0 12px',
-          fontSize: 'clamp(24px, 4vw, 34px)',
-          fontWeight: 800,
-          color: '#fff',
-          letterSpacing: '-0.02em',
-          lineHeight: 1.15,
+          fontSize: 'clamp(28px, 4vw, 40px)',
+          fontWeight: 900, color: '#fff',
+          letterSpacing: '-0.02em', lineHeight: 1.15,
+          fontFamily: 'DM Sans, sans-serif',
         }}>
-          Five portraits from {total} people.
+          A reading of {total} voices.
         </h2>
 
-        <p style={{ margin: '0 0 10px', fontSize: 15, color: '#797D80', lineHeight: 1.7 }}>
-          Built from 16 dimensions per person — frequency, stage, sentiment, barriers, tools,
-          own-pocket investment, and open-text voice.
+        <p style={{
+          margin: '0 0 28px', fontSize: 15, color: '#797D80',
+          maxWidth: 520, lineHeight: 1.7,
+          fontFamily: 'DM Sans, sans-serif',
+        }}>
+          Five archetypes built from 16 dimensions per person.
+          Click any card to reveal who lives there — or deal the full spread at once.
         </p>
 
-        <p style={{ margin: 0, fontSize: 12, color: '#4a5158', lineHeight: 1.6 }}>
-          Click any card to reveal the portrait. Click the pill below to read the full cohort profile.
-        </p>
+        {/* Reveal button — hidden once all are revealed */}
+        {!allRevealed && (
+          <motion.button
+            onClick={revealAll}
+            disabled={revealing}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            style={{
+              padding: '12px 28px',
+              background: 'linear-gradient(135deg, rgba(125,230,155,0.15), rgba(89,190,201,0.12))',
+              border: '1px solid rgba(125,230,155,0.4)',
+              borderRadius: 24,
+              color: '#7DE69B',
+              fontSize: 13, fontWeight: 700,
+              cursor: revealing ? 'not-allowed' : 'pointer',
+              letterSpacing: '0.04em',
+              fontFamily: 'DM Sans, sans-serif',
+            }}
+          >
+            {revealing ? 'Dealing...' : '✦ Reveal the Team'}
+          </motion.button>
+        )}
       </div>
 
-      {/* Cards — centered flex row, wraps on smaller screens */}
-      <div style={{
-        display: 'flex',
-        flexWrap: 'wrap',
-        gap: 24,
-        justifyContent: 'center',
-        alignItems: 'flex-start',
-      }}>
-        {ARCHETYPE_DEFS.map((def, i) => (
-          <ArchetypeCard
-            key={def.key}
-            def={def}
-            data={archetypes[def.key]}
-            index={i}
-          />
-        ))}
+      {/* ── Arc spread — horizontal scroll, centered ── */}
+      <div style={{ overflowX: 'auto', overflowY: 'visible', padding: '0 40px 110px' }}>
+        <motion.div style={{
+          display: 'flex', gap: 16,
+          justifyContent: 'center', alignItems: 'flex-end',
+          width: 'max-content', minWidth: '100%',
+          paddingBottom: 24,
+        }}>
+          {ARCHETYPE_DEFS.map((def, i) => (
+            <motion.div
+              key={def.key}
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: i * 0.08 }}
+            >
+              <ArchetypeCard
+                def={def}
+                data={archetypes[def.key]}
+                index={i}
+                revealed={revealedCards.has(def.key)}
+                onReveal={handleReveal}
+                onFocus={setFocusedKey}
+              />
+            </motion.div>
+          ))}
+        </motion.div>
       </div>
 
-      {/* Footer note */}
+      {/* ── Footer note ── */}
       <p style={{
-        marginTop: 40,
-        fontSize: 12,
-        color: '#4a5158',
-        lineHeight: 1.6,
-        maxWidth: 680,
-        textAlign: 'center',
-        margin: '40px auto 0',
+        textAlign: 'center', fontSize: 12, color: '#3a4048',
+        margin: '0 40px', lineHeight: 1.6,
+        fontFamily: 'DM Sans, sans-serif',
       }}>
-        Each respondent receives an affinity score (0–100) for all five archetypes across 16 dimensions.
-        The archetype with the highest score is assigned. Near-ties resolve toward the more advanced
-        adoption stage.
+        Each respondent scores 0–100 across all five archetypes via 16-dimension affinity scoring.
+        Highest score wins. Near-ties promote to the more advanced adoption stage.
       </p>
+
+      {/* ── Full-screen portrait modal ── */}
+      <AnimatePresence>
+        {focusedKey && focusedDef && focusedData && (
+          <FullScreenPortrait
+            def={focusedDef}
+            data={focusedData}
+            dynamicPills={buildDynamicPills(focusedKey, focusedData)}
+            onClose={() => setFocusedKey(null)}
+          />
+        )}
+      </AnimatePresence>
     </section>
   );
 }
