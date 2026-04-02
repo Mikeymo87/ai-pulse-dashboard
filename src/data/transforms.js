@@ -360,6 +360,18 @@ export function buildTransforms({ survey1, survey2, survey3 }) {
     'Unclear guidelines', 'Too many tools',
   ];
 
+  // Keywords that mark systems-level thinking in open-text — not "I use it daily"
+  // but "I build with it": agents, workflows, GPTs, automation, scaling, integration.
+  const MULTIPLIER_VOICE_KEYWORDS = [
+    'agent', 'workflow', 'gpt', 'automat', 'integrat',
+    'scaling', 'deploy', 'mapping', 'pipeline', 'build',
+  ];
+
+  function hasMultiplierVoice(r) {
+    const text = ((r.struggle || '') + ' ' + (r.excitement || '')).toLowerCase();
+    return MULTIPLIER_VOICE_KEYWORDS.some(kw => text.includes(kw));
+  }
+
   function classifyRow(r) {
     const isDaily    = r.frequency === 'Daily';
     const isWeekly   = r.frequency === 'Weekly';
@@ -372,9 +384,10 @@ export function buildTransforms({ survey1, survey2, survey3 }) {
     const isBlocked  = r.barriers.some(b => BLOCKED_BARRIERS.includes(b));
     const isMixed    = r.sentiment === 'Mixed' || r.sentiment === 'Negative';
 
-    // 1 — Multiplier: ALL four signals required — the rarest classification
-    // Daily use + advanced stage + paying own pocket + importance rated 5
-    if (isDaily && advStage && r.ownPocket === true && r.importance === 5) {
+    // 1 — Multiplier: ALL five gates required — the rarest classification.
+    // Behavioral: daily + advanced stage + paying own pocket + importance 5
+    // Voice: open-text shows systems-level thinking (agents, workflows, GPTs, automation)
+    if (isDaily && advStage && r.ownPocket === true && r.importance === 5 && hasMultiplierVoice(r)) {
       return 'multiplier';
     }
 

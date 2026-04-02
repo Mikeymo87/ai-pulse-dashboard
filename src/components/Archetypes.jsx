@@ -3,31 +3,61 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 // ─── Archetype static definitions ────────────────────────────────────────────
 
+// Internal adoption readiness scores — for classification logic only, never rendered.
+// 1 = earliest stage, 5 = most advanced. Order determines card display sequence.
 const ARCHETYPE_DEFS = [
   {
-    key: 'multiplier',
-    name: 'The Multiplier',
-    tagline: 'Pulling the department forward — with or without a mandate.',
+    key: 'confident-bystander',
+    _adoptionScore: 1, // internal only — never display
+    name: 'The Confident Bystander',
+    tagline: 'Nothing stopping them. Nothing moving them.',
     description:
-      'Daily users who have embedded AI as a core collaborator. They pay out of their own pocket, rate importance at 5/5, and are already operating at Integration or Transformation stage. These are your internal champions.',
-    accentColor: '#7DE69B',
+      'High self-reported confidence, no listed barriers, but monthly or less frequency and no own-pocket investment. The behavior doesn\'t match the self-assessment — not because they\'re misleading, but because they haven\'t yet done the work that would make it true.',
+    accentColor: '#797D80',
     icon: (
       <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
-        <circle cx="28" cy="28" r="27" stroke="#7DE69B" strokeWidth="1.5" strokeOpacity="0.3" />
-        <path d="M28 14 L34 24 H44 L36 31 L39 42 L28 35 L17 42 L20 31 L12 24 H22 Z"
-          fill="none" stroke="#7DE69B" strokeWidth="1.8" strokeLinejoin="round" />
+        <circle cx="28" cy="28" r="27" stroke="#797D80" strokeWidth="1.5" strokeOpacity="0.3" />
+        <circle cx="28" cy="22" r="7" stroke="#797D80" strokeWidth="1.8" />
+        <path d="M16 42 C16 35 40 35 40 42" stroke="#797D80" strokeWidth="1.8" strokeLinecap="round" fill="none" />
+        <path d="M20 28 L36 28" stroke="#797D80" strokeWidth="1" strokeOpacity="0.4" strokeDasharray="2 2" />
       </svg>
     ),
     pills: [
-      { label: 'Daily use', type: 'green' },
-      { label: 'Integration / Transformation stage', type: 'green' },
-      { label: 'Paying own pocket', type: 'green' },
-      { label: 'Voluntary commitment', type: 'yellow' },
+      { label: 'Monthly or less', type: 'coral' },
+      { label: 'No barriers listed', type: 'yellow' },
+      { label: 'High self-reported confidence', type: 'yellow' },
+      { label: 'No own-pocket investment', type: 'coral' },
     ],
-    tension: 'Voluntary commitment, not compliance',
+    tension: 'Untapped potential',
+  },
+  {
+    key: 'thoughtful-skeptic',
+    _adoptionScore: 2, // internal only — never display
+    name: 'The Thoughtful Skeptic',
+    tagline: 'Not resistant because they don\'t understand — because they do.',
+    description:
+      'Mixed or cautious sentiment paired with real use. They have earned concerns: accuracy, human oversight, workflow disruption. Their open-text responses are the most detailed in the dataset. They are not against AI. They have good questions worth taking seriously.',
+    accentColor: '#E5554F',
+    icon: (
+      <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+        <circle cx="28" cy="28" r="27" stroke="#E5554F" strokeWidth="1.5" strokeOpacity="0.3" />
+        <circle cx="28" cy="24" r="8" stroke="#E5554F" strokeWidth="1.8" />
+        <path d="M24 36 Q28 40 32 36" stroke="#E5554F" strokeWidth="1.8" strokeLinecap="round" fill="none" />
+        <circle cx="25" cy="23" r="1.5" fill="#E5554F" />
+        <circle cx="31" cy="23" r="1.5" fill="#E5554F" />
+      </svg>
+    ),
+    pills: [
+      { label: 'Mixed / cautious sentiment', type: 'coral' },
+      { label: 'Accuracy + oversight concerns', type: 'coral' },
+      { label: 'Weekly to monthly use', type: 'yellow' },
+      { label: 'Most detailed open-text', type: 'green' },
+    ],
+    tension: 'Earned skepticism — not fear',
   },
   {
     key: 'blocked-believer',
+    _adoptionScore: 3, // internal only — never display
     name: 'The Blocked Believer',
     tagline: 'Enthusiastic people slowed by organizational friction.',
     description:
@@ -52,10 +82,11 @@ const ARCHETYPE_DEFS = [
   },
   {
     key: 'experimenter',
+    _adoptionScore: 4, // internal only — never display
     name: 'The Experimenter',
     tagline: 'Curious, multi-tool, moveable — highest training ROI.',
     description:
-      'Still in the Experimentation stage, trying 2–3 tools, learning what works. The barrier is the learning curve, not the will. The right training or tool access could convert them into Multipliers faster than anyone else in the department.',
+      'Still in the Experimentation stage, trying 2–3 tools, learning what works. The barrier is the learning curve, not the will. The right training or tool access could convert them into the most advanced users faster than anyone else in the department.',
     accentColor: '#FFCD00',
     icon: (
       <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
@@ -77,51 +108,27 @@ const ARCHETYPE_DEFS = [
     tension: 'Motion without traction — for now',
   },
   {
-    key: 'thoughtful-skeptic',
-    name: 'The Thoughtful Skeptic',
-    tagline: 'Not resistant because they don\'t understand — because they do.',
+    key: 'multiplier',
+    _adoptionScore: 5, // internal only — never display
+    name: 'The Multiplier',
+    tagline: 'Pulling the department forward — with or without a mandate.',
     description:
-      'Mixed or cautious sentiment paired with real use. They have earned concerns: accuracy, human oversight, workflow disruption. Their open-text responses are the most detailed in the dataset. They are not against AI. They have good questions worth taking seriously.',
-    accentColor: '#E5554F',
+      'Daily users building with AI, not just using it. They design workflows, build agents, create custom tools, and think about AI as infrastructure. They pay out of pocket, rate importance at 5/5, and operate at Integration or Transformation stage. These are your internal champions.',
+    accentColor: '#7DE69B',
     icon: (
       <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
-        <circle cx="28" cy="28" r="27" stroke="#E5554F" strokeWidth="1.5" strokeOpacity="0.3" />
-        <circle cx="28" cy="24" r="8" stroke="#E5554F" strokeWidth="1.8" />
-        <path d="M24 36 Q28 40 32 36" stroke="#E5554F" strokeWidth="1.8" strokeLinecap="round" fill="none" />
-        <circle cx="25" cy="23" r="1.5" fill="#E5554F" />
-        <circle cx="31" cy="23" r="1.5" fill="#E5554F" />
+        <circle cx="28" cy="28" r="27" stroke="#7DE69B" strokeWidth="1.5" strokeOpacity="0.3" />
+        <path d="M28 14 L34 24 H44 L36 31 L39 42 L28 35 L17 42 L20 31 L12 24 H22 Z"
+          fill="none" stroke="#7DE69B" strokeWidth="1.8" strokeLinejoin="round" />
       </svg>
     ),
     pills: [
-      { label: 'Mixed / cautious sentiment', type: 'coral' },
-      { label: 'Accuracy + oversight concerns', type: 'coral' },
-      { label: 'Weekly to monthly use', type: 'yellow' },
-      { label: 'Most detailed open-text', type: 'green' },
+      { label: 'Daily use', type: 'green' },
+      { label: 'Building agents + workflows', type: 'green' },
+      { label: 'Paying own pocket', type: 'green' },
+      { label: 'Voluntary commitment', type: 'yellow' },
     ],
-    tension: 'Earned skepticism — not fear',
-  },
-  {
-    key: 'confident-bystander',
-    name: 'The Confident Bystander',
-    tagline: 'Nothing stopping them. Nothing moving them.',
-    description:
-      'High self-reported confidence, no listed barriers, but monthly or less frequency and no own-pocket investment. The behavior doesn\'t match the self-assessment — not because they\'re misleading, but because they haven\'t yet done the work that would make it true.',
-    accentColor: '#797D80',
-    icon: (
-      <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
-        <circle cx="28" cy="28" r="27" stroke="#797D80" strokeWidth="1.5" strokeOpacity="0.3" />
-        <circle cx="28" cy="22" r="7" stroke="#797D80" strokeWidth="1.8" />
-        <path d="M16 42 C16 35 40 35 40 42" stroke="#797D80" strokeWidth="1.8" strokeLinecap="round" fill="none" />
-        <path d="M20 28 L36 28" stroke="#797D80" strokeWidth="1" strokeOpacity="0.4" strokeDasharray="2 2" />
-      </svg>
-    ),
-    pills: [
-      { label: 'Monthly or less', type: 'coral' },
-      { label: 'No barriers listed', type: 'yellow' },
-      { label: 'High self-reported confidence', type: 'yellow' },
-      { label: 'No own-pocket investment', type: 'coral' },
-    ],
-    tension: 'Untapped potential',
+    tension: 'Voluntary commitment, not compliance',
   },
 ];
 
