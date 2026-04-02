@@ -33,92 +33,104 @@ React + Vite · Tailwind CSS · Recharts · Framer Motion · Papa Parse · Claud
 
 | File | What it does |
 |------|-------------|
-| `src/App.jsx` | Root — Nav, Hero, GrowthStory, ConvictionMoment, TrendCharts, DeepDive, OpportunitySpotlight, ChatPanel, PresentationMode |
-| `src/components/Nav.jsx` | Sticky nav — "Ask AI" pill opens ChatPanel, "Present" button triggers PresentationMode |
+| `src/App.jsx` | Root — Nav, Hero, GrowthStory, ConvictionMoment, TrendCharts, ParticipationStory, Archetypes, DeepDive, OpenTextIntelligence, OpportunitySpotlight, ChatPanel, PresentationMode; Leadership Vault password gate |
+| `src/components/Nav.jsx` | Sticky nav — tab switcher (Story/Numbers/Team/What's Next), "Ask AI" pill, "Present" button |
 | `src/components/Hero.jsx` | Full-height hero — ThenNowDiptych quote carousel, 3 stat cards, 3-paragraph exec summary |
 | `src/components/GrowthStory.jsx` | Cinematic 3-wave scroll — stat pills with delta badges, Wave 3 extra pills |
-| `src/components/ConvictionMoment.jsx` | Full-width 43% panel — coral glow, count-up, rotating quotes from confirmed own-pocket respondents only |
-| `src/components/TrendCharts.jsx` | 5 trend charts grid + AdoptionCurve (full-width) + StruggleMap (full-width) |
-| `src/components/AdoptionCurve.jsx` | Gaussian bell curve SVG — peak shifts left S1→S2→S3 via animated path + fill areas; wave buttons + slider + auto-play |
-| `src/components/StruggleMap.jsx` | 2-panel heatmap — struggles (left) + excitement (right); S3 only; hover tooltip with quotes |
-| `src/components/DeepDive.jsx` | Scatter plot + role/function breakdown + tool bubble chart |
-| `src/components/OpportunitySpotlight.jsx` | 5 Claude API insight cards (ENABLEMENT/ADOPTION/RISK/MOMENTUM/READINESS) |
-| `src/components/ChatPanel.jsx` | Floating Claude chat — prompt chips, multi-turn, markdown render |
-| `src/components/PresentationMode.jsx` | P-key fullscreen slides — 7 slides, Audience Lens pre-flight (AI Council/Exec/Dept) |
-| `src/components/Archetypes.jsx` | Centerpiece tarot card experience — 5 archetype cards in arc fan spread, 3D tilt parallax, sequential reveal ritual, oracle readings inside card, full-screen portrait modal |
+| `src/components/ConvictionMoment.jsx` | Full-width own-pocket panel — coral glow, count-up, rotating quotes from confirmed respondents |
+| `src/components/TrendCharts.jsx` | AdoptionScorecard (4 tiles) + Frequency chart + AdoptionCurve + StruggleMap |
+| `src/components/AdoptionCurve.jsx` | Gaussian bell curve SVG — peak shifts left S1→S2→S3; wave buttons + slider + auto-play. Takes `{ familiarityTrend }` |
+| `src/components/StruggleMap.jsx` | 2-panel heatmap — struggles (left) + excitement (right); S3 only; hover tooltip. Takes `{ transforms }` |
+| `src/components/ParticipationStory.jsx` | 117-dot grid in Team tab — 3 survey waves, auto-plays on scroll-in, live counts from transforms.responseCounts |
+| `src/components/Archetypes.jsx` | Tarot card fan spread — 5 archetypes, 3D tilt, flip reveal, oracle text, full-screen portrait modal |
+| `src/components/DeepDive.jsx` | Scatter plot + role/function breakdown + tool bubble chart — GATED behind Leadership Vault |
+| `src/components/OpenTextIntelligence.jsx` | 4 Claude API insight cards in What's Next — Aspiration Gap/Tool Mindset/Leadership Voices/Blocked Investors |
+| `src/components/OpportunitySpotlight.jsx` | 5 Claude API insight cards (ENABLEMENT/ADOPTION/RISK/MOMENTUM/READINESS) — synthesizes ALL data layers |
+| `src/components/ChatPanel.jsx` | Floating Claude chat — prompt chips, multi-turn, vault-aware (`vaultUnlocked` prop) |
+| `src/components/PresentationMode.jsx` | P-key fullscreen — 3 lenses (Council/Exec/Dept), 12/8/10 slides, audience pre-flight screen |
 | `src/components/StageFlow.jsx` | Unused — replaced by AdoptionCurve; leave in place |
 | `src/data/parseCSVs.js` | Papa Parse loader + normalization for all 3 surveys |
-| `src/data/transforms.js` | All aggregate stats — sentiment, confidence, frequency, familiarity, importance, stage, barriers, themes, tools, benefits, momentum, own-pocket, by role, by function; `s3OwnPocketQuotes` for ConvictionMoment |
-| `src/data/themes.js` | Keyword-based theme extraction — 16 use-case themes, 11 struggle themes, 8 excitement themes |
+| `src/data/transforms.js` | All aggregate stats + archetypes (16-dim affinity scoring) + openTextInsights cross-cuts from S3 |
+| `src/data/themes.js` | Keyword-based theme extraction — 16 use-case, 11 struggle, 8 excitement themes |
 | `src/hooks/useSurveyData.js` | React hook → `{ surveys, transforms, loading, error }` |
+
+### Presentation Slides
+
+| File | What it does |
+|------|-------------|
+| `src/components/slides/SlideCover.jsx` | Cinematic opening — ambient glows, giant title, stat triptych, opening quote |
+| `src/components/slides/SlideOverview.jsx` | Participation story (3 response pods) + "14 months changed everything" transformation cards |
+| `src/components/slides/SlideWave.jsx` | Per-wave chapter slide — 3-band layout: badge/hero number/narrative+stats; thesis copy at bottom |
+| `src/components/slides/SlideBellCurve.jsx` | Adoption arc shift — embeds AdoptionCurve with narrative header |
+| `src/components/slides/SlideArchetypes.jsx` | 5 persona cards with distribution bar and narrative copy |
+| `src/components/slides/SlideStruggle.jsx` | Friction & excitement — embeds StruggleMap with narrative header |
+| `src/components/slides/SlideTrends.jsx` | Chart pairs (sentiment+frequency / familiarity+confidence / journey+barriers) |
+| `src/components/slides/SlideSpotlight.jsx` | Claude API opportunity cards in presentation context |
+| `src/components/slides/SlideTeam.jsx` | Team readiness (unused in current lenses — gated) |
+
+---
+
+## Tab Structure (live)
+
+| Tab | Contents |
+|-----|---------|
+| The Story | Hero + ThenNowDiptych + GrowthStory + ConvictionMoment |
+| The Numbers | AdoptionScorecard (4 tiles) + Frequency chart + AdoptionCurve + StruggleMap |
+| The Team | ParticipationStory + Archetypes + Leadership Vault (password: `TGSD26` / `VITE_VAULT_PASSWORD`) |
+| What's Next | OpenTextIntelligence + OpportunitySpotlight |
+
+**Leadership Vault:** Password `TGSD26` (override via `VITE_VAULT_PASSWORD` env var on Replit). Unlocks `DeepDive` (scatter + roles + tools). Vault data injected into ChatPanel system prompt when unlocked. Nothing from the vault appears in any presentation lens.
+
+---
+
+## Presentation Lens Sequences (current)
+
+| Lens | Slides | Duration |
+|------|--------|----------|
+| AI Council | cover → overview → wave-0 → wave-1 → wave-2 → bell-curve → archetypes → struggle → trends-a → trends-b → trends-c → spotlight (12) | ~30 min |
+| Executive | cover → overview → wave-1 → wave-2 → bell-curve → archetypes → struggle → spotlight (8) | ~12 min |
+| Full Department | cover → overview → wave-0 → wave-1 → wave-2 → bell-curve → archetypes → struggle → trends-b → spotlight (10) | ~18 min |
 
 ---
 
 ## What's Been Built (complete history)
 
-### ✅ Phases 0–8 (built March 30 – April 1, 2026)
+### ✅ Phases 0–8 (March 30 – April 1, 2026)
 - Phase 0: Setup — GitHub, Vite, deps, CSVs, Replit
 - Phase 1: Data layer — parseCSVs, transforms, themes, useSurveyData hook
 - Phase 2: Hero + GrowthStory + Nav
-- Phase 3: 5 trend line charts (Sentiment, Familiarity, Frequency, Importance, Confidence) + Top Barriers horizontal bar
+- Phase 3: 5 trend line charts + Top Barriers horizontal bar
 - Phase 4: OpportunitySpotlight — 5 Claude API cards
 - Phase 5: DeepDive — scatter plot + role/function breakdown
 - Phase 6: Tool Ecosystem bubble chart (inside DeepDive)
 - Phase 7: ChatPanel — floating Claude chat
-- Phase 8: PresentationMode — P key, 7 slides, arrow keys, ESC, Framer Motion transitions
+- Phase 8: PresentationMode — P key, slides, arrow keys, ESC, Framer Motion transitions
 
-### ✅ Idea #1 — Emotional Content Layer (built April 1, 2026)
-1. **ThenNowDiptych** in Hero.jsx — S1 hoping quotes vs S3 conviction quotes, auto-cycles 6s
-2. **ConvictionMoment.jsx** — 43% own-pocket panel between GrowthStory and TrendCharts
-3. **Audience Lens** in PresentationMode — pre-flight screen, 3 slide sequences (AI Council / Exec / Dept)
-4. **StruggleMap.jsx** — full-width heatmap below AdoptionCurve in TrendCharts; hover quotes
-5. **AdoptionCurve.jsx** — real Gaussian bell curve shifting left S1→S2→S3; replaces StageFlow
+### ✅ Idea #1 — Emotional Content Layer (April 1, 2026)
+1. ThenNowDiptych in Hero — S1 hoping vs S3 conviction quotes, auto-cycles
+2. ConvictionMoment — own-pocket panel with count-up + rotating quotes
+3. Audience Lens in PresentationMode — pre-flight, 3 slide sequences
+4. StruggleMap — full-width heatmap in Numbers tab; hover quotes
+5. AdoptionCurve — real Gaussian bell curve shifting left S1→S2→S3
 
-### ✅ Idea #3 — Adoption Bell Curve (built April 1, 2026)
-- `AdoptionCurve.jsx`: actual SVG Gaussian curve, 3 color segments, wave buttons + slider, auto-plays on scroll-in
-- Wave data: S1=16/59/25%, S2=27/68/5%, S3=38/61/1% (S3 computed live from familiarityTrend)
+### ✅ Idea #2 — Tab Navigation + Team Intelligence (April 2, 2026)
+1. 4-tab navigation (Story / Numbers / Team / What's Next)
+2. AdoptionScorecard — 4 expandable metric tiles
+3. Archetypes — 5 tarot card personas, 16-dim behavioral scoring
+4. OpenTextIntelligence — 4 Claude API cross-cut insight cards
+5. ParticipationStory — 117-dot grid, live from Google Sheets
+6. Leadership Vault — password-gated DeepDive; vault-aware ChatPanel
+7. ChatPanel vault awareness — full archetype + role data injected when unlocked
 
-### ✅ Polish Pass — Idea #1 refinements (April 1, 2026)
-1. **AdoptionCurve peak shift** — Bell curve peak animates left S1→S2→S3 via `waveMu()` weighted centroid (Innovators→100px, Pragmatists→300px, Laggards→500px); fill areas also animate; `motion.path` morphs curve shape
-2. **AdoptionCurve labels** — Gradient fills, colored category names, sublabels from beating_the_curve.md, ↑↓ % delta badges per segment
-3. **ConvictionMoment quotes** — Now pulls only from `s3OwnPocketQuotes`: struggle text from `ownPocket === true` respondents AND filtered to payment keywords only; falls back to curated set if <3 matches
-4. **StruggleMap S3-only** — Removed S1/S2 toggle tabs (those surveys had no dedicated struggle/excitement questions); S3 data only shown
-
----
-
-## Idea #2 — In Progress (April 2, 2026)
-
-Full detail in: `/Users/michaelmora/.claude/plans/twinkly-bouncing-pnueli.md`
-
-| # | What | Description | Priority | Status |
-|---|------|-------------|----------|--------|
-| 1 | **Tab Navigation** | 4 "museum rooms": Story / Numbers / Team / What's Next — kills the infinite scroll | ⭐ First | ✅ DONE |
-| 2 | **Adoption Scorecard** | 4 expandable metric tiles (Sentiment, Familiarity, Confidence, Importance) — "View full chart" expand; Frequency stays always-visible | High | ✅ DONE |
-| 3 | **Archetypes** | 5 personas from S3 row-level data (16 dimensions per person) | High | ✅ DONE |
-| 4 | **Open Text Intelligence** | Aspiration-action gap, tool-to-mindset links from open text | Medium | Next |
-| 5 | **Participation Story** | 117-dot grid replacing scatter plot for public view | Medium | |
-
-**Tab structure (live):**
-| Tab | Contents |
-|-----|---------|
-| The Story | Hero + ThenNowDiptych + GrowthStory + ConvictionMoment |
-| The Numbers | AdoptionScorecard (4 tiles) + Frequency chart (always-visible) + AdoptionCurve + StruggleMap |
-| The Team | DeepDive (scatter + roles + tools) + Archetypes (tarot cards) |
-| What's Next | OpportunitySpotlight + Claude Chat (floating) |
-
-**Component map additions:**
-| File | What it does |
-|------|-------------|
-| `src/components/AdoptionScorecard.jsx` | 4 metric tiles — Sentiment/Familiarity/Confidence/Importance — each with sparkline + expand-to-full-chart |
-| `src/components/Archetypes.jsx` | 5 archetype cards — arc fan spread, 3D tilt (back face), flip reveal, oracle text inside card, full-screen portrait modal; rainbow accent colors I→V (violet/blue/teal/mint/gold) |
-
-**Archetypes card details (live):**
-- CARD_W=260, CARD_H=520; arc config: rotate ±10/±5/0deg, dip 40/15/0px
-- Accent colors: confident-bystander=#A78BFA, thoughtful-skeptic=#60A5FA, blocked-believer=#59BEC9, experimenter=#7DE69B, multiplier=#FFCD00
-- Dual color overlay on portraits: mix-blend-mode:color at 45% + screen at 12%
-- Oracle text: 13px italic #e8f0f5, line-height 1.35, fades in at 0.65s delay after flip
-- Affinity scoring: 16 dimensions per respondent, 5 scorer functions 0–100, highest wins; near-ties → more advanced stage
-- Pills only in full-screen modal, not on card face
+### ✅ Presentation Mode Redesign (April 2, 2026)
+1. SlideCover — cinematic opening slide
+2. SlideOverview — participation story leads + transformation cards
+3. SlideWave — 3-band layout: hero number + narrative + thesis copy (no "Say This")
+4. SlideBellCurve — NEW: adoption arc shift embedded
+5. SlideArchetypes — NEW: 5 persona summary cards with distribution bar
+6. SlideStruggle — NEW: friction & excitement heatmap embedded
+7. All 3 lenses include: bell curve, archetypes, struggle map
+8. Narrative copy built into every slide (not presenter notes)
 
 ---
 
@@ -131,6 +143,8 @@ Full detail in: `/Users/michaelmora/.claude/plans/twinkly-bouncing-pnueli.md`
 - Barriers: 3-pass fuzzy matching (exact → prefix → keyword/substring)
 - Confidence normalized to "% scoring ≥ 3" across all surveys (scales differ per survey)
 - Total MarCom team = 117; participation rates are behavioral proof, not self-reported
+- AdoptionCurve takes `{ familiarityTrend }` directly — NOT `{ transforms }`
+- Leadership Vault password: `TGSD26` (env: `VITE_VAULT_PASSWORD`) — never show in presentation lenses
 
 ---
 

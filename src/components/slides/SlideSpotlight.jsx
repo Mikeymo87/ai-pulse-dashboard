@@ -70,7 +70,7 @@ function InsightCard({ card, index }) {
           fontWeight: 700,
           letterSpacing: '0.12em',
           color: cfg.color,
-          fontFamily: 'Inter, sans-serif',
+          fontFamily: 'DM Sans, sans-serif',
           textTransform: 'uppercase',
         }}>
           <span style={{ fontSize: 7 }}>{cfg.icon}</span>
@@ -81,7 +81,7 @@ function InsightCard({ card, index }) {
       {/* Headline */}
       <p style={{
         margin: 0,
-        fontFamily: 'Inter, sans-serif',
+        fontFamily: 'DM Sans, sans-serif',
         fontSize: 15,
         fontWeight: 800,
         color: '#f0f2f4',
@@ -97,7 +97,7 @@ function InsightCard({ card, index }) {
       {/* Body */}
       <p style={{
         margin: 0,
-        fontFamily: 'Inter, sans-serif',
+        fontFamily: 'DM Sans, sans-serif',
         fontSize: 12,
         fontWeight: 400,
         color: '#9aa4b0',
@@ -126,7 +126,7 @@ function InsightCard({ card, index }) {
           <span style={{ color: cfg.color, fontSize: 10, fontWeight: 700, flexShrink: 0, paddingTop: 1 }}>→</span>
           <p style={{
             margin: 0,
-            fontFamily: 'Inter, sans-serif',
+            fontFamily: 'DM Sans, sans-serif',
             fontSize: 11,
             fontWeight: 500,
             color: '#c8d4e0',
@@ -145,7 +145,7 @@ function InsightCard({ card, index }) {
       <div style={{
         paddingTop: 10,
         borderTop: '1px solid rgba(255,255,255,0.06)',
-        fontFamily: 'Inter, sans-serif',
+        fontFamily: 'DM Sans, sans-serif',
         fontSize: 11,
         fontWeight: 600,
         color: cfg.color,
@@ -299,7 +299,7 @@ stat: one key data point as a short string`,
           Claude AI · Opportunity Spotlight
         </div>
         <h2 style={{
-          fontFamily: 'Inter, sans-serif',
+          fontFamily: 'DM Sans, sans-serif',
           fontSize: 24,
           fontWeight: 800,
           color: '#ffffff',
@@ -332,7 +332,7 @@ stat: one key data point as a short string`,
             flexDirection: 'column',
             gap: 12,
           }}>
-            <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, color: '#E5554F' }}>
+            <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 14, color: '#E5554F' }}>
               Could not load insights — check your API key.
             </p>
             <button
@@ -344,7 +344,7 @@ stat: one key data point as a short string`,
                 borderRadius: 20,
                 color: '#E5554F',
                 cursor: 'pointer',
-                fontFamily: 'Inter, sans-serif',
+                fontFamily: 'DM Sans, sans-serif',
                 fontSize: 12,
                 fontWeight: 600,
               }}

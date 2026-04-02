@@ -8,7 +8,7 @@ import {
 } from 'recharts';
 
 // ─── Shared axis/grid styles ─────────────────────────────────────────────────
-const axisStyle = { fill: '#797D80', fontSize: 10, fontFamily: 'Inter, sans-serif' };
+const axisStyle = { fill: '#797D80', fontSize: 10, fontFamily: 'DM Sans, sans-serif' };
 const gridStyle = { stroke: 'rgba(125,230,155,0.07)', strokeDasharray: '3 3' };
 
 const PERIOD_LABEL = {
@@ -21,11 +21,11 @@ function CustomXTick({ x, y, payload }) {
   const info = PERIOD_LABEL[payload.value] || { survey: payload.value, date: '' };
   return (
     <g transform={`translate(${x},${y})`}>
-      <text x={0} y={0} dy={13} textAnchor="middle" fill="#e0e0e0" fontSize={10} fontWeight={700} fontFamily="Inter, sans-serif">
+      <text x={0} y={0} dy={13} textAnchor="middle" fill="#e0e0e0" fontSize={10} fontWeight={700} fontFamily="DM Sans, sans-serif">
         {info.survey}
       </text>
       {info.date && (
-        <text x={0} y={0} dy={24} textAnchor="middle" fill="#797D80" fontSize={9} fontFamily="Inter, sans-serif">
+        <text x={0} y={0} dy={24} textAnchor="middle" fill="#797D80" fontSize={9} fontFamily="DM Sans, sans-serif">
           ({info.date})
         </text>
       )}
@@ -49,7 +49,7 @@ function ChartTooltip({ active, payload, label, suffix = '%' }) {
       border: '1px solid rgba(125,230,155,0.35)',
       borderRadius: 8,
       padding: '8px 12px',
-      fontFamily: 'Inter, sans-serif',
+      fontFamily: 'DM Sans, sans-serif',
       fontSize: 12,
       color: '#e0e0e0',
     }}>
@@ -230,7 +230,7 @@ function ChartBlock({ id, chartData, chartH }) {
           <XAxis dataKey="stage" tick={{ ...axisStyle, fontSize: 9 }} tickLine={false} axisLine={false} />
           <YAxis tick={axisStyle} tickLine={false} axisLine={false} tickFormatter={v => `${v}%`} />
           <Tooltip content={<ChartTooltip />} />
-          <Legend wrapperStyle={{ fontSize: 10, fontFamily: 'Inter, sans-serif', color: '#797D80', paddingTop: 4 }} />
+          <Legend wrapperStyle={{ fontSize: 10, fontFamily: 'DM Sans, sans-serif', color: '#797D80', paddingTop: 4 }} />
           <Bar dataKey="Survey 2" fill="#59BEC9" radius={[3, 3, 0, 0]} />
           <Bar dataKey="Survey 3" fill="#7DE69B" radius={[3, 3, 0, 0]} />
         </BarChart>
@@ -249,7 +249,7 @@ function ChartBlock({ id, chartData, chartH }) {
           <YAxis dataKey="barrier" type="category" tick={{ ...axisStyle, fontSize: 9 }} tickLine={false} axisLine={false} width={120} />
           <XAxis type="number" tick={axisStyle} tickLine={false} axisLine={false} tickFormatter={v => `${v}%`} domain={[0, 'auto']} />
           <Tooltip content={<ChartTooltip />} />
-          <Legend wrapperStyle={{ fontSize: 10, fontFamily: 'Inter, sans-serif', color: '#797D80', paddingTop: 4 }} />
+          <Legend wrapperStyle={{ fontSize: 10, fontFamily: 'DM Sans, sans-serif', color: '#797D80', paddingTop: 4 }} />
           <Bar dataKey="S1" name="Survey 1" fill="#797D80" radius={[0, 3, 3, 0]} />
           <Bar dataKey="S2" name="Survey 2" fill="#59BEC9" radius={[0, 3, 3, 0]} />
           <Bar dataKey="S3" name="Survey 3" fill="#7DE69B" radius={[0, 3, 3, 0]} />
@@ -275,7 +275,7 @@ function ChartBlock({ id, chartData, chartH }) {
     }}>
       {/* Title row */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, flexShrink: 0 }}>
-        <p style={{ margin: 0, fontFamily: 'Inter, sans-serif', fontSize: 13, fontWeight: 700, color: '#e0e0e0' }}>
+        <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 700, color: '#e0e0e0' }}>
           {cfg.title}
         </p>
         <span style={{
@@ -286,7 +286,7 @@ function ChartBlock({ id, chartData, chartH }) {
           letterSpacing: '0.07em',
           padding: '2px 8px',
           borderRadius: 20,
-          fontFamily: 'Inter, sans-serif',
+          fontFamily: 'DM Sans, sans-serif',
           flexShrink: 0,
         }}>
           {cfg.tag}
@@ -309,7 +309,7 @@ function ChartBlock({ id, chartData, chartH }) {
         borderRadius: '0 6px 6px 0',
         flexShrink: 0,
       }}>
-        <p style={{ margin: 0, fontFamily: 'Inter, sans-serif', fontSize: 11, color: 'rgba(224,224,224,0.75)', lineHeight: 1.5, fontStyle: 'italic' }}>
+        <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: 'rgba(224,224,224,0.75)', lineHeight: 1.5, fontStyle: 'italic' }}>
           <span style={{ color: '#7DE69B', fontWeight: 700, fontStyle: 'normal', marginRight: 4 }}>Key takeaway:</span>
           {cfg.insight}
         </p>

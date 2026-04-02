@@ -57,7 +57,7 @@ function ScatterTooltip({ active, payload }) {
       border: '1px solid rgba(125,230,155,0.2)',
       borderRadius: 10,
       padding: '10px 14px',
-      fontFamily: 'Inter, sans-serif',
+      fontFamily: 'DM Sans, sans-serif',
       fontSize: 12,
       color: '#e0e0e0',
       lineHeight: 1.7,
@@ -83,7 +83,7 @@ function QuadLabel({ x, y, text, color }) {
       color,
       textTransform: 'uppercase',
       opacity: 0.55,
-      fontFamily: 'Inter, sans-serif',
+      fontFamily: 'DM Sans, sans-serif',
       pointerEvents: 'none',
       lineHeight: 1.3,
       textAlign: 'center',
@@ -100,7 +100,7 @@ function MetricBar({ label, value, max = 5, color }) {
     <div style={{ marginBottom: 10 }}>
       <div style={{
         display: 'flex', justifyContent: 'space-between',
-        fontFamily: 'Inter, sans-serif', fontSize: 11, marginBottom: 4,
+        fontFamily: 'DM Sans, sans-serif', fontSize: 11, marginBottom: 4,
       }}>
         <span style={{ color: '#797D80', fontWeight: 500 }}>{label}</span>
         <span style={{ color, fontWeight: 700 }}>{value ? value.toFixed(1) : '—'}</span>
@@ -136,7 +136,7 @@ function GroupCard({ name, data, color, index }) {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
         <p style={{
           margin: 0,
-          fontFamily: 'Inter, sans-serif',
+          fontFamily: 'DM Sans, sans-serif',
           fontSize: 13,
           fontWeight: 700,
           color: '#f0f2f4',
@@ -151,7 +151,7 @@ function GroupCard({ name, data, color, index }) {
           fontSize: 10,
           fontWeight: 700,
           color,
-          fontFamily: 'Inter, sans-serif',
+          fontFamily: 'DM Sans, sans-serif',
           flexShrink: 0,
         }}>n={data.count}</span>
       </div>
@@ -215,7 +215,7 @@ function ToolBubbles({ tools, totalN }) {
               {showLabel ? (
                 <>
                   <span style={{
-                    fontFamily: 'Inter, sans-serif',
+                    fontFamily: 'DM Sans, sans-serif',
                     fontSize: Math.max(9, Math.min(12, size / 9)),
                     fontWeight: 700,
                     color,
@@ -227,7 +227,7 @@ function ToolBubbles({ tools, totalN }) {
                     {tool.label}
                   </span>
                   <span style={{
-                    fontFamily: 'Inter, sans-serif',
+                    fontFamily: 'DM Sans, sans-serif',
                     fontSize: Math.max(9, Math.min(11, size / 10)),
                     fontWeight: 500,
                     color: '#797D80',
@@ -238,7 +238,7 @@ function ToolBubbles({ tools, totalN }) {
                 </>
               ) : (
                 <span style={{
-                  fontFamily: 'Inter, sans-serif',
+                  fontFamily: 'DM Sans, sans-serif',
                   fontSize: 9,
                   fontWeight: 700,
                   color,
@@ -264,7 +264,7 @@ function ToolBubbles({ tools, totalN }) {
                   padding: '8px 12px',
                   whiteSpace: 'nowrap',
                   zIndex: 10,
-                  fontFamily: 'Inter, sans-serif',
+                  fontFamily: 'DM Sans, sans-serif',
                   fontSize: 12,
                   pointerEvents: 'none',
                 }}>
@@ -283,7 +283,7 @@ function ToolBubbles({ tools, totalN }) {
         {[...new Set(tools.map(t => getToolCategory(t.label)))].map(cat => (
           <div key={cat} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
             <div style={{ width: 7, height: 7, borderRadius: '50%', background: TOOL_CATEGORIES[cat]?.color ?? '#797D80', flexShrink: 0 }} />
-            <span style={{ fontSize: 10, color: '#797D80', fontFamily: 'Inter, sans-serif' }}>{cat}</span>
+            <span style={{ fontSize: 10, color: '#797D80', fontFamily: 'DM Sans, sans-serif' }}>{cat}</span>
           </div>
         ))}
       </div>
@@ -347,10 +347,10 @@ export default function DeepDive({ surveys, transforms }) {
     <section
       id="deepdive"
       style={{
-        padding: '96px 24px 80px',
-        maxWidth: 1120,
+        padding: '96px 32px 80px',
+        maxWidth: 1360,
         margin: '0 auto',
-        fontFamily: 'Inter, sans-serif',
+        fontFamily: 'DM Sans, sans-serif',
       }}
     >
       {/* Section header */}
@@ -359,36 +359,37 @@ export default function DeepDive({ surveys, transforms }) {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.5 }}
-        style={{ marginBottom: 52, textAlign: 'center' }}
+        style={{ marginBottom: 56, textAlign: 'center' }}
       >
         <span style={{
           display: 'inline-block',
-          fontSize: 10,
+          fontSize: 11,
           fontWeight: 700,
-          letterSpacing: '0.18em',
+          letterSpacing: '0.13em',
           color: '#7DE69B',
           textTransform: 'uppercase',
-          marginBottom: 14,
+          marginBottom: 12,
         }}>
           Survey 3 Deep Dive
         </span>
         <h2 style={{
-          margin: '0 0 14px',
-          fontSize: 'clamp(28px, 4vw, 40px)',
-          fontWeight: 900,
+          margin: '0 0 16px',
+          fontSize: 'clamp(30px, 4vw, 44px)',
+          fontWeight: 800,
           color: '#f0f2f4',
-          lineHeight: 1.15,
-          letterSpacing: '-0.02em',
+          lineHeight: 1.1,
+          letterSpacing: '-0.025em',
+          fontFamily: "'Plus Jakarta Sans', sans-serif",
         }}>
           Who's Ready, Who Needs Support
         </h2>
         <p style={{
           margin: 0,
-          fontSize: 15,
+          fontSize: 16,
           color: '#797D80',
-          maxWidth: 520,
+          maxWidth: 560,
           marginInline: 'auto',
-          lineHeight: 1.6,
+          lineHeight: 1.65,
         }}>
           Role and function data is from Survey 3 only — Surveys 1 & 2 were anonymous.
         </p>
@@ -404,30 +405,30 @@ export default function DeepDive({ surveys, transforms }) {
           background: 'rgba(29,77,82,0.35)',
           border: '1px solid rgba(125,230,155,0.15)',
           borderRadius: 16,
-          padding: '28px 28px 20px',
-          marginBottom: 40,
+          padding: '32px 36px 28px',
+          marginBottom: 48,
         }}
       >
-        <p style={{ margin: '0 0 4px', fontSize: 16, fontWeight: 800, color: '#f0f2f4' }}>
+        <p style={{ margin: '0 0 4px', fontSize: 16, fontWeight: 800, color: '#f0f2f4', letterSpacing: '0.01em' }}>
           Confidence vs. Importance
         </p>
-        <p style={{ margin: '0 0 24px', fontSize: 13, color: '#797D80' }}>
+        <p style={{ margin: '0 0 24px', fontSize: 15, color: '#797D80', lineHeight: 1.6 }}>
           Each dot = one Survey 3 respondent. X = how important AI is to their role; Y = how confident they feel using it.
         </p>
 
         {/* Quadrant labels overlay */}
         <div style={{ position: 'relative' }}>
           <div style={{ position: 'absolute', top: 8, right: 40, zIndex: 1, textAlign: 'right' }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: '#7DE69B', opacity: 0.6, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Ready to Lead</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#7DE69B', opacity: 0.6, letterSpacing: '0.07em', textTransform: 'uppercase' }}>Ready to Lead</div>
           </div>
           <div style={{ position: 'absolute', top: 8, left: 40, zIndex: 1 }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: '#FFCD00', opacity: 0.6, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Quiet Users</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#FFCD00', opacity: 0.6, letterSpacing: '0.07em', textTransform: 'uppercase' }}>Quiet Users</div>
           </div>
           <div style={{ position: 'absolute', bottom: 36, right: 40, zIndex: 1, textAlign: 'right' }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: '#E5554F', opacity: 0.6, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Needs Support</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#E5554F', opacity: 0.6, letterSpacing: '0.07em', textTransform: 'uppercase' }}>Needs Support</div>
           </div>
           <div style={{ position: 'absolute', bottom: 36, left: 40, zIndex: 1 }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: '#797D80', opacity: 0.6, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Not Engaged</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#797D80', opacity: 0.6, letterSpacing: '0.07em', textTransform: 'uppercase' }}>Not Engaged</div>
           </div>
 
           <ResponsiveContainer width="100%" height={400}>
@@ -436,16 +437,16 @@ export default function DeepDive({ surveys, transforms }) {
               <XAxis
                 type="number" dataKey="x" name="Importance"
                 domain={[0.5, 5.5]} ticks={[1, 2, 3, 4, 5]}
-                tick={{ fill: '#797D80', fontSize: 11, fontFamily: 'Inter, sans-serif' }}
+                tick={{ fill: '#797D80', fontSize: 11, fontFamily: 'DM Sans, sans-serif' }}
                 tickLine={false} axisLine={false}
-                label={{ value: 'Importance to Role →', position: 'insideBottom', offset: -8, fill: '#797D80', fontSize: 11, fontFamily: 'Inter, sans-serif' }}
+                label={{ value: 'Importance to Role →', position: 'insideBottom', offset: -8, fill: '#797D80', fontSize: 11, fontFamily: 'DM Sans, sans-serif' }}
               />
               <YAxis
                 type="number" dataKey="y" name="Confidence"
                 domain={[0.5, 5.5]} ticks={[1, 2, 3, 4, 5]}
-                tick={{ fill: '#797D80', fontSize: 11, fontFamily: 'Inter, sans-serif' }}
+                tick={{ fill: '#797D80', fontSize: 11, fontFamily: 'DM Sans, sans-serif' }}
                 tickLine={false} axisLine={false}
-                label={{ value: 'Confidence →', angle: -90, position: 'insideLeft', offset: 10, fill: '#797D80', fontSize: 11, fontFamily: 'Inter, sans-serif' }}
+                label={{ value: 'Confidence →', angle: -90, position: 'insideLeft', offset: 10, fill: '#797D80', fontSize: 11, fontFamily: 'DM Sans, sans-serif' }}
               />
               <Tooltip content={<ScatterTooltip />} cursor={{ strokeDasharray: '3 3', stroke: 'rgba(125,230,155,0.2)' }} />
               {/* Quadrant dividers */}
@@ -472,7 +473,7 @@ export default function DeepDive({ surveys, transforms }) {
             {allRoles.map(role => (
               <div key={role} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <div style={{ width: 8, height: 8, borderRadius: '50%', background: roleColor(role, allRoles), flexShrink: 0 }} />
-                <span style={{ fontSize: 11, color: '#b0b8c0', fontFamily: 'Inter, sans-serif' }}>{role}</span>
+                <span style={{ fontSize: 11, color: '#b0b8c0', fontFamily: 'DM Sans, sans-serif' }}>{role}</span>
               </div>
             ))}
           </div>
@@ -484,8 +485,8 @@ export default function DeepDive({ surveys, transforms }) {
         {/* Toggle */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
           <div>
-            <p style={{ margin: '0 0 2px', fontSize: 16, fontWeight: 800, color: '#f0f2f4' }}>Team Breakdown</p>
-            <p style={{ margin: 0, fontSize: 13, color: '#797D80' }}>Average scores across Confidence, Importance, and Familiarity (scale 1–5)</p>
+            <p style={{ margin: '0 0 2px', fontSize: 16, fontWeight: 800, color: '#f0f2f4', letterSpacing: '0.01em' }}>Team Breakdown</p>
+            <p style={{ margin: 0, fontSize: 15, color: '#797D80', lineHeight: 1.5 }}>Average scores across Confidence, Importance, and Familiarity (scale 1–5)</p>
           </div>
           <div style={{
             display: 'flex',
@@ -504,9 +505,10 @@ export default function DeepDive({ surveys, transforms }) {
                   borderRadius: 8,
                   border: 'none',
                   cursor: 'pointer',
-                  fontFamily: 'Inter, sans-serif',
+                  fontFamily: 'DM Sans, sans-serif',
                   fontSize: 12,
                   fontWeight: 600,
+                  letterSpacing: '0.03em',
                   transition: 'all 0.2s',
                   background: groupBy === opt ? 'rgba(125,230,155,0.15)' : 'transparent',
                   color: groupBy === opt ? '#7DE69B' : '#797D80',
@@ -546,10 +548,10 @@ export default function DeepDive({ surveys, transforms }) {
       >
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 24 }}>
           <div>
-            <p style={{ margin: '0 0 2px', fontSize: 16, fontWeight: 800, color: '#f0f2f4' }}>
+            <p style={{ margin: '0 0 2px', fontSize: 16, fontWeight: 800, color: '#f0f2f4', letterSpacing: '0.01em' }}>
               What Tools Are They Using?
             </p>
-            <p style={{ margin: 0, fontSize: 13, color: '#797D80' }}>
+            <p style={{ margin: 0, fontSize: 15, color: '#797D80', lineHeight: 1.5 }}>
               {toolSurvey === 's2'
                 ? 'Survey 2 — all AI tools used at work (structured list, 106 respondents)'
                 : 'Survey 3 — personal & non-endorsed tools only (free-text, 89 respondents)'}
@@ -572,9 +574,10 @@ export default function DeepDive({ surveys, transforms }) {
                   borderRadius: 8,
                   border: 'none',
                   cursor: 'pointer',
-                  fontFamily: 'Inter, sans-serif',
+                  fontFamily: 'DM Sans, sans-serif',
                   fontSize: 12,
                   fontWeight: 600,
+                  letterSpacing: '0.03em',
                   transition: 'all 0.2s',
                   background: toolSurvey === opt.key ? 'rgba(125,230,155,0.15)' : 'transparent',
                   color: toolSurvey === opt.key ? '#7DE69B' : '#797D80',
@@ -594,7 +597,7 @@ export default function DeepDive({ surveys, transforms }) {
         }}>
           {activeTools.length > 0
             ? <ToolBubbles tools={activeTools} totalN={activeN} />
-            : <p style={{ textAlign: 'center', color: '#797D80', fontFamily: 'Inter, sans-serif', fontSize: 13, padding: '32px 0' }}>No tool data available for this survey.</p>
+            : <p style={{ textAlign: 'center', color: '#797D80', fontFamily: 'DM Sans, sans-serif', fontSize: 15, padding: '32px 0', lineHeight: 1.6 }}>No tool data available for this survey.</p>
           }
         </div>
       </motion.div>

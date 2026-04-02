@@ -56,7 +56,8 @@ function StatCard({ value, label, accentColor, delay }) {
         padding: '24px 28px',
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'flex-start',
+        alignItems: 'center',
+        textAlign: 'center',
         boxShadow: `0 0 28px rgba(${hexToRgb(accentColor)}, 0.1)`,
       }}
     >
@@ -66,18 +67,18 @@ function StatCard({ value, label, accentColor, delay }) {
         color: accentColor,
         lineHeight: 1,
         letterSpacing: '-0.02em',
-        fontFamily: 'Inter, sans-serif',
+        fontFamily: "'Plus Jakarta Sans', sans-serif",
       }}>
         {displayValue}
       </div>
       <div style={{
-        fontSize: 12,
-        color: 'rgba(125,230,155,0.45)',
-        letterSpacing: '0.08em',
+        fontSize: 13,
+        color: 'rgba(125,230,155,0.5)',
+        letterSpacing: '0.07em',
         fontWeight: 500,
         textTransform: 'uppercase',
-        marginTop: 8,
-        fontFamily: 'Inter, sans-serif',
+        marginTop: 10,
+        fontFamily: 'DM Sans, sans-serif',
       }}>
         {label}
       </div>
@@ -148,7 +149,7 @@ function ThenNowDiptych({ s1Quotes, s3Quotes }) {
       transition={{ duration: 0.6, delay: 0.85 }}
       style={{
         marginTop: 40,
-        maxWidth: 800,
+        maxWidth: 1000,
         width: '100%',
         boxSizing: 'border-box',
       }}
@@ -194,9 +195,9 @@ function ThenNowDiptych({ s1Quotes, s3Quotes }) {
           {/* Era label */}
           <div style={{
             fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
-            fontSize: 9,
-            color: 'rgba(255,205,0,0.65)',
-            letterSpacing: '0.2em',
+            fontSize: 11,
+            color: 'rgba(255,205,0,0.7)',
+            letterSpacing: '0.15em',
             textTransform: 'uppercase',
             marginBottom: 14,
           }}>
@@ -212,10 +213,10 @@ function ThenNowDiptych({ s1Quotes, s3Quotes }) {
                 exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.3 }}
                 style={{
-                  fontSize: 15,
+                  fontSize: 16,
                   lineHeight: 1.75,
-                  color: 'rgba(255,255,255,0.72)',
-                  fontFamily: 'Inter, sans-serif',
+                  color: 'rgba(255,255,255,0.75)',
+                  fontFamily: 'DM Sans, sans-serif',
                   fontStyle: 'italic',
                   fontWeight: 400,
                   margin: 0,
@@ -229,9 +230,9 @@ function ThenNowDiptych({ s1Quotes, s3Quotes }) {
 
           <div style={{
             marginTop: 16,
-            fontSize: 11,
-            color: 'rgba(255,205,0,0.45)',
-            fontFamily: 'Inter, sans-serif',
+            fontSize: 13,
+            color: 'rgba(255,205,0,0.55)',
+            fontFamily: 'DM Sans, sans-serif',
             fontWeight: 500,
           }}>
             Survey 1 respondent
@@ -296,9 +297,9 @@ function ThenNowDiptych({ s1Quotes, s3Quotes }) {
           {/* Era label */}
           <div style={{
             fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
-            fontSize: 9,
-            color: 'rgba(125,230,155,0.75)',
-            letterSpacing: '0.2em',
+            fontSize: 11,
+            color: 'rgba(125,230,155,0.8)',
+            letterSpacing: '0.15em',
             textTransform: 'uppercase',
             marginBottom: 14,
           }}>
@@ -314,10 +315,10 @@ function ThenNowDiptych({ s1Quotes, s3Quotes }) {
                 exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.3, delay: 0.05 }}
                 style={{
-                  fontSize: 15,
+                  fontSize: 16,
                   lineHeight: 1.75,
-                  color: 'rgba(255,255,255,0.9)',
-                  fontFamily: 'Inter, sans-serif',
+                  color: 'rgba(255,255,255,0.92)',
+                  fontFamily: 'DM Sans, sans-serif',
                   fontStyle: 'italic',
                   fontWeight: 500,
                   margin: 0,
@@ -331,9 +332,9 @@ function ThenNowDiptych({ s1Quotes, s3Quotes }) {
 
           <div style={{
             marginTop: 16,
-            fontSize: 11,
-            color: 'rgba(125,230,155,0.55)',
-            fontFamily: 'Inter, sans-serif',
+            fontSize: 13,
+            color: 'rgba(125,230,155,0.65)',
+            fontFamily: 'DM Sans, sans-serif',
             fontWeight: 500,
           }}>
             Survey 3 respondent
@@ -412,7 +413,7 @@ export default function Hero({ transforms }) {
         flexDirection: 'column',
         alignItems: 'center',
         width: '100%',
-        maxWidth: 900,
+        maxWidth: 1100,
       }}>
         {/* Eyebrow */}
         <motion.div
@@ -440,11 +441,11 @@ export default function Hero({ transforms }) {
             transition={{ duration: 0.7, delay: 0.2 }}
             style={{
               fontSize: 'clamp(48px, 8vw, 72px)',
-              fontWeight: 900,
+              fontWeight: 800,
               color: '#ffffff',
               letterSpacing: '-0.03em',
               lineHeight: 1.05,
-              fontFamily: 'Inter, sans-serif',
+              fontFamily: "'Plus Jakarta Sans', sans-serif",
             }}
           >
             AI Adoption
@@ -455,16 +456,37 @@ export default function Hero({ transforms }) {
             transition={{ duration: 0.7, delay: 0.35 }}
             style={{
               fontSize: 'clamp(48px, 8vw, 72px)',
-              fontWeight: 900,
+              fontWeight: 800,
               color: '#7DE69B',
               letterSpacing: '-0.03em',
               lineHeight: 1.05,
-              fontFamily: 'Inter, sans-serif',
+              fontFamily: "'Plus Jakarta Sans', sans-serif",
             }}
           >
             In Motion
           </motion.div>
         </div>
+
+        {/* Deck — one evocative question */}
+        <motion.p
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          style={{
+            color: '#e0e0e0',
+            fontSize: 'clamp(17px, 2.2vw, 22px)',
+            fontWeight: 400,
+            marginTop: 20,
+            marginBottom: 8,
+            textAlign: 'center',
+            fontFamily: 'DM Sans, sans-serif',
+            lineHeight: 1.55,
+            maxWidth: 680,
+            fontStyle: 'italic',
+          }}
+        >
+          What happens when leadership says "Human-first, AI-forward" — and a team of 117 actually believes it?
+        </motion.p>
 
         {/* Sub-tagline — dynamic response count */}
         <motion.p
@@ -473,12 +495,12 @@ export default function Hero({ transforms }) {
           transition={{ duration: 0.6, delay: 0.5 }}
           style={{
             color: 'var(--text-support)',
-            fontSize: 16,
+            fontSize: 15,
             fontWeight: 400,
-            marginTop: 16,
+            marginTop: 8,
             marginBottom: 36,
             textAlign: 'center',
-            fontFamily: 'Inter, sans-serif',
+            fontFamily: 'DM Sans, sans-serif',
           }}
         >
           Three surveys. {totalResponses} responses. 14 months of transformation.
@@ -490,7 +512,7 @@ export default function Hero({ transforms }) {
           gridTemplateColumns: 'repeat(3, 1fr)',
           gap: 16,
           width: '100%',
-          maxWidth: 600,
+          maxWidth: 800,
         }}>
           {stats.map((stat, i) => (
             <StatCard
@@ -502,6 +524,28 @@ export default function Hero({ transforms }) {
             />
           ))}
         </div>
+
+        {/* Narrative bridge — between data and voices */}
+        <motion.p
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.9 }}
+          style={{
+            color: '#797D80',
+            fontSize: 15,
+            fontWeight: 400,
+            marginTop: 36,
+            marginBottom: 0,
+            textAlign: 'center',
+            fontFamily: 'DM Sans, sans-serif',
+            lineHeight: 1.7,
+            maxWidth: 580,
+          }}
+        >
+          This is not a story about technology. It's a story about trust, intention, and what
+          becomes possible when leaders model the change they want to see. The words below are
+          from the same people — fourteen months apart.
+        </motion.p>
 
         {/* Then vs. Now quote diptych */}
         <ThenNowDiptych
@@ -526,7 +570,7 @@ export default function Hero({ transforms }) {
               color: 'rgba(125,230,155,0.55)',
               letterSpacing: '0.12em',
               textTransform: 'uppercase',
-              fontFamily: 'Inter, sans-serif',
+              fontFamily: 'DM Sans, sans-serif',
             }}>
               Scroll to explore
             </div>

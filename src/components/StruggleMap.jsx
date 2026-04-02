@@ -56,7 +56,7 @@ function ThemeCell({ theme, colorMap, maxPct, onEnter, onLeave, delay }) {
         color: '#e0e0e0',
         fontSize: 11.5,
         fontWeight: 600,
-        fontFamily: 'Inter, sans-serif',
+        fontFamily: 'DM Sans, sans-serif',
         lineHeight: 1.35,
       }}>
         {theme.label}
@@ -65,7 +65,7 @@ function ThemeCell({ theme, colorMap, maxPct, onEnter, onLeave, delay }) {
         color: c.accent,
         fontSize: 14,
         fontWeight: 800,
-        fontFamily: 'Inter, sans-serif',
+        fontFamily: 'DM Sans, sans-serif',
         letterSpacing: '-0.01em',
       }}>
         {theme.pct}%
@@ -108,7 +108,7 @@ function HoverTooltip({ tooltip }) {
         boxShadow: '0 8px 32px rgba(0,0,0,0.65)',
         pointerEvents: 'none',
         zIndex: 9999,
-        fontFamily: 'Inter, sans-serif',
+        fontFamily: 'DM Sans, sans-serif',
       }}
     >
       <p style={{ color: '#e0e0e0', fontWeight: 700, fontSize: 13.5, margin: '0 0 4px', lineHeight: 1.3 }}>
@@ -148,7 +148,7 @@ function HoverTooltip({ tooltip }) {
 function IntensityLegend({ colorMap }) {
   return (
     <div style={{ display: 'flex', gap: 12, marginTop: 12, alignItems: 'center' }}>
-      <span style={{ color: '#797D80', fontSize: 10, fontFamily: 'Inter, sans-serif' }}>
+      <span style={{ color: '#797D80', fontSize: 12, fontFamily: 'DM Sans, sans-serif' }}>
         Intensity:
       </span>
       {['low', 'mid', 'high'].map((level) => {
@@ -160,7 +160,7 @@ function IntensityLegend({ colorMap }) {
               background: c.bg, border: `1px solid ${c.border}`,
               display: 'inline-block',
             }} />
-            <span style={{ color: '#797D80', fontSize: 10, fontFamily: 'Inter, sans-serif', textTransform: 'capitalize' }}>
+            <span style={{ color: '#797D80', fontSize: 12, fontFamily: 'DM Sans, sans-serif', textTransform: 'capitalize' }}>
               {level}
             </span>
           </div>
@@ -170,7 +170,7 @@ function IntensityLegend({ colorMap }) {
   );
 }
 
-const FONT = 'Inter, sans-serif';
+const FONT = 'DM Sans, sans-serif';
 
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function StruggleMap({ transforms }) {
@@ -205,9 +205,9 @@ export default function StruggleMap({ transforms }) {
       {/* Section header */}
       <div style={{ marginBottom: 16, textAlign: 'center' }}>
         <p style={{
-          color: '#7DE69B', fontSize: 11, fontWeight: 700,
+          color: '#7DE69B', fontSize: 12, fontWeight: 700,
           letterSpacing: '0.12em', textTransform: 'uppercase',
-          margin: '0 0 6px', fontFamily: FONT,
+          margin: '0 0 8px', fontFamily: FONT,
         }}>
           Struggle Map
         </p>
@@ -218,8 +218,8 @@ export default function StruggleMap({ transforms }) {
           What&rsquo;s in the Way — and What They&rsquo;re Reaching For
         </h3>
         <p style={{
-          color: '#797D80', fontSize: 12, margin: '7px 0 0',
-          fontFamily: FONT,
+          color: '#797D80', fontSize: 15, margin: '8px 0 0',
+          fontFamily: FONT, lineHeight: 1.6,
         }}>
           Open-text responses thematically coded &middot; Hover any cell to read verbatim quotes
         </p>
@@ -245,8 +245,8 @@ export default function StruggleMap({ transforms }) {
               borderRadius: 2, display: 'inline-block', flexShrink: 0,
             }} />
             <p style={{
-              color: '#e0e0e0', fontWeight: 700, fontSize: 13,
-              margin: 0, fontFamily: 'Inter, sans-serif',
+              color: '#e0e0e0', fontWeight: 700, fontSize: 15,
+              margin: 0, fontFamily: 'DM Sans, sans-serif', letterSpacing: '0.01em',
             }}>
               What&rsquo;s in the Way
             </p>
@@ -255,7 +255,7 @@ export default function StruggleMap({ transforms }) {
               color: '#E5554F',
               fontSize: 10, fontWeight: 700,
               padding: '2px 8px', borderRadius: 20,
-              fontFamily: 'Inter, sans-serif',
+              fontFamily: 'DM Sans, sans-serif',
               letterSpacing: '0.06em',
             }}>
               STRUGGLES
@@ -289,8 +289,8 @@ export default function StruggleMap({ transforms }) {
               borderRadius: 2, display: 'inline-block', flexShrink: 0,
             }} />
             <p style={{
-              color: '#e0e0e0', fontWeight: 700, fontSize: 13,
-              margin: 0, fontFamily: 'Inter, sans-serif',
+              color: '#e0e0e0', fontWeight: 700, fontSize: 15,
+              margin: 0, fontFamily: 'DM Sans, sans-serif', letterSpacing: '0.01em',
             }}>
               What They&rsquo;re Reaching For
             </p>
@@ -299,7 +299,7 @@ export default function StruggleMap({ transforms }) {
               color: '#59BEC9',
               fontSize: 10, fontWeight: 700,
               padding: '2px 8px', borderRadius: 20,
-              fontFamily: 'Inter, sans-serif',
+              fontFamily: 'DM Sans, sans-serif',
               letterSpacing: '0.06em',
             }}>
               EXCITEMENT
@@ -336,7 +336,7 @@ export default function StruggleMap({ transforms }) {
       }}>
         <p style={{
           color: 'rgba(224,224,224,0.80)', fontSize: 11, fontStyle: 'italic',
-          margin: 0, lineHeight: 1.55, fontFamily: 'Inter, sans-serif',
+          margin: 0, lineHeight: 1.55, fontFamily: 'DM Sans, sans-serif',
         }}>
           <span style={{ color: '#7DE69B', fontWeight: 700, fontStyle: 'normal', marginRight: 4 }}>
             What this tells us:

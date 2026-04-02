@@ -1,50 +1,50 @@
 import { motion } from 'framer-motion';
 import {
   LineChart, Line,
-  AreaChart, Area,
-  BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, Legend,
+  ResponsiveContainer,
 } from 'recharts';
 import StruggleMap from './StruggleMap';
 import AdoptionCurve from './AdoptionCurve';
+import AdoptionScorecard from './AdoptionScorecard';
 
 // ─── Shared style constants ───────────────────────────────────────────────────
-const axisStyle = { fill: '#797D80', fontSize: 11, fontFamily: 'Inter, sans-serif' };
+const axisStyle = { fill: '#797D80', fontSize: 12, fontFamily: 'DM Sans, sans-serif' };
 const gridStyle = { stroke: 'rgba(125,230,155,0.07)', strokeDasharray: '3 3' };
 
 const questionStyle = {
-  color: 'rgba(121,125,128,0.75)',
-  fontSize: 10,
+  color: 'rgba(121,125,128,0.85)',
+  fontSize: 13,
   fontStyle: 'italic',
-  margin: '4px 0 0',
-  lineHeight: 1.4,
-  fontFamily: 'Inter, sans-serif',
+  margin: '6px 0 0',
+  lineHeight: 1.55,
+  fontFamily: 'DM Sans, sans-serif',
   fontWeight: 400,
 };
 
 const insightContainerStyle = {
-  marginTop: 12,
-  padding: '9px 12px',
+  marginTop: 16,
+  padding: '11px 16px',
   borderLeft: '3px solid rgba(125,230,155,0.55)',
   background: 'rgba(125,230,155,0.06)',
-  borderRadius: '0 8px 8px 0',
+  borderRadius: '0 10px 10px 0',
 };
 
 const insightTextStyle = {
-  color: 'rgba(224,224,224,0.80)',
-  fontSize: 11,
+  color: '#b0b8c0',
+  fontSize: 15,
   fontStyle: 'italic',
   margin: 0,
-  lineHeight: 1.55,
-  fontFamily: 'Inter, sans-serif',
+  lineHeight: 1.7,
+  fontFamily: 'DM Sans, sans-serif',
 };
 
 const insightLabelStyle = {
   color: '#7DE69B',
   fontWeight: 700,
   fontStyle: 'normal',
-  marginRight: 4,
+  marginRight: 6,
+  letterSpacing: '0.02em',
 };
 
 // ─── Survey period → label mapping ───────────────────────────────────────────
@@ -65,7 +65,7 @@ function CustomXTick({ x, y, payload }) {
         fill="#e0e0e0"
         fontSize={11}
         fontWeight={700}
-        fontFamily="Inter, sans-serif"
+        fontFamily="DM Sans, sans-serif"
       >
         {info.survey}
       </text>
@@ -75,7 +75,7 @@ function CustomXTick({ x, y, payload }) {
           textAnchor="middle"
           fill="#797D80"
           fontSize={9.5}
-          fontFamily="Inter, sans-serif"
+          fontFamily="DM Sans, sans-serif"
         >
           ({info.date})
         </text>
@@ -105,13 +105,13 @@ function ChartTooltip({ active, payload, label, suffix = '%' }) {
         border: '1px solid rgba(125,230,155,0.35)',
         borderRadius: 10,
         padding: '10px 14px',
-        fontFamily: 'Inter, sans-serif',
+        fontFamily: 'DM Sans, sans-serif',
         fontSize: 12,
         color: '#e0e0e0',
         boxShadow: '0 4px 24px rgba(0,0,0,0.5)',
       }}
     >
-      <p style={{ color: '#7DE69B', fontWeight: 700, margin: '0 0 6px' }}>{header}</p>
+      <p style={{ color: '#7DE69B', fontWeight: 700, margin: '0 0 6px', letterSpacing: '0.02em' }}>{header}</p>
       {payload.map((entry) => (
         <p key={entry.name} style={{ color: entry.color, margin: '2px 0' }}>
           {entry.name}: <strong>{entry.value}{suffix}</strong>
@@ -133,7 +133,7 @@ function ChartCard({ title, subtitle, question, tag, tagColor, insight, children
         background: 'rgba(29,77,82,0.35)',
         border: '1px solid rgba(125,230,155,0.15)',
         borderRadius: 16,
-        padding: '22px 24px 18px',
+        padding: '28px 32px 24px',
         display: 'flex',
         flexDirection: 'column',
       }}
@@ -141,11 +141,11 @@ function ChartCard({ title, subtitle, question, tag, tagColor, insight, children
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 14 }}>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={{ color: '#e0e0e0', fontWeight: 700, fontSize: 15, margin: 0, fontFamily: 'Inter, sans-serif' }}>
+          <p style={{ color: '#f0f2f4', fontWeight: 700, fontSize: 16, margin: 0, fontFamily: 'DM Sans, sans-serif', letterSpacing: '0.01em' }}>
             {title}
           </p>
           {subtitle && (
-            <p style={{ color: '#797D80', fontSize: 11, margin: '3px 0 0', fontWeight: 400, fontFamily: 'Inter, sans-serif' }}>
+            <p style={{ color: '#797D80', fontSize: 15, margin: '6px 0 0', fontWeight: 400, fontFamily: 'DM Sans, sans-serif', lineHeight: 1.6 }}>
               {subtitle}
             </p>
           )}
@@ -163,7 +163,7 @@ function ChartCard({ title, subtitle, question, tag, tagColor, insight, children
             whiteSpace: 'nowrap',
             marginLeft: 12,
             flexShrink: 0,
-            fontFamily: 'Inter, sans-serif',
+            fontFamily: 'DM Sans, sans-serif',
           }}
         >
           {tag}
@@ -188,82 +188,21 @@ function ChartCard({ title, subtitle, question, tag, tagColor, insight, children
 
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function TrendCharts({ transforms }) {
-  const {
-    sentimentTrend,
-    familiarityTrend,
-    frequencyTrend,
-    importanceTrend,
-    confidenceTrend,
-  } = transforms;
+  const { frequencyTrend, familiarityTrend } = transforms;
 
-  // ── 1. Sentiment ─────────────────────────────────────────────────────────
-  const sentimentData = ['Jan–Feb 2025', 'Aug–Sep 2025', 'Mar 2026'].map((period, i) => {
-    const key = ['s1', 's2', 's3'][i];
-    const row = { period };
-    for (const entry of sentimentTrend) {
-      row[entry.sentiment] = entry[key]?.pct ?? 0;
-    }
-    return row;
-  });
-  const showUnsure = sentimentData.some(d => (d['Unsure'] ?? 0) > 0);
-
-  // ── 2. Familiarity avg ────────────────────────────────────────────────────
-  const familiarityData = familiarityTrend.map(s => ({
-    period: s.period,
-    'Avg Score': s.avg ?? 0,
-  }));
-  const famDomain = autoDomain(familiarityData.map(d => d['Avg Score']), 0.25, 1, 5);
-
-  // ── 3. Frequency (Daily vs Never) ─────────────────────────────────────────
+  // ── Frequency (Daily vs Never) — the "too dramatic to hide" chart ──────────
   const frequencyData = frequencyTrend.map(s => {
     const daily = s.distribution.find(d => d.label === 'Daily')?.pct ?? 0;
     const never = s.distribution.find(d => d.label === 'Never')?.pct ?? 0;
     return { period: s.period, 'Daily Use': daily, 'Never': never };
   });
-
-  // ── 4. Importance avg ────────────────────────────────────────────────────
-  const importanceData = importanceTrend.map(s => ({
-    period: s.period,
-    'Avg Score': s.avg ?? 0,
-  }));
-  const impDomain = autoDomain(importanceData.map(d => d['Avg Score']), 0.25, 1, 5);
-
-  // ── 5. Confidence — normalized to "Confident or Higher" (score >= 3) ─────
-  const confidenceData = confidenceTrend.map(s => ({
-    period: s.period,
-    'Confident or Higher': s.distribution
-      .filter(d => d.score >= 3)
-      .reduce((sum, d) => sum + d.pct, 0),
-  }));
-  const confDomain = autoDomain(
-    confidenceData.map(d => d['Confident or Higher']),
-    5, 0, 100
-  );
-
-  // ── Computed insight values ────────────────────────────────────────────────
-  const s1PosPct   = sentimentData[0]?.['Positive'] ?? 0;
-  const s3PosPct   = sentimentData[2]?.['Positive'] ?? 0;
-  const s1NegPct   = sentimentData[0]?.['Negative'] ?? 0;
-  const s3NegPct   = sentimentData[2]?.['Negative'] ?? 0;
-
-  const s1FamAvg   = familiarityData[0]?.['Avg Score'] ?? 0;
-  const s3FamAvg   = familiarityData[2]?.['Avg Score'] ?? 0;
-  const famChange  = (s3FamAvg - s1FamAvg).toFixed(1);
-
-  const s1Daily    = frequencyData[0]?.['Daily Use'] ?? 0;
-  const s3Daily    = frequencyData[2]?.['Daily Use'] ?? 0;
-  const s1Never    = frequencyData[0]?.['Never'] ?? 0;
-  const s3Never    = frequencyData[2]?.['Never'] ?? 0;
-
-  const s1ImpAvg   = importanceData[0]?.['Avg Score'] ?? 0;
-  const s3ImpAvg   = importanceData[2]?.['Avg Score'] ?? 0;
-  const impChange  = (s3ImpAvg - s1ImpAvg).toFixed(1);
-
-  const s1ConfPct  = confidenceData[0]?.['Confident or Higher'] ?? 0;
-  const s3ConfPct  = confidenceData[2]?.['Confident or Higher'] ?? 0;
+  const s1Daily = frequencyData[0]?.['Daily Use'] ?? 0;
+  const s3Daily = frequencyData[2]?.['Daily Use'] ?? 0;
+  const s1Never = frequencyData[0]?.['Never'] ?? 0;
+  const s3Never = frequencyData[2]?.['Never'] ?? 0;
 
   return (
-    <section id="trends" style={{ maxWidth: 1140, margin: '0 auto', padding: '80px 24px' }}>
+    <section id="trends" style={{ maxWidth: 1360, margin: '0 auto', padding: '80px 32px' }}>
 
       {/* Section header */}
       <motion.div
@@ -271,173 +210,157 @@ export default function TrendCharts({ transforms }) {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.5 }}
-        style={{ marginBottom: 44, textAlign: 'center' }}
+        style={{ marginBottom: 56, textAlign: 'center' }}
       >
         <p style={{
           color: '#7DE69B', fontSize: 11, fontWeight: 700,
-          letterSpacing: '0.12em', textTransform: 'uppercase',
-          marginBottom: 10, fontFamily: 'Inter, sans-serif',
+          letterSpacing: '0.13em', textTransform: 'uppercase',
+          marginBottom: 12, fontFamily: 'DM Sans, sans-serif',
         }}>
           14-Month Trend
         </p>
         <h2 style={{
-          color: '#e0e0e0', fontSize: 'clamp(28px, 4vw, 40px)',
-          fontWeight: 900, margin: 0, fontFamily: 'Inter, sans-serif', lineHeight: 1.15,
+          color: '#f0f2f4', fontSize: 'clamp(30px, 4vw, 44px)',
+          fontWeight: 800, margin: '0 0 16px', fontFamily: "'Plus Jakarta Sans', sans-serif",
+          lineHeight: 1.1, letterSpacing: '-0.025em',
         }}>
-          The Trend Lines Tell the Story
+          The Numbers Tell the Story
         </h2>
+        <p style={{
+          margin: 0, fontSize: 16, color: '#797D80',
+          lineHeight: 1.65, fontFamily: 'DM Sans, sans-serif',
+          maxWidth: 540, marginInline: 'auto',
+        }}>
+          Four key adoption metrics — plus the single number that changes every conversation.
+        </p>
       </motion.div>
 
-      {/* Chart grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(480px, 1fr))', gap: 20 }}>
+      {/* ── Adoption Scorecard — 4 expandable metric tiles ─────────────────── */}
+      <AdoptionScorecard transforms={transforms} />
 
-        {/* ── 1. Sentiment Shift ─────────────────────────────────────────── */}
-        <ChartCard
-          title="Sentiment Shift"
-          subtitle="How the team feels about AI across all three surveys"
-          question="How would you describe your current feelings about Artificial Intelligence (AI)?"
-          tag="SENTIMENT"
-          delay={0}
-          insight={`Positive sentiment is at ${s3PosPct}% today — up from ${s1PosPct}% in Survey 1. Negative responses dropped from ${s1NegPct}% to ${s3NegPct}%. The team's relationship with AI has grown more optimistic with every wave.`}
-        >
-          <ResponsiveContainer width="100%" height={230}>
-            <LineChart data={sentimentData} margin={{ top: 4, right: 8, bottom: 20, left: -10 }}>
-              <CartesianGrid {...gridStyle} vertical={false} />
-              <XAxis dataKey="period" tick={<CustomXTick />} tickLine={false} axisLine={false} height={42} interval={0} />
-              <YAxis tick={axisStyle} tickLine={false} axisLine={false} tickFormatter={v => `${v}%`} />
-              <Tooltip content={<ChartTooltip />} />
-              <Line type="monotone" dataKey="Positive" stroke="#2EA84A" strokeWidth={2.5}
-                dot={{ r: 4, fill: '#2EA84A', strokeWidth: 0 }} activeDot={{ r: 6 }} />
-              <Line type="monotone" dataKey="Mixed" stroke="#FFCD00" strokeWidth={2.5}
-                dot={{ r: 4, fill: '#FFCD00', strokeWidth: 0 }} activeDot={{ r: 6 }} />
-              <Line type="monotone" dataKey="Negative" stroke="#E5554F" strokeWidth={2.5}
-                dot={{ r: 4, fill: '#E5554F', strokeWidth: 0 }} activeDot={{ r: 6 }} />
-              {showUnsure && (
-                <Line type="monotone" dataKey="Unsure" stroke="#59BEC9" strokeWidth={2}
-                  strokeDasharray="4 4" dot={{ r: 3, fill: '#59BEC9', strokeWidth: 0 }} activeDot={{ r: 5 }} />
-              )}
-            </LineChart>
-          </ResponsiveContainer>
-        </ChartCard>
+      {/* ── Divider before the hero chart ─────────────────────────────────── */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5 }}
+        style={{ margin: '52px 0 36px', display: 'flex', alignItems: 'center', gap: 16 }}
+      >
+        <div style={{ flex: 1, height: 1, background: 'rgba(125,230,155,0.15)' }} />
+        <span style={{
+          color: '#7DE69B', fontSize: 10, fontWeight: 700,
+          letterSpacing: '0.14em', textTransform: 'uppercase',
+          fontFamily: 'DM Sans, sans-serif', whiteSpace: 'nowrap',
+        }}>
+          The Number That Can't Be Hidden
+        </span>
+        <div style={{ flex: 1, height: 1, background: 'rgba(125,230,155,0.15)' }} />
+      </motion.div>
 
-        {/* ── 2. AI Familiarity ──────────────────────────────────────────── */}
-        <ChartCard
-          title="AI Familiarity"
-          subtitle="Average self-reported familiarity score (1–5 scale)"
-          question="How would you best describe your familiarity with AI tools and their applications in marketing & communications?"
-          tag="FAMILIARITY"
-          delay={0.1}
-          insight={`Average familiarity is now ${s3FamAvg.toFixed(1)} out of 5 — up from ${s1FamAvg.toFixed(1)} in Survey 1, a +${famChange} point climb over 14 months. The team has moved from observers to practitioners, and that trajectory shows no sign of flattening.`}
-        >
-          <ResponsiveContainer width="100%" height={230}>
-            <AreaChart data={familiarityData} margin={{ top: 4, right: 8, bottom: 20, left: -10 }}>
-              <defs>
-                <linearGradient id="familiarityGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#59BEC9" stopOpacity={0.35} />
-                  <stop offset="95%" stopColor="#59BEC9" stopOpacity={0.03} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid {...gridStyle} vertical={false} />
-              <XAxis dataKey="period" tick={<CustomXTick />} tickLine={false} axisLine={false} height={42} interval={0} />
-              <YAxis
-                tick={axisStyle} tickLine={false} axisLine={false}
-                domain={famDomain}
-                tickFormatter={v => v.toFixed(1)}
-              />
-              <Tooltip content={<ChartTooltip suffix="" />} />
-              <Area type="monotone" dataKey="Avg Score" stroke="#59BEC9" strokeWidth={2.5}
-                fill="url(#familiarityGrad)" dot={{ r: 4, fill: '#59BEC9', strokeWidth: 0 }} activeDot={{ r: 6 }} />
-            </AreaChart>
-          </ResponsiveContainer>
-        </ChartCard>
+      {/* ── Frequency of Use — hero full-width chart ──────────────────────── */}
+      <motion.div
+        initial={{ opacity: 0, y: 28 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.55, ease: 'easeOut' }}
+        style={{
+          background: 'rgba(29,77,82,0.35)',
+          border: '1px solid rgba(125,230,155,0.15)',
+          borderTop: '4px solid #7DE69B',
+          borderRadius: 18,
+          padding: '36px 44px 32px',
+        }}
+      >
+        {/* Card header */}
+        <div style={{ marginBottom: 28 }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 24 }}>
+            <div>
+              <p style={{
+                color: '#7DE69B',
+                fontSize: 'clamp(28px, 3.5vw, 40px)',
+                fontWeight: 800,
+                fontFamily: "'Plus Jakarta Sans', sans-serif",
+                letterSpacing: '-0.02em',
+                lineHeight: 1,
+                margin: '0 0 8px',
+              }}>
+                {s1Daily}% → {s3Daily}%
+              </p>
+              <p style={{
+                color: '#e0e0e0',
+                fontSize: 17,
+                fontWeight: 500,
+                fontFamily: 'DM Sans, sans-serif',
+                letterSpacing: '0.015em',
+                margin: '0 0 8px',
+              }}>
+                Daily AI use across the team — 14 months
+              </p>
+              <p style={{
+                color: '#797D80',
+                fontSize: 14,
+                fontStyle: 'italic',
+                fontFamily: 'DM Sans, sans-serif',
+                margin: 0,
+                lineHeight: 1.55,
+              }}>
+                "How often do you currently use AI tools in your work?"
+              </p>
+            </div>
+            {/* Stat callout */}
+            <div style={{
+              flexShrink: 0,
+              background: 'rgba(125,230,155,0.08)',
+              border: '1px solid rgba(125,230,155,0.2)',
+              borderRadius: 14,
+              padding: '16px 24px',
+              textAlign: 'center',
+              minWidth: 130,
+            }}>
+              <p style={{
+                color: '#7DE69B', fontSize: 32, fontWeight: 800,
+                fontFamily: "'Plus Jakarta Sans', sans-serif", margin: '0 0 4px', lineHeight: 1,
+              }}>
+                +{s3Daily - s1Daily}
+              </p>
+              <p style={{ color: '#797D80', fontSize: 13, margin: 0, fontFamily: 'DM Sans, sans-serif', letterSpacing: '0.03em' }}>
+                percentage points<br />in 14 months
+              </p>
+            </div>
+          </div>
+        </div>
 
-        {/* ── 3. Frequency of Use ────────────────────────────────────────── */}
-        <ChartCard
-          title="Frequency of Use"
-          subtitle="Daily users growing; non-users declining"
-          question="How often do you currently use AI tools in your work?"
-          tag="FREQUENCY"
-          delay={0.2}
-          insight={`Daily use climbed from ${s1Daily}% in Survey 1 to ${s3Daily}% today. Respondents who never use AI dropped from ${s1Never}% to ${s3Never}%. The gap between daily users and non-users is closing fast — a clear sign of organic adoption taking hold.`}
-        >
-          <ResponsiveContainer width="100%" height={230}>
-            <LineChart data={frequencyData} margin={{ top: 4, right: 8, bottom: 20, left: -10 }}>
-              <CartesianGrid {...gridStyle} vertical={false} />
-              <XAxis dataKey="period" tick={<CustomXTick />} tickLine={false} axisLine={false} height={42} interval={0} />
-              <YAxis tick={axisStyle} tickLine={false} axisLine={false} tickFormatter={v => `${v}%`} />
-              <Tooltip content={<ChartTooltip />} />
-              <Line type="monotone" dataKey="Daily Use" stroke="#7DE69B" strokeWidth={2.5}
-                dot={{ r: 4, fill: '#7DE69B', strokeWidth: 0 }} activeDot={{ r: 6 }} />
-              <Line type="monotone" dataKey="Never" stroke="#E5554F" strokeWidth={2}
-                strokeDasharray="5 4" dot={{ r: 4, fill: '#E5554F', strokeWidth: 0 }} activeDot={{ r: 6 }} />
-            </LineChart>
-          </ResponsiveContainer>
-        </ChartCard>
+        {/* Chart */}
+        <ResponsiveContainer width="100%" height={320}>
+          <LineChart data={frequencyData} margin={{ top: 4, right: 8, bottom: 20, left: -10 }}>
+            <CartesianGrid {...gridStyle} vertical={false} />
+            <XAxis dataKey="period" tick={<CustomXTick />} tickLine={false} axisLine={false} height={42} interval={0} />
+            <YAxis tick={axisStyle} tickLine={false} axisLine={false} tickFormatter={v => `${v}%`} />
+            <Tooltip content={<ChartTooltip />} />
+            <Line type="monotone" dataKey="Daily Use" stroke="#7DE69B" strokeWidth={3}
+              dot={{ r: 5, fill: '#7DE69B', strokeWidth: 0 }} activeDot={{ r: 7 }} />
+            <Line type="monotone" dataKey="Never" stroke="#E5554F" strokeWidth={2}
+              strokeDasharray="5 4" dot={{ r: 4, fill: '#E5554F', strokeWidth: 0 }} activeDot={{ r: 6 }} />
+          </LineChart>
+        </ResponsiveContainer>
 
-        {/* ── 4. Importance to Role ──────────────────────────────────────── */}
-        <ChartCard
-          title="Importance to Role"
-          subtitle="Average rated importance of AI to their job (1–5 scale)"
-          question="How important is AI to the success of your individual or team work over the next 12 months?"
-          tag="IMPORTANCE"
-          delay={0.3}
-          insight={`Rated importance reached ${s3ImpAvg.toFixed(1)} out of 5 in Survey 3 — up from ${s1ImpAvg.toFixed(1)} in Survey 1, a +${impChange} point increase. The department no longer sees AI as optional. That conviction is the engine behind sustained adoption.`}
-        >
-          <ResponsiveContainer width="100%" height={230}>
-            <AreaChart data={importanceData} margin={{ top: 4, right: 8, bottom: 20, left: -10 }}>
-              <defs>
-                <linearGradient id="importanceGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#2EA84A" stopOpacity={0.35} />
-                  <stop offset="95%" stopColor="#2EA84A" stopOpacity={0.03} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid {...gridStyle} vertical={false} />
-              <XAxis dataKey="period" tick={<CustomXTick />} tickLine={false} axisLine={false} height={42} interval={0} />
-              <YAxis
-                tick={axisStyle} tickLine={false} axisLine={false}
-                domain={impDomain}
-                tickFormatter={v => v.toFixed(1)}
-              />
-              <Tooltip content={<ChartTooltip suffix="" />} />
-              <Area type="monotone" dataKey="Avg Score" stroke="#2EA84A" strokeWidth={2.5}
-                fill="url(#importanceGrad)" dot={{ r: 4, fill: '#2EA84A', strokeWidth: 0 }} activeDot={{ r: 6 }} />
-            </AreaChart>
-          </ResponsiveContainer>
-        </ChartCard>
-
-        {/* ── 5. Confidence Over Time ────────────────────────────────────── */}
-        <ChartCard
-          title="Confidence Over Time"
-          subtitle="% rating themselves Confident or higher (normalized across survey scales)"
-          question="How confident are you today in your ability to use AI tools effectively in your role?"
-          tag="CONFIDENCE"
-          delay={0.4}
-          insight={`${s3ConfPct}% of the team now rates themselves Confident or higher — up from ${s1ConfPct}% in Survey 1. That ${s3ConfPct - s1ConfPct}-point gain matters: confidence is what turns occasional users into daily practitioners.`}
-        >
-          <ResponsiveContainer width="100%" height={230}>
-            <AreaChart data={confidenceData} margin={{ top: 4, right: 8, bottom: 20, left: -10 }}>
-              <defs>
-                <linearGradient id="confidenceGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#FFCD00" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#FFCD00" stopOpacity={0.03} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid {...gridStyle} vertical={false} />
-              <XAxis dataKey="period" tick={<CustomXTick />} tickLine={false} axisLine={false} height={42} interval={0} />
-              <YAxis
-                tick={axisStyle} tickLine={false} axisLine={false}
-                domain={confDomain}
-                tickFormatter={v => `${Math.round(v)}%`}
-              />
-              <Tooltip content={<ChartTooltip />} />
-              <Area type="monotone" dataKey="Confident or Higher" stroke="#FFCD00" strokeWidth={2.5}
-                fill="url(#confidenceGrad)" dot={{ r: 4, fill: '#FFCD00', strokeWidth: 0 }} activeDot={{ r: 6 }} />
-            </AreaChart>
-          </ResponsiveContainer>
-        </ChartCard>
-
-
-      </div>
+        {/* Insight callout */}
+        <div style={{
+          marginTop: 20,
+          padding: '12px 16px',
+          borderLeft: '3px solid rgba(125,230,155,0.55)',
+          background: 'rgba(125,230,155,0.06)',
+          borderRadius: '0 10px 10px 0',
+        }}>
+          <p style={{
+            color: 'rgba(224,224,224,0.85)', fontSize: 15, fontStyle: 'italic',
+            margin: 0, lineHeight: 1.7, fontFamily: 'DM Sans, sans-serif',
+          }}>
+            <span style={{ color: '#7DE69B', fontWeight: 700, fontStyle: 'normal', marginRight: 6, letterSpacing: '0.02em' }}>What this tells us:</span>
+            {`Daily use climbed from ${s1Daily}% in Survey 1 to ${s3Daily}% today — a ${s3Daily - s1Daily}-point leap in 14 months. Respondents who never use AI dropped from ${s1Never}% to ${s3Never}%. This is organic adoption, not mandated compliance. The team moved itself.`}
+          </p>
+        </div>
+      </motion.div>
 
       {/* ── Adoption Bell Curve (S1 → S2 → S3, shifting left) ───────────── */}
       <motion.div

@@ -12,21 +12,21 @@ const CHAPTERS = [
     dateRange: 'Jan 30 – Feb 10, 2025',
     watermark: '01',
     title: 'The Baseline',
-    narrative: `When we launched the first AI Pulse Survey in January 2025, just over half the team reported positive feelings about AI, and 42% were using it daily. Confidence averaged 3.6 out of 5 — solid, but with room to grow. Curiosity was the dominant theme: people were interested and experimenting, but barriers like limited training, access gaps, and uncertainty about what was allowed were still slowing adoption.`,
+    narrative: `January 2025 was day one of two things at once: the baseline survey, and the launch of the transformation effort itself. A formal AI training program was underway. Enterprise subscriptions for ChatGPT, Jasper, Gemini, Copilot, and Adobe Firefly were being provisioned. The guiding philosophy — "Human-first, AI-forward" — had just been introduced. The survey captured the team at the starting line: curious, cautiously optimistic, 42% already using AI daily, but still navigating real barriers around training, access, and clarity about what was allowed.`,
   },
   {
     waveLabel: 'WAVE 02',
     dateRange: 'Aug 27 – Sept 12, 2025',
     watermark: '02',
     title: 'The Momentum',
-    narrative: `By August, something had shifted. Daily usage nearly doubled — jumping from 42% to 85% — as AI moved from something team members explored to something they relied on. Positive sentiment climbed to 67%, and the range of tools in use expanded well beyond the company's endorsed subscriptions. The introduction of AI journey stages in this survey told a nuanced story: experimentation had given way to integration, and integration was starting to look like transformation.`,
+    narrative: `Eight months of deliberate work showed up in the numbers. Daily usage nearly doubled — from 42% to 85% — as AI moved from something people explored to something they depended on. The cohort feeling "not confident at all" was completely eliminated. Positive sentiment climbed to 67%. And the range of tools in use had expanded well beyond the company's endorsed subscriptions — a sign that people weren't just following the program. They were running ahead of it.`,
   },
   {
     waveLabel: 'WAVE 03',
     dateRange: 'Mar 18 – Mar 30, 2026',
     watermark: '03',
     title: 'The New Normal',
-    narrative: `Fourteen months in, AI is woven into the daily rhythm of how this team works. 92% of respondents use it every day — a figure that would have seemed ambitious at the start. Positive sentiment held strong at 69%, and confidence continued climbing. Survey 3 introduced new questions that revealed the full picture: for the first time, role and function data shows exactly who is using AI and how deeply. Benefits data confirms that time savings and quality improvements are the top outcomes. And one number stands above the rest — a significant share of the team is spending their own money on AI tools, not because they were asked to, but because they're convinced it makes their work better.`,
+    narrative: `The national average for daily AI use at work is 8%. This team is at 92%. That's not a rounding error — it's more than ten times the national benchmark, and it's the proof that "Human-first, AI-forward" wasn't just a philosophy. It became a practice. Positive sentiment held strong at 69%. Confidence kept climbing. Survey 3 introduced new questions that revealed the full picture for the first time: who is using AI, in what roles, and how deeply it has changed the way they work. Time savings and quality improvements top the list of benefits. And one number stands apart from all the rest — a significant share of the team is now spending their own money on AI tools. Not because anyone asked them to. Because they're convinced.`,
   },
 ];
 
@@ -58,9 +58,9 @@ function MiniSentimentBar({ sentimentTrend, surveyKey }) {
   return (
     <div style={{ marginTop: 24 }}>
       <div style={{
-        fontSize: 10,
+        fontSize: 12,
         color: '#797D80',
-        letterSpacing: '0.1em',
+        letterSpacing: '0.08em',
         textTransform: 'uppercase',
         marginBottom: 8,
         fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
@@ -78,7 +78,7 @@ function MiniSentimentBar({ sentimentTrend, surveyKey }) {
           pct > 0 ? (
             <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
               <div style={{ width: 6, height: 6, borderRadius: 2, background: color, flexShrink: 0 }} />
-              <span style={{ fontSize: 10, color: '#797D80', fontFamily: 'Inter, sans-serif' }}>
+              <span style={{ fontSize: 12, color: '#797D80', fontFamily: 'DM Sans, sans-serif' }}>
                 {label} {pct}%
               </span>
             </div>
@@ -111,11 +111,11 @@ function StatPill({ value, label, accentColor, delta }) {
       }}>
         <div style={{
           fontSize: 44,
-          fontWeight: 900,
+          fontWeight: 800,
           color: accentColor,
           lineHeight: 1,
           letterSpacing: '-0.02em',
-          fontFamily: 'Inter, sans-serif',
+          fontFamily: "'Plus Jakarta Sans', sans-serif",
         }}>
           {value}
         </div>
@@ -131,7 +131,8 @@ function StatPill({ value, label, accentColor, delta }) {
             border: `1px solid ${delta >= 0 ? 'rgba(46,168,74,0.25)' : 'rgba(229,85,79,0.25)'}`,
             borderRadius: 6,
             padding: '3px 8px',
-            fontFamily: 'Inter, sans-serif',
+            fontFamily: 'DM Sans, sans-serif',
+            letterSpacing: '0.02em',
             marginBottom: 7,
             flexShrink: 0,
           }}>
@@ -140,11 +141,11 @@ function StatPill({ value, label, accentColor, delta }) {
         )}
       </div>
       <div style={{
-        fontSize: 11,
+        fontSize: 13,
         color: 'var(--text-support)',
         textTransform: 'uppercase',
-        letterSpacing: '0.08em',
-        fontFamily: 'Inter, sans-serif',
+        letterSpacing: '0.07em',
+        fontFamily: 'DM Sans, sans-serif',
       }}>
         {label}
       </div>
@@ -152,14 +153,51 @@ function StatPill({ value, label, accentColor, delta }) {
   );
 }
 
-// ── Connector line between wave cards ─────────────────────────────────────────
-function ConnectorLine() {
+// ── Narrative bridge between wave cards ───────────────────────────────────────
+const BRIDGE_COPY = [
+  // Between Wave 1 → Wave 2
+  `That shift didn't happen by chance. Between January and August, a deliberate playbook was activated: an AI Council was formed, enterprise subscriptions were provisioned for every team member, hands-on role-specific workshops launched, and near-daily tips landed in team channels. A dedicated AI Sherpa was appointed to coach individuals through real blockers. The 'Invent Tomorrow' recognition program made wins visible. Curiosity, it turns out, needs infrastructure.`,
+  // Between Wave 2 → Wave 3
+  `By September 2025, the team's daily AI usage was more than ten times the national average of 8%. But the work wasn't finished — it was compounding. The six months that followed would reveal something the numbers alone couldn't capture: how personally invested people had become. Not just in their workflows. In the tools themselves.`,
+];
+
+function ConnectorLine({ index }) {
+  const copy = BRIDGE_COPY[index];
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', height: 60 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '12px 0 20px' }}>
       <div style={{
         width: 1,
-        flex: 1,
-        background: 'linear-gradient(to bottom, rgba(46,168,74,0.3), rgba(125,230,155,0.2))',
+        height: 32,
+        background: 'linear-gradient(to bottom, rgba(46,168,74,0.3), rgba(125,230,155,0.15))',
+        marginBottom: 28,
+      }} />
+      {copy && (
+        <motion.p
+          initial={{ opacity: 0, y: 8 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+          style={{
+            color: '#b0b8c0',
+            fontSize: 16,
+            fontWeight: 400,
+            fontStyle: 'italic',
+            lineHeight: 1.75,
+            textAlign: 'center',
+            maxWidth: 560,
+            margin: '0 auto',
+            fontFamily: 'DM Sans, sans-serif',
+            padding: '0 24px',
+          }}
+        >
+          {copy.replace(/\s+/g, ' ').trim()}
+        </motion.p>
+      )}
+      <div style={{
+        width: 1,
+        height: 32,
+        background: 'linear-gradient(to bottom, rgba(125,230,155,0.15), rgba(46,168,74,0.3))',
+        marginTop: 28,
       }} />
     </div>
   );
@@ -231,41 +269,44 @@ export default function GrowthStory({ transforms, presentationWave }) {
   return (
     <section style={{
       padding: presentationWave !== undefined && presentationWave !== null ? '48px 48px' : '80px 48px',
-      maxWidth: 1100,
+      maxWidth: 1360,
       margin: '0 auto',
       boxSizing: 'border-box',
       width: '100%',
     }}>
       {/* Section header — hidden in presentation mode (single-wave slides) */}
       {(presentationWave === undefined || presentationWave === null) && (
-        <div style={{ textAlign: 'center', marginBottom: 80 }}>
+        <div style={{ textAlign: 'center', marginBottom: 72 }}>
           <div style={{
-            fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+            fontFamily: 'DM Sans, sans-serif',
             fontSize: 11,
+            fontWeight: 700,
             color: '#7DE69B',
-            letterSpacing: '0.22em',
+            letterSpacing: '0.13em',
             textTransform: 'uppercase',
-            marginBottom: 16,
+            marginBottom: 12,
           }}>
-            01  —  The Journey
+            The Journey
           </div>
           <h2 style={{
-            fontSize: 40,
+            fontSize: 'clamp(30px, 4vw, 44px)',
             fontWeight: 800,
-            color: '#ffffff',
-            letterSpacing: '-0.02em',
-            margin: 0,
-            fontFamily: 'Inter, sans-serif',
+            color: '#f0f2f4',
+            letterSpacing: '-0.025em',
+            lineHeight: 1.1,
+            margin: '0 0 16px',
+            fontFamily: "'Plus Jakarta Sans', sans-serif",
           }}>
             Three Waves, One Story
           </h2>
           <p style={{
-            color: 'var(--text-support)',
-            fontSize: 15,
-            marginTop: 12,
-            fontFamily: 'Inter, sans-serif',
+            color: '#797D80',
+            fontSize: 16,
+            lineHeight: 1.65,
+            margin: 0,
+            fontFamily: 'DM Sans, sans-serif',
           }}>
-            How AI adoption evolved across Baptist Health MarCom
+            How AI adoption evolved across Baptist Health MarCom — January 2025 to March 2026
           </p>
         </div>
       )}
@@ -294,7 +335,7 @@ export default function GrowthStory({ transforms, presentationWave }) {
                 position: 'relative',
                 overflow: 'hidden',
                 display: 'flex',
-                gap: 64,
+                gap: 80,
                 alignItems: 'flex-start',
                 boxShadow: '0 2px 40px rgba(0,0,0,0.35)',
               }}
@@ -302,7 +343,7 @@ export default function GrowthStory({ transforms, presentationWave }) {
               {/* Watermark number */}
               <div style={{
                 fontSize: 160,
-                fontWeight: 900,
+                fontWeight: 800,
                 color: 'rgba(125,230,155,0.05)',
                 position: 'absolute',
                 right: -10,
@@ -310,7 +351,7 @@ export default function GrowthStory({ transforms, presentationWave }) {
                 lineHeight: 1,
                 userSelect: 'none',
                 pointerEvents: 'none',
-                fontFamily: 'Inter, sans-serif',
+                fontFamily: "'Plus Jakarta Sans', sans-serif",
               }}>
                 {chapter.watermark}
               </div>
@@ -335,7 +376,7 @@ export default function GrowthStory({ transforms, presentationWave }) {
                     border: '1px solid rgba(125,230,155,0.12)',
                     borderRadius: 6,
                     padding: '4px 10px',
-                    fontFamily: 'Inter, sans-serif',
+                    fontFamily: 'DM Sans, sans-serif',
                   }}>
                     {chapter.dateRange}
                   </div>
@@ -349,7 +390,7 @@ export default function GrowthStory({ transforms, presentationWave }) {
                   letterSpacing: '-0.02em',
                   marginTop: 10,
                   marginBottom: 0,
-                  fontFamily: 'Inter, sans-serif',
+                  fontFamily: "'Plus Jakarta Sans', sans-serif",
                   textShadow: '0 0 30px rgba(125,230,155,0.1)',
                 }}>
                   {chapter.title}
@@ -357,13 +398,13 @@ export default function GrowthStory({ transforms, presentationWave }) {
 
                 {/* Narrative — full paragraph */}
                 <p style={{
-                  fontSize: 14.5,
+                  fontSize: 16,
                   color: 'var(--text-support)',
                   fontWeight: 400,
                   lineHeight: 1.75,
                   maxWidth: 520,
                   marginTop: 14,
-                  fontFamily: 'Inter, sans-serif',
+                  fontFamily: 'DM Sans, sans-serif',
                 }}>
                   {chapter.narrative}
                 </p>
@@ -377,7 +418,7 @@ export default function GrowthStory({ transforms, presentationWave }) {
                 display: 'grid',
                 gridTemplateColumns: 'repeat(2, 1fr)',
                 gap: 12,
-                minWidth: i === 2 ? 320 : 300,
+                minWidth: i === 2 ? 480 : 440,
                 flexShrink: 0,
                 position: 'relative',
                 zIndex: 1,
@@ -396,10 +437,42 @@ export default function GrowthStory({ transforms, presentationWave }) {
             </motion.div>
 
             {/* Connector between chapters — only in normal scroll mode */}
-            {(presentationWave === undefined || presentationWave === null) && i < CHAPTERS.length - 1 && <ConnectorLine />}
+            {(presentationWave === undefined || presentationWave === null) && i < CHAPTERS.length - 1 && <ConnectorLine index={i} />}
           </div>
         );
       })}
+
+      {/* Closing bridge — transitions into ConvictionMoment */}
+      {(presentationWave === undefined || presentationWave === null) && (
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.55, ease: 'easeOut' }}
+          style={{ textAlign: 'center', padding: '48px 24px 16px', maxWidth: 600, margin: '0 auto' }}
+        >
+          <div style={{
+            width: 1,
+            height: 40,
+            background: 'linear-gradient(to bottom, rgba(125,230,155,0.2), rgba(229,85,79,0.3))',
+            margin: '0 auto 32px',
+          }} />
+          <p style={{
+            color: '#b0b8c0',
+            fontSize: 17,
+            fontWeight: 400,
+            fontStyle: 'italic',
+            lineHeight: 1.75,
+            fontFamily: 'DM Sans, sans-serif',
+            margin: 0,
+          }}>
+            The national average for daily AI use at work is 8%. This team reached 92%.
+            That gap — more than ten times the national benchmark — is the direct result
+            of leadership that modeled the change, built the infrastructure, and trusted
+            a team of 117 to run with it. What comes next is the number that proves it wasn't top-down.
+          </p>
+        </motion.div>
+      )}
     </section>
   );
 }

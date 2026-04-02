@@ -113,7 +113,7 @@ export default function ConvictionMoment({ transforms }) {
         background: 'linear-gradient(90deg, transparent, rgba(229,85,79,0.2), transparent)',
       }} />
 
-      <div style={{ position: 'relative', zIndex: 1, maxWidth: 680, width: '100%' }}>
+      <div style={{ position: 'relative', zIndex: 1, maxWidth: 900, width: '100%' }}>
 
         {/* Eyebrow label */}
         <motion.div
@@ -141,11 +141,11 @@ export default function ConvictionMoment({ transforms }) {
           transition={{ duration: 0.6, delay: 0.1 }}
           style={{
             fontSize: 'clamp(96px, 18vw, 160px)',
-            fontWeight: 900,
+            fontWeight: 800,
             color: '#E5554F',
             lineHeight: 1,
             letterSpacing: '-0.04em',
-            fontFamily: 'Inter, sans-serif',
+            fontFamily: "'Plus Jakarta Sans', sans-serif",
             textShadow: '0 0 60px rgba(229,85,79,0.35)',
           }}
         >
@@ -162,7 +162,8 @@ export default function ConvictionMoment({ transforms }) {
             fontSize: 'clamp(18px, 3vw, 24px)',
             fontWeight: 600,
             color: 'rgba(255,255,255,0.9)',
-            fontFamily: 'Inter, sans-serif',
+            fontFamily: 'DM Sans, sans-serif',
+            letterSpacing: '0.01em',
             lineHeight: 1.45,
             margin: '20px 0 12px',
           }}
@@ -180,7 +181,7 @@ export default function ConvictionMoment({ transforms }) {
           style={{
             fontSize: 15,
             color: 'var(--text-support)',
-            fontFamily: 'Inter, sans-serif',
+            fontFamily: 'DM Sans, sans-serif',
             lineHeight: 1.7,
             margin: '0 0 40px',
             maxWidth: 520,
@@ -219,7 +220,7 @@ export default function ConvictionMoment({ transforms }) {
                   fontStyle: 'italic',
                   lineHeight: 1.75,
                   color: 'rgba(255,255,255,0.6)',
-                  fontFamily: 'Inter, sans-serif',
+                  fontFamily: 'DM Sans, sans-serif',
                 }}
               >
                 "{quotes[quoteIdx]}"
@@ -230,7 +231,7 @@ export default function ConvictionMoment({ transforms }) {
             marginTop: 12,
             fontSize: 11,
             color: 'rgba(229,85,79,0.5)',
-            fontFamily: 'Inter, sans-serif',
+            fontFamily: 'DM Sans, sans-serif',
             fontWeight: 500,
             letterSpacing: '0.06em',
           }}>

@@ -33,7 +33,7 @@ function ScatterTooltip({ active, payload }) {
       border: '1px solid rgba(125,230,155,0.2)',
       borderRadius: 8,
       padding: '8px 12px',
-      fontFamily: 'Inter, sans-serif',
+      fontFamily: 'DM Sans, sans-serif',
       fontSize: 11,
       color: '#e0e0e0',
       lineHeight: 1.6,
@@ -56,7 +56,7 @@ function QuadLabel({ style, text, color }) {
       color,
       textTransform: 'uppercase',
       opacity: 0.5,
-      fontFamily: 'Inter, sans-serif',
+      fontFamily: 'DM Sans, sans-serif',
       pointerEvents: 'none',
       lineHeight: 1.3,
       textAlign: 'center',
@@ -67,7 +67,7 @@ function QuadLabel({ style, text, color }) {
   );
 }
 
-const axisStyle = { fill: '#797D80', fontSize: 10, fontFamily: 'Inter, sans-serif' };
+const axisStyle = { fill: '#797D80', fontSize: 10, fontFamily: 'DM Sans, sans-serif' };
 const gridStyle = { stroke: 'rgba(125,230,155,0.07)', strokeDasharray: '3 3' };
 
 export default function SlideTeam({ surveys, transforms }) {
@@ -131,7 +131,7 @@ export default function SlideTeam({ surveys, transforms }) {
         </div>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 16 }}>
           <h2 style={{
-            fontFamily: 'Inter, sans-serif',
+            fontFamily: 'DM Sans, sans-serif',
             fontSize: 24,
             fontWeight: 800,
             color: '#ffffff',
@@ -140,7 +140,7 @@ export default function SlideTeam({ surveys, transforms }) {
           }}>
             Confidence × Importance
           </h2>
-          <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#797D80' }}>
+          <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: '#797D80' }}>
             {scatterData.length} respondents · colored by role
           </span>
         </div>
@@ -174,13 +174,13 @@ export default function SlideTeam({ surveys, transforms }) {
                 type="number" dataKey="x"
                 name="Importance" domain={[0.5, 5.5]}
                 tick={axisStyle} tickLine={false} axisLine={false}
-                label={{ value: 'Importance to Role →', position: 'insideBottom', offset: -12, fill: '#797D80', fontSize: 10, fontFamily: 'Inter' }}
+                label={{ value: 'Importance to Role →', position: 'insideBottom', offset: -12, fill: '#797D80', fontSize: 10, fontFamily: 'DM Sans' }}
               />
               <YAxis
                 type="number" dataKey="y"
                 name="Confidence" domain={[0.5, 5.5]}
                 tick={axisStyle} tickLine={false} axisLine={false}
-                label={{ value: 'Confidence →', angle: -90, position: 'insideLeft', offset: 16, fill: '#797D80', fontSize: 10, fontFamily: 'Inter' }}
+                label={{ value: 'Confidence →', angle: -90, position: 'insideLeft', offset: 16, fill: '#797D80', fontSize: 10, fontFamily: 'DM Sans' }}
               />
               <ReferenceLine x={3} stroke="rgba(125,230,155,0.12)" strokeDasharray="4 4" />
               <ReferenceLine y={3} stroke="rgba(125,230,155,0.12)" strokeDasharray="4 4" />
@@ -216,10 +216,10 @@ export default function SlideTeam({ surveys, transforms }) {
             padding: '14px 16px',
             flexShrink: 0,
           }}>
-            <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 28, fontWeight: 900, color: '#7DE69B', lineHeight: 1 }}>
+            <div style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 28, fontWeight: 900, color: '#7DE69B', lineHeight: 1 }}>
               {readyPct}%
             </div>
-            <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#797D80', marginTop: 4 }}>
+            <div style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: '#797D80', marginTop: 4 }}>
               of respondents are in the "Ready to Lead" quadrant (Importance ≥ 3 + Confidence ≥ 3)
             </div>
           </div>
@@ -252,10 +252,10 @@ export default function SlideTeam({ surveys, transforms }) {
                   background: roleColor(role, allRoles),
                   flexShrink: 0,
                 }} />
-                <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#c0c8d0', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: '#c0c8d0', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {role}
                 </span>
-                <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, color: '#797D80', flexShrink: 0 }}>
+                <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: '#797D80', flexShrink: 0 }}>
                   n={points.length}
                 </span>
               </div>
@@ -287,8 +287,8 @@ export default function SlideTeam({ surveys, transforms }) {
               <div key={q.label} style={{ display: 'flex', gap: 7, marginBottom: 6 }}>
                 <div style={{ width: 7, height: 7, borderRadius: 2, background: q.color, marginTop: 2, flexShrink: 0 }} />
                 <div>
-                  <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 700, color: q.color }}>{q.label}</span>
-                  <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, color: '#797D80' }}> — {q.desc}</span>
+                  <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 10, fontWeight: 700, color: q.color }}>{q.label}</span>
+                  <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: '#797D80' }}> — {q.desc}</span>
                 </div>
               </div>
             ))}

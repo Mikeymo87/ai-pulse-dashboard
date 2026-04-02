@@ -109,7 +109,7 @@ const SEGMENTS = [
 ];
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
-const FONT = 'Inter, sans-serif';
+const FONT = 'DM Sans, sans-serif';
 
 const waveBtn = (active) => ({
   padding: '7px 16px',

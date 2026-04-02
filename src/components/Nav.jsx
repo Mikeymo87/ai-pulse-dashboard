@@ -1,6 +1,13 @@
 import { motion } from 'framer-motion';
 
-export default function Nav({ onOpenChat, onPresent }) {
+const TABS = [
+  { id: 'story',      label: 'The Story' },
+  { id: 'numbers',    label: 'The Numbers' },
+  { id: 'team',       label: 'The Team' },
+  { id: 'whats-next', label: "What's Next" },
+];
+
+export default function Nav({ onOpenChat, onPresent, activeTab, onTabChange }) {
   return (
     <div style={{
       position: 'sticky',
@@ -17,7 +24,7 @@ export default function Nav({ onOpenChat, onPresent }) {
       boxSizing: 'border-box',
     }}>
       {/* Left — brand */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 0, flexShrink: 0 }}>
         <motion.div
           animate={{ opacity: [0.7, 1, 0.7] }}
           transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
@@ -34,8 +41,8 @@ export default function Nav({ onOpenChat, onPresent }) {
           fontSize: 14,
           fontWeight: 700,
           color: '#ffffff',
-          letterSpacing: '-0.01em',
-          fontFamily: 'Inter, sans-serif',
+          letterSpacing: '0.01em',
+          fontFamily: 'DM Sans, sans-serif',
           marginLeft: 10,
         }}>
           Baptist Health
@@ -54,14 +61,67 @@ export default function Nav({ onOpenChat, onPresent }) {
           fontWeight: 500,
           color: '#7DE69B',
           letterSpacing: '0.01em',
-          fontFamily: 'Inter, sans-serif',
+          fontFamily: 'DM Sans, sans-serif',
         }}>
           AI Pulse
         </span>
       </div>
 
+      {/* Center — tab navigation */}
+      <div style={{
+        position: 'absolute',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 4,
+      }}>
+        {TABS.map(tab => {
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => onTabChange(tab.id)}
+              style={{
+                position: 'relative',
+                padding: '6px 16px',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                fontFamily: 'DM Sans, sans-serif',
+                fontSize: 13,
+                fontWeight: isActive ? 600 : 400,
+                color: isActive ? '#7DE69B' : '#797D80',
+                letterSpacing: isActive ? '0.025em' : '0.01em',
+                transition: 'color 0.2s',
+                outline: 'none',
+              }}
+              onMouseEnter={e => { if (!isActive) e.currentTarget.style.color = '#b0b5b8'; }}
+              onMouseLeave={e => { if (!isActive) e.currentTarget.style.color = '#797D80'; }}
+            >
+              {tab.label}
+              {isActive && (
+                <motion.div
+                  layoutId="tab-indicator"
+                  style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 8,
+                    right: 8,
+                    height: 2,
+                    background: '#7DE69B',
+                    borderRadius: 1,
+                  }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 35 }}
+                />
+              )}
+            </button>
+          );
+        })}
+      </div>
+
       {/* Right — Ask AI button + survey label */}
-      <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 16 }}>
+      <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 16, flexShrink: 0 }}>
         <span style={{
           fontSize: 11,
           color: '#797D80',
@@ -86,11 +146,11 @@ export default function Nav({ onOpenChat, onPresent }) {
             border: '1px solid rgba(99,102,241,0.3)',
             borderRadius: 20,
             cursor: 'pointer',
-            fontFamily: 'Inter, sans-serif',
+            fontFamily: 'DM Sans, sans-serif',
             fontSize: 12,
             fontWeight: 600,
             color: '#a5b4fc',
-            letterSpacing: '0.01em',
+            letterSpacing: '0.03em',
             transition: 'background 0.2s',
           }}
           onMouseEnter={e => e.currentTarget.style.background = 'rgba(99,102,241,0.22)'}
@@ -113,11 +173,11 @@ export default function Nav({ onOpenChat, onPresent }) {
             border: '1px solid rgba(125,230,155,0.35)',
             borderRadius: 20,
             cursor: 'pointer',
-            fontFamily: 'Inter, sans-serif',
+            fontFamily: 'DM Sans, sans-serif',
             fontSize: 12,
             fontWeight: 600,
             color: '#7DE69B',
-            letterSpacing: '0.01em',
+            letterSpacing: '0.03em',
             transition: 'background 0.2s',
           }}
           onMouseEnter={e => e.currentTarget.style.background = 'rgba(46,168,74,0.25)'}
