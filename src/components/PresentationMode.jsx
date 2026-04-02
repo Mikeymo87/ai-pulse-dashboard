@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import SlideCover    from './slides/SlideCover';
-import SlideOverview  from './slides/SlideOverview';
+import SlideCover       from './slides/SlideCover';
+import SlideOverview    from './slides/SlideOverview';
+import SlideArchetypes  from './slides/SlideArchetypes';
 import SlideWave      from './slides/SlideWave';
 import SlideTrends    from './slides/SlideTrends';
 import SlideTeam      from './slides/SlideTeam';
@@ -13,8 +14,9 @@ const SLIDES_ALL = [
   { id: 'overview',  label: 'Overview' },
   { id: 'wave-0',    label: 'Wave 01 — The Baseline' },
   { id: 'wave-1',    label: 'Wave 02 — The Momentum' },
-  { id: 'wave-2',    label: 'Wave 03 — The New Normal' },
-  { id: 'trends-a',  label: 'Trends — Adoption' },
+  { id: 'wave-2',      label: 'Wave 03 — The New Normal' },
+  { id: 'archetypes',  label: 'The Team — Five Personas' },
+  { id: 'trends-a',    label: 'Trends — Adoption' },
   { id: 'trends-b',  label: 'Trends — Readiness' },
   { id: 'trends-c',  label: 'Trends — Landscape' },
   { id: 'team',      label: 'Team Readiness' },
@@ -39,6 +41,7 @@ const SLIDE_SETS = {
     'wave-0',      // Where you started
     'wave-1',      // The momentum you built
     'wave-2',      // Where you are now
+    'archetypes',  // Five ways to be on this team
     'trends-b',    // How you feel about it — confidence, readiness
     'spotlight',   // What comes next
   ],
@@ -319,8 +322,9 @@ export default function PresentationMode({ transforms, surveys, onClose }) {
   }, [current, goTo, onClose, lens]);
 
   function renderSlide(id) {
-    if (id === 'cover')     return <SlideCover     transforms={transforms} />;
-    if (id === 'overview')  return <SlideOverview  transforms={transforms} />;
+    if (id === 'cover')      return <SlideCover      transforms={transforms} />;
+    if (id === 'overview')   return <SlideOverview   transforms={transforms} />;
+    if (id === 'archetypes') return <SlideArchetypes transforms={transforms} />;
     if (id === 'wave-0')    return <SlideWave       transforms={transforms} wave={0} />;
     if (id === 'wave-1')    return <SlideWave       transforms={transforms} wave={1} />;
     if (id === 'wave-2')    return <SlideWave       transforms={transforms} wave={2} />;
