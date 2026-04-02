@@ -1,87 +1,68 @@
-import { useRef } from 'react';
-import { motion, useInView } from 'framer-motion';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { motion } from 'framer-motion';
 
-// ─── Shared style tokens ──────────────────────────────────────────────────────
-const SURFACE = 'rgba(29,77,82,0.35)';
-const BORDER   = 'rgba(125,230,155,0.15)';
-const FONT     = 'DM Sans, sans-serif';
+// ─── Accent color per insight ID (fixed — not generated) ─────────────────────
+const ACCENT = {
+  'aspiration-gap':    '#FFCD00',
+  'tool-mindset':      '#59BEC9',
+  'leadership-voices': '#7DE69B',
+  'blocked-investors': '#E5554F',
+};
 
-// ─── Insight card definitions (static copy) ──────────────────────────────────
-// Each card receives live `data` at render time from transforms.openTextInsights.
-const CARDS = [
-  {
-    id: 'aspiration-gap',
-    number: '01',
-    label: 'ASPIRATION GAP',
-    accentColor: '#FFCD00',
-    headline: 'They write about transformation. They use it less than weekly.',
-    subhead: "Some of the most inspired responses in the dataset belong to people who aren't yet acting on what they believe. The distance between what someone imagines AI can do and how often they actually open it — that gap is the activation opportunity.",
-    statLabel: "people wrote detailed excitement about AI's potential",
-    statSuffix: 'but use it less than weekly',
-    actionLabel: 'For leadership',
-    action: "These are your highest-ROI activation targets. They already believe. The barrier isn't motivation — it's a first experience that makes the belief feel real. Remove one friction point and they convert.",
-  },
-  {
-    id: 'tool-mindset',
-    number: '02',
-    label: 'TOOL → MINDSET LINK',
-    accentColor: '#59BEC9',
-    headline: 'The tool someone chooses reveals how they think AI works.',
-    subhead: "Claude users tend to describe AI as a \"thought partner\" or \"collaborator\" — something that augments judgment. ChatGPT users tend to describe efficiency and output speed — something that accelerates production. These aren't just tool preferences. They're mental models.",
-    statLabel: null, // rendered custom
-    statSuffix: null,
-    actionLabel: 'For leadership',
-    action: 'Tool access shapes culture. If you want a department that thinks strategically about AI — not just uses it faster — consider which tools you make easy to reach for first.',
-  },
-  {
-    id: 'leadership-voices',
-    number: '03',
-    label: 'LEADERSHIP VOICES',
-    accentColor: '#7DE69B',
-    headline: "Some people's struggles aren't personal — they're managerial.",
-    subhead: "A subset of the struggle responses are about pulling colleagues forward, not about personal skill gaps. These are the informal adoption leaders — managers and senior contributors already doing the culture work whether leadership asks them to or not.",
-    statLabel: "people described team-level struggles — not personal friction",
-    statSuffix: "they're already doing the adoption leadership work",
-    actionLabel: 'For leadership',
-    action: 'These individuals need structured resources, not personal licenses. Give them a framework, a community, a role. They\'re already leading — recognize it.',
-  },
-  {
-    id: 'blocked-investors',
-    number: '04',
-    label: 'BLOCKED INVESTORS',
-    accentColor: '#E5554F',
-    headline: "They're paying out of their own wallet. The organization is slowing them down.",
-    subhead: "The people most committed to AI — committed enough to pay for it themselves — are the same people most likely to face organizational barriers: tool blocks, IT restrictions, unclear guidelines. These aren't the hesitant people. These are your champions.",
-    statLabel: 'people are paying out of pocket while facing org-level access barriers',
-    statSuffix: '',
-    actionLabel: 'For leadership',
-    action: 'One policy decision — approved tools, cleared access, a team budget — unlocks this group entirely. The will is there. The barrier is institutional.',
-  },
-];
+const LABEL = {
+  'aspiration-gap':    'ASPIRATION GAP',
+  'tool-mindset':      'TOOL → MINDSET LINK',
+  'leadership-voices': 'LEADERSHIP VOICES',
+  'blocked-investors': 'BLOCKED INVESTORS',
+};
 
-// ─── Single quote block ──────────────────────────────────────────────────────
-function QuoteBlock({ quotes, accentColor, showFreq = false }) {
-  if (!quotes || quotes.length === 0) return null;
-  const displayed = quotes.slice(0, 2);
+const ORDER = ['aspiration-gap', 'tool-mindset', 'leadership-voices', 'blocked-investors'];
+
+// ─── Skeleton card ────────────────────────────────────────────────────────────
+function SkeletonCard({ delay = 0, id }) {
+  const accent = ACCENT[id] || '#7DE69B';
+  return (
+    <motion.div
+      animate={{ opacity: [0.4, 0.75, 0.4] }}
+      transition={{ repeat: Infinity, duration: 1.6, delay }}
+      style={{
+        background: 'rgba(29,77,82,0.35)',
+        border: '1px solid rgba(125,230,155,0.15)',
+        borderTop: `2px solid ${accent}`,
+        borderRadius: 16,
+        padding: '28px 28px 24px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 14,
+        minHeight: 260,
+      }}
+    >
+      <div style={{ width: 120, height: 20, background: 'rgba(255,255,255,0.08)', borderRadius: 20 }} />
+      <div style={{ width: '75%', height: 22, background: 'rgba(255,255,255,0.07)', borderRadius: 6 }} />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div style={{ width: '100%', height: 13, background: 'rgba(255,255,255,0.05)', borderRadius: 4 }} />
+        <div style={{ width: '88%',  height: 13, background: 'rgba(255,255,255,0.05)', borderRadius: 4 }} />
+        <div style={{ width: '65%',  height: 13, background: 'rgba(255,255,255,0.05)', borderRadius: 4 }} />
+      </div>
+      <div style={{ width: '50%', height: 16, marginTop: 'auto', background: 'rgba(255,255,255,0.06)', borderRadius: 4 }} />
+    </motion.div>
+  );
+}
+
+// ─── Quote block ──────────────────────────────────────────────────────────────
+function Quotes({ quotes, accent, showFreq }) {
+  if (!quotes?.length) return null;
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-      {displayed.map((q, i) => {
+      {quotes.slice(0, 2).map((q, i) => {
         const text = typeof q === 'string' ? q : q.text;
         const freq = typeof q === 'object' ? q.freq : null;
         return (
-          <div
-            key={i}
-            style={{
-              borderLeft: `2px solid ${accentColor}`,
-              paddingLeft: 12,
-              paddingTop: 4,
-              paddingBottom: 4,
-            }}
-          >
+          <div key={i} style={{ borderLeft: `2px solid ${accent}`, paddingLeft: 12 }}>
             <p style={{
-              fontFamily: FONT,
+              fontFamily: 'DM Sans, sans-serif',
               fontSize: 12.5,
-              lineHeight: 1.5,
+              lineHeight: 1.55,
               color: '#c8d0d8',
               fontStyle: 'italic',
               margin: 0,
@@ -89,13 +70,7 @@ function QuoteBlock({ quotes, accentColor, showFreq = false }) {
               "{text}"
             </p>
             {showFreq && freq && (
-              <span style={{
-                display: 'inline-block',
-                marginTop: 4,
-                fontSize: 10,
-                color: '#797D80',
-                fontFamily: FONT,
-              }}>
+              <span style={{ display: 'inline-block', marginTop: 3, fontSize: 10, color: '#797D80', fontFamily: 'DM Sans, sans-serif' }}>
                 — uses AI {freq}
               </span>
             )}
@@ -106,222 +81,157 @@ function QuoteBlock({ quotes, accentColor, showFreq = false }) {
   );
 }
 
-// ─── Tool Mindset custom stat block ──────────────────────────────────────────
-function ToolMindsetStat({ data }) {
+// ─── Tool mindset side-by-side stat ──────────────────────────────────────────
+function ToolStat({ data }) {
   if (!data) return null;
   const { claude, chatgpt } = data;
   return (
-    <div style={{ display: 'flex', gap: 12, marginTop: 4 }}>
+    <div style={{ display: 'flex', gap: 10 }}>
       {[
-        { label: 'Claude users', count: claude.count, accent: '#59BEC9', descriptor: 'call AI a thought partner or collaborator' },
-        { label: 'ChatGPT users', count: chatgpt.count, accent: '#7DE69B', descriptor: 'emphasize speed and efficiency gains' },
-      ].map(({ label, count, accent, descriptor }) => (
-        <div
-          key={label}
-          style={{
-            flex: 1,
-            background: 'rgba(0,0,0,0.25)',
-            borderRadius: 10,
-            padding: '12px 14px',
-            border: `1px solid ${accent}22`,
-          }}
-        >
-          <div style={{ fontFamily: FONT, fontSize: 22, fontWeight: 800, color: accent, lineHeight: 1 }}>
-            {count}
-          </div>
-          <div style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: accent, marginTop: 2 }}>
-            {label}
-          </div>
-          <div style={{ fontFamily: FONT, fontSize: 11.5, color: '#797D80', marginTop: 4, lineHeight: 1.4 }}>
-            {descriptor}
-          </div>
+        { label: 'Claude users', count: claude.count, accent: '#59BEC9', quotes: claude.quotes, tag: 'Claude user' },
+        { label: 'ChatGPT users', count: chatgpt.count, accent: '#7DE69B', quotes: chatgpt.quotes, tag: 'ChatGPT user' },
+      ].map(({ label, count, accent, quotes, tag }) => (
+        <div key={label} style={{ flex: 1 }}>
+          <div style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 22, fontWeight: 800, color: accent, lineHeight: 1 }}>{count}</div>
+          <div style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 10.5, fontWeight: 700, color: accent, marginBottom: 8 }}>{label}</div>
+          {quotes?.slice(0, 1).map((q, i) => (
+            <div key={i} style={{ borderLeft: `2px solid ${accent}`, paddingLeft: 10 }}>
+              <span style={{ display: 'block', fontSize: 9.5, fontFamily: 'DM Sans, sans-serif', color: accent, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>{tag}</span>
+              <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, lineHeight: 1.5, color: '#c8d0d8', fontStyle: 'italic', margin: 0 }}>"{q}"</p>
+            </div>
+          ))}
         </div>
       ))}
     </div>
   );
 }
 
-// ─── Single insight card ─────────────────────────────────────────────────────
-function InsightCard({ card, data, index }) {
-  const ref  = useRef(null);
-  const inView = useInView(ref, { once: true, margin: '-60px' });
-
-  const { accentColor, number, label, headline, subhead,
-          statLabel, statSuffix, actionLabel, action, id } = card;
-
-  // Resolve live data
-  let statCount = null;
-  let quotes    = [];
-
-  if (id === 'aspiration-gap' && data) {
-    statCount = data.count;
-    quotes    = data.quotes || [];
-  } else if (id === 'leadership-voices' && data) {
-    statCount = data.count;
-    quotes    = data.quotes || [];
-  } else if (id === 'blocked-investors' && data) {
-    statCount = data.count;
-    quotes    = data.quotes || [];
-  }
-
+// ─── Single insight card (AI copy + live data) ────────────────────────────────
+function InsightCard({ id, copy, data, index }) {
+  const accent = ACCENT[id];
+  const label  = LABEL[id];
   return (
     <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 32 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
+      initial={{ opacity: 0, y: 28 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
       transition={{ duration: 0.55, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
       style={{
-        background: SURFACE,
-        border: `1px solid ${BORDER}`,
+        background: 'rgba(29,77,82,0.35)',
+        border: '1px solid rgba(125,230,155,0.15)',
+        borderTop: `2px solid ${accent}`,
         borderRadius: 16,
         padding: '28px 28px 24px',
         display: 'flex',
         flexDirection: 'column',
-        gap: 16,
+        gap: 14,
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)',
-        borderTop: `2px solid ${accentColor}`,
       }}
     >
-      {/* Header row */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+      {/* Label badge */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <span style={{
-          fontFamily: FONT,
-          fontSize: 11,
+          fontFamily: 'DM Sans, sans-serif',
+          fontSize: 10,
           fontWeight: 800,
-          color: accentColor,
-          background: `${accentColor}15`,
-          borderRadius: 6,
-          padding: '3px 8px',
-          letterSpacing: '0.08em',
-          flexShrink: 0,
-          marginTop: 1,
+          color: accent,
+          background: `${accent}18`,
+          borderRadius: 20,
+          padding: '3px 10px',
+          letterSpacing: '0.1em',
+          textTransform: 'uppercase',
         }}>
           {label}
         </span>
-        <span style={{
-          fontFamily: FONT,
-          fontSize: 11,
-          fontWeight: 700,
-          color: '#797D80',
-          marginLeft: 'auto',
-          flexShrink: 0,
-        }}>
-          {number} / 04
+        <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 10.5, fontWeight: 700, color: '#797D80' }}>
+          {String(index + 1).padStart(2, '0')} / 04
         </span>
       </div>
 
-      {/* Headline */}
-      <h3 style={{
-        fontFamily: FONT,
+      {/* AI-generated headline */}
+      <p style={{
+        margin: 0,
+        fontFamily: 'DM Sans, sans-serif',
         fontSize: 17,
         fontWeight: 800,
         color: '#f0f4f8',
         lineHeight: 1.35,
-        margin: 0,
+        letterSpacing: '0.01em',
       }}>
-        {headline}
-      </h3>
-
-      {/* Subhead */}
-      <p style={{
-        fontFamily: FONT,
-        fontSize: 13,
-        lineHeight: 1.65,
-        color: '#9ca8b4',
-        margin: 0,
-      }}>
-        {subhead}
+        {copy.headline}
       </p>
 
-      {/* Stat or custom block */}
+      {/* AI-generated body */}
+      <p style={{
+        margin: 0,
+        fontFamily: 'DM Sans, sans-serif',
+        fontSize: 14,
+        lineHeight: 1.7,
+        color: '#b0b8c0',
+        flex: 1,
+      }}>
+        {copy.body}
+      </p>
+
+      {/* Live data block */}
       {id === 'tool-mindset' ? (
-        <ToolMindsetStat data={data} />
-      ) : statCount !== null && (
-        <div style={{
-          display: 'flex',
-          alignItems: 'baseline',
-          gap: 10,
-          background: 'rgba(0,0,0,0.2)',
-          borderRadius: 10,
-          padding: '12px 16px',
-        }}>
-          <span style={{
-            fontFamily: FONT,
-            fontSize: 36,
-            fontWeight: 900,
-            color: accentColor,
-            lineHeight: 1,
-          }}>
-            {statCount}
-          </span>
-          <div>
-            {statLabel && (
-              <p style={{ fontFamily: FONT, fontSize: 12.5, color: '#c8d0d8', margin: '0 0 2px', lineHeight: 1.4 }}>
-                {statLabel}
-              </p>
-            )}
-            {statSuffix && (
-              <p style={{ fontFamily: FONT, fontSize: 11.5, color: '#797D80', margin: 0, fontStyle: 'italic' }}>
-                {statSuffix}
-              </p>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Quotes */}
-      {id === 'tool-mindset' && data ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {data.claude.quotes.slice(0, 1).map((q, i) => (
-            <div key={`c${i}`} style={{ borderLeft: `2px solid #59BEC9`, paddingLeft: 12 }}>
-              <span style={{ fontSize: 9.5, fontFamily: FONT, color: '#59BEC9', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Claude user</span>
-              <p style={{ fontFamily: FONT, fontSize: 12.5, lineHeight: 1.5, color: '#c8d0d8', fontStyle: 'italic', margin: '2px 0 0' }}>"{q}"</p>
-            </div>
-          ))}
-          {data.chatgpt.quotes.slice(0, 1).map((q, i) => (
-            <div key={`g${i}`} style={{ borderLeft: `2px solid #7DE69B`, paddingLeft: 12 }}>
-              <span style={{ fontSize: 9.5, fontFamily: FONT, color: '#7DE69B', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>ChatGPT user</span>
-              <p style={{ fontFamily: FONT, fontSize: 12.5, lineHeight: 1.5, color: '#c8d0d8', fontStyle: 'italic', margin: '2px 0 0' }}>"{q}"</p>
-            </div>
-          ))}
-        </div>
+        <ToolStat data={data} />
       ) : (
-        <QuoteBlock
-          quotes={quotes}
-          accentColor={accentColor}
-          showFreq={id === 'aspiration-gap'}
-        />
+        <>
+          {data?.count != null && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'baseline',
+              gap: 8,
+              background: 'rgba(0,0,0,0.2)',
+              borderRadius: 10,
+              padding: '10px 14px',
+            }}>
+              <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 32, fontWeight: 900, color: accent, lineHeight: 1 }}>
+                {data.count}
+              </span>
+              <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: '#9ca8b4' }}>
+                {copy.stat}
+              </span>
+            </div>
+          )}
+          <Quotes
+            quotes={data?.quotes}
+            accent={accent}
+            showFreq={id === 'aspiration-gap'}
+          />
+        </>
       )}
 
-      {/* Leadership action callout */}
+      {/* AI-generated leadership action */}
       <div style={{
-        background: `${accentColor}10`,
-        border: `1px solid ${accentColor}30`,
+        background: `${accent}10`,
+        border: `1px solid ${accent}28`,
         borderRadius: 10,
         padding: '12px 14px',
         marginTop: 'auto',
       }}>
         <span style={{
           display: 'inline-block',
-          fontFamily: FONT,
-          fontSize: 10,
+          fontFamily: 'DM Sans, sans-serif',
+          fontSize: 9.5,
           fontWeight: 800,
-          color: accentColor,
+          color: accent,
           textTransform: 'uppercase',
-          letterSpacing: '0.08em',
+          letterSpacing: '0.1em',
           marginBottom: 5,
         }}>
-          {actionLabel}
+          For leadership
         </span>
         <p style={{
-          fontFamily: FONT,
-          fontSize: 12.5,
-          lineHeight: 1.6,
-          color: '#b0bcc8',
           margin: 0,
+          fontFamily: 'DM Sans, sans-serif',
+          fontSize: 13,
+          lineHeight: 1.65,
+          color: '#b0bcc8',
         }}>
-          {action}
+          {copy.action}
         </p>
       </div>
     </motion.div>
@@ -330,82 +240,205 @@ function InsightCard({ card, data, index }) {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function OpenTextIntelligence({ transforms }) {
-  const headerRef = useRef(null);
-  const headerInView = useInView(headerRef, { once: true, margin: '-60px' });
+  const [cards, setCards]   = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError]   = useState(false);
+  const fetchedRef = useRef(false);
+
+  const fetchInsights = useCallback(async () => {
+    const insights = transforms?.openTextInsights;
+    if (!insights) return;
+
+    const { aspirationGap, toolMindset, leadershipVoices, blockedInvestors } = insights;
+
+    // ── Build prompt context from live computed data ───────────────────────
+    const ctx = {
+      dataset: {
+        survey: 'Baptist Health Marketing & Communications dept',
+        totalS3Respondents: 89,
+        surveyPeriod: 'Mar 2026',
+      },
+      aspirationGap: {
+        description: 'Respondents who wrote detailed excitement about AI (>80 chars) but use it less than weekly',
+        count: aspirationGap.count,
+        pctOfTeam: aspirationGap.pct,
+        byFrequency: aspirationGap.byFreq,
+        sampleQuotes: aspirationGap.quotes.slice(0, 3).map(q => `[${q.freq}] "${q.text}"`),
+      },
+      toolMindset: {
+        description: 'Cross-referencing which AI tools respondents use with how they describe AI in their excitement text',
+        claudeUserCount: toolMindset.claude.count,
+        chatgptUserCount: toolMindset.chatgpt.count,
+        useBothCount: toolMindset.bothCount,
+        claudeSampleExcitement: toolMindset.claude.quotes.slice(0, 2),
+        chatgptSampleExcitement: toolMindset.chatgpt.quotes.slice(0, 2),
+      },
+      leadershipVoices: {
+        description: 'Respondents whose struggle text describes team-level challenges (pulling others forward, getting team buy-in, adoption concerns) rather than personal skill gaps',
+        count: leadershipVoices.count,
+        pctOfTeam: leadershipVoices.pct,
+        sampleQuotes: leadershipVoices.quotes.slice(0, 3),
+      },
+      blockedInvestors: {
+        description: 'Respondents who are paying out of pocket for AI tools AND reporting org-level barriers (IT access, compliance, unclear guidelines)',
+        count: blockedInvestors.count,
+        pctOfTeam: blockedInvestors.pct,
+        sampleQuotes: blockedInvestors.quotes.slice(0, 3),
+      },
+    };
+
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'x-api-key': import.meta.env.VITE_ANTHROPIC_API_KEY,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true',
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 1600,
+          system: `You are a strategic communications advisor for Baptist Health. You will receive structured findings from an open-text analysis of an internal AI adoption survey. Each finding includes computed counts, percentages, and real verbatim quotes from employees.
+
+Return ONLY a valid JSON array of exactly 4 insight objects — one per finding, in this exact order: aspiration-gap, tool-mindset, leadership-voices, blocked-investors.
+
+Each object: { "id": string, "headline": string, "body": string, "stat": string, "action": string }
+
+Rules:
+- id must match the input finding key exactly
+- headline: 8–13 words, punchy, present-tense, grounded in the actual data — do not invent narrative, let the numbers speak
+- body: 2 sentences that interpret what the pattern means — what is actually happening and why it matters to the department; cite the actual numbers provided
+- stat: a short (5–10 word) phrase describing what the count represents — will appear next to the live number in the UI, e.g. "people with high inspiration but low frequency"
+- action: 2 sentences — a specific, concrete leadership recommendation based on this finding; no platitudes
+Do not add markdown. Do not wrap in code fences. Return raw JSON only.`,
+          messages: [{
+            role: 'user',
+            content: `Analyze these four open-text cross-reference findings and generate the 4 insight cards:\n\n${JSON.stringify(ctx, null, 2)}`,
+          }],
+        }),
+      });
+
+      if (!res.ok) throw new Error(`API ${res.status}`);
+      const data = await res.json();
+      const raw = data.content?.[0]?.text ?? '';
+      const text = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+      const parsed = JSON.parse(text);
+      if (!Array.isArray(parsed) || parsed.length < 4) throw new Error('Unexpected shape');
+      setCards(parsed);
+    } catch (err) {
+      console.error('OpenTextIntelligence error:', err);
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  }, [transforms]);
+
+  useEffect(() => {
+    if (fetchedRef.current) return;
+    fetchedRef.current = true;
+    fetchInsights();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const insights = transforms?.openTextInsights;
 
-  if (!insights) return null;
-
-  // Map card id → live data
   const dataMap = {
-    'aspiration-gap':    insights.aspirationGap,
-    'tool-mindset':      insights.toolMindset,
-    'leadership-voices': insights.leadershipVoices,
-    'blocked-investors': insights.blockedInvestors,
+    'aspiration-gap':    insights?.aspirationGap,
+    'tool-mindset':      insights?.toolMindset,
+    'leadership-voices': insights?.leadershipVoices,
+    'blocked-investors': insights?.blockedInvestors,
   };
 
   return (
-    <section style={{ padding: '72px 24px 80px', maxWidth: 1100, margin: '0 auto' }}>
-
+    <section style={{
+      padding: '96px 32px 80px',
+      maxWidth: 1360,
+      margin: '0 auto',
+      fontFamily: 'DM Sans, sans-serif',
+    }}>
       {/* Section header */}
       <motion.div
-        ref={headerRef}
-        initial={{ opacity: 0, y: 20 }}
-        animate={headerInView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        style={{ marginBottom: 48, maxWidth: 680 }}
+        initial={{ opacity: 0, y: 18 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5 }}
+        style={{ marginBottom: 56, textAlign: 'center' }}
       >
         <span style={{
           display: 'inline-block',
-          fontFamily: FONT,
-          fontSize: 10.5,
-          fontWeight: 800,
+          fontSize: 11,
+          fontWeight: 700,
+          letterSpacing: '0.13em',
           color: '#7DE69B',
           textTransform: 'uppercase',
-          letterSpacing: '0.12em',
           marginBottom: 12,
         }}>
           Open Text Intelligence
         </span>
         <h2 style={{
-          fontFamily: FONT,
-          fontSize: 28,
-          fontWeight: 900,
-          color: '#f0f4f8',
-          lineHeight: 1.25,
-          margin: '0 0 14px',
+          margin: '0 0 16px',
+          fontSize: 'clamp(28px, 4vw, 42px)',
+          fontWeight: 800,
+          color: '#f0f2f4',
+          lineHeight: 1.1,
+          letterSpacing: '-0.025em',
+          fontFamily: "'Plus Jakarta Sans', sans-serif",
         }}>
           What They're Actually Saying
         </h2>
         <p style={{
-          fontFamily: FONT,
-          fontSize: 14,
-          lineHeight: 1.75,
-          color: '#797D80',
           margin: 0,
+          fontSize: 15,
+          color: '#797D80',
+          maxWidth: 560,
+          marginInline: 'auto',
+          lineHeight: 1.7,
         }}>
-          The open-ended responses are the most honest data in the survey. Numbers can be inflated.
-          Multiple-choice answers can be strategic. But when someone types what they actually think —
-          that's a real thought from a real person. These four patterns are only visible when you
-          cross-reference what people write with what they actually do.
+          Patterns only visible when you cross-reference what people write with what they actually do.
+          Claude analyzed the open-text responses against every respondent's behavioral data.
         </p>
       </motion.div>
 
-      {/* 2×2 card grid */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(440px, 1fr))',
-        gap: 20,
-      }}>
-        {CARDS.map((card, i) => (
-          <InsightCard
-            key={card.id}
-            card={card}
-            data={dataMap[card.id]}
-            index={i}
-          />
-        ))}
-      </div>
+      {/* Loading state */}
+      {loading && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(460px, 1fr))', gap: 24 }}>
+          {ORDER.map((id, i) => <SkeletonCard key={id} id={id} delay={i * 0.15} />)}
+        </div>
+      )}
+
+      {/* Error state */}
+      {error && (
+        <div style={{
+          background: 'rgba(29,77,82,0.25)',
+          border: '1px solid rgba(125,230,155,0.1)',
+          borderRadius: 16,
+          padding: '36px 28px',
+          textAlign: 'center',
+        }}>
+          <p style={{ margin: 0, color: '#797D80', fontSize: 14 }}>
+            Insights couldn't load — check API key or try reloading.
+          </p>
+        </div>
+      )}
+
+      {/* Card grid */}
+      {!loading && !error && cards && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(460px, 1fr))', gap: 24 }}>
+          {ORDER.map((id, i) => {
+            const copy = cards.find(c => c.id === id);
+            if (!copy) return null;
+            return (
+              <InsightCard
+                key={id}
+                id={id}
+                copy={copy}
+                data={dataMap[id]}
+                index={i}
+              />
+            );
+          })}
+        </div>
+      )}
     </section>
   );
 }
