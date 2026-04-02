@@ -4,22 +4,25 @@ const WAVE_ACCENT = ['#59BEC9', '#2EA84A', '#7DE69B'];
 
 const CHAPTERS = [
   {
-    waveLabel: 'WAVE 01',
+    waveLabel: 'Wave 01',
     dateRange: 'Jan 30 – Feb 10, 2025',
     title: 'The Baseline',
-    narrative: `When we launched the first AI Pulse Survey in January 2025, just over half the team reported positive feelings about AI, and 42% were using it daily. Confidence averaged 3.6 out of 5 — solid, but with room to grow. Curiosity was the dominant theme: people were interested and experimenting, but barriers like limited training, access gaps, and uncertainty about what was allowed were still slowing adoption.`,
+    eyebrow: 'Where the story begins',
+    narrative: `When we launched the first AI Pulse Survey in January 2025, just over half the team reported positive feelings about AI, and 42% were using it daily. Confidence averaged 3.6 out of 5 — solid, but with real room to grow. Curiosity was the dominant theme: people were interested, experimenting, leaning in. But barriers like limited training, access gaps, and uncertainty about what was allowed were still slowing adoption down.`,
   },
   {
-    waveLabel: 'WAVE 02',
+    waveLabel: 'Wave 02',
     dateRange: 'Aug 27 – Sept 12, 2025',
     title: 'The Momentum',
+    eyebrow: 'Something shifts',
     narrative: `By August, something had shifted. Daily usage nearly doubled — jumping from 42% to 85% — as AI moved from something team members explored to something they relied on. Positive sentiment climbed to 67%, and the range of tools in use expanded well beyond the company's endorsed subscriptions. Experimentation had given way to integration, and integration was starting to look like transformation.`,
   },
   {
-    waveLabel: 'WAVE 03',
+    waveLabel: 'Wave 03',
     dateRange: 'Mar 18 – Mar 30, 2026',
     title: 'The New Normal',
-    narrative: `Fourteen months in, AI is woven into the daily rhythm of how this team works. 92% of respondents use it every day. Positive sentiment held strong at 69%, and confidence continued climbing. Role and function data shows exactly who is using AI and how deeply. A significant share of the team is spending their own money on AI tools — not because they were asked to, but because they're convinced it makes their work better.`,
+    eyebrow: '14 months in — this is who you are now',
+    narrative: `Fourteen months in, AI is woven into the daily rhythm of how this team works. 92% of respondents use it every day. Positive sentiment held strong at 69%, and confidence continued climbing. A significant share of the team is spending their own money on AI tools — not because they were asked to, but because they're convinced it makes their work better. This is no longer an experiment. It's identity.`,
   },
 ];
 
@@ -34,38 +37,38 @@ function getConfPct(distribution, threshold) {
   return distribution.filter(d => d.score >= threshold).reduce((sum, d) => sum + d.pct, 0);
 }
 
-function MiniSentimentBar({ sentimentTrend, surveyKey }) {
+function SentimentBar({ sentimentTrend, surveyKey }) {
   const pos    = sentimentTrend.find(e => e.sentiment === 'Positive')?.[surveyKey]?.pct ?? 0;
   const mixed  = sentimentTrend.find(e => e.sentiment === 'Mixed')?.[surveyKey]?.pct ?? 0;
   const neg    = sentimentTrend.find(e => e.sentiment === 'Negative')?.[surveyKey]?.pct ?? 0;
   const unsure = sentimentTrend.find(e => e.sentiment === 'Unsure')?.[surveyKey]?.pct ?? 0;
 
   return (
-    <div style={{ marginTop: 20 }}>
+    <div style={{ marginTop: 24 }}>
       <div style={{
-        fontSize: 9,
+        fontSize: 10,
         color: '#797D80',
-        letterSpacing: '0.1em',
+        letterSpacing: '0.12em',
         textTransform: 'uppercase',
-        marginBottom: 7,
+        marginBottom: 8,
         fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
       }}>
         Sentiment distribution
       </div>
-      <div style={{ display: 'flex', borderRadius: 4, overflow: 'hidden', height: 6, gap: 1 }}>
-        {pos    > 0 && <div title={`Positive ${pos}%`}   style={{ width: `${pos}%`,    background: '#2EA84A' }} />}
-        {mixed  > 0 && <div title={`Mixed ${mixed}%`}    style={{ width: `${mixed}%`,  background: '#FFCD00' }} />}
-        {neg    > 0 && <div title={`Negative ${neg}%`}   style={{ width: `${neg}%`,    background: '#E5554F' }} />}
-        {unsure > 0 && <div title={`Unsure ${unsure}%`}  style={{ width: `${unsure}%`, background: '#797D80' }} />}
+      <div style={{ display: 'flex', borderRadius: 6, overflow: 'hidden', height: 8, gap: 1 }}>
+        {pos    > 0 && <div title={`Positive ${pos}%`}   style={{ width: `${pos}%`,    background: '#2EA84A', transition: 'width 0.6s ease' }} />}
+        {mixed  > 0 && <div title={`Mixed ${mixed}%`}    style={{ width: `${mixed}%`,  background: '#FFCD00', transition: 'width 0.6s ease' }} />}
+        {neg    > 0 && <div title={`Negative ${neg}%`}   style={{ width: `${neg}%`,    background: '#E5554F', transition: 'width 0.6s ease' }} />}
+        {unsure > 0 && <div title={`Unsure ${unsure}%`}  style={{ width: `${unsure}%`, background: '#797D80', transition: 'width 0.6s ease' }} />}
       </div>
-      <div style={{ display: 'flex', gap: 12, marginTop: 6, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: 16, marginTop: 8, flexWrap: 'wrap' }}>
         {[['#2EA84A', 'Positive', pos], ['#FFCD00', 'Mixed', mixed], ['#E5554F', 'Negative', neg], ['#797D80', 'Unsure', unsure]]
           .filter(([, , pct]) => pct > 0)
           .map(([color, label, pct]) => (
-            <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-              <div style={{ width: 6, height: 6, borderRadius: 2, background: color, flexShrink: 0 }} />
-              <span style={{ fontSize: 10, color: '#797D80', fontFamily: 'Inter, sans-serif' }}>
-                {label} {pct}%
+            <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <div style={{ width: 7, height: 7, borderRadius: 2, background: color, flexShrink: 0 }} />
+              <span style={{ fontSize: 12, color: '#9ca8b4', fontFamily: 'DM Sans, sans-serif' }}>
+                {label} <strong style={{ color: '#e0e4e8' }}>{pct}%</strong>
               </span>
             </div>
           ))}
@@ -74,25 +77,33 @@ function MiniSentimentBar({ sentimentTrend, surveyKey }) {
   );
 }
 
-function StatPill({ value, label, accentColor, delta }) {
+function BigStat({ value, label, accentColor, delta, delay = 0 }) {
+  const rgb = hexToRgb(accentColor);
   return (
-    <div style={{
-      background: `rgba(${hexToRgb(accentColor)},0.07)`,
-      border: `1px solid rgba(${hexToRgb(accentColor)},0.18)`,
-      borderRadius: 10,
-      padding: '14px 16px',
-      display: 'flex',
-      flexDirection: 'column',
-      boxSizing: 'border-box',
-    }}>
-      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 7, marginBottom: 7, flexWrap: 'wrap' }}>
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.45, delay }}
+      style={{
+        background: `rgba(${rgb},0.06)`,
+        border: `1px solid rgba(${rgb},0.15)`,
+        borderTop: `3px solid ${accentColor}`,
+        borderRadius: 12,
+        padding: '20px 22px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 6,
+        boxSizing: 'border-box',
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, flexWrap: 'wrap' }}>
         <div style={{
-          fontSize: 36,
+          fontFamily: "'Plus Jakarta Sans', DM Sans, sans-serif",
+          fontSize: 'clamp(40px, 4.5vw, 56px)',
           fontWeight: 900,
           color: accentColor,
           lineHeight: 1,
-          letterSpacing: '-0.02em',
-          fontFamily: 'Inter, sans-serif',
+          letterSpacing: '-0.03em',
         }}>
           {value}
         </div>
@@ -100,16 +111,16 @@ function StatPill({ value, label, accentColor, delta }) {
           <div style={{
             display: 'inline-flex',
             alignItems: 'center',
-            gap: 2,
-            fontSize: 11,
+            gap: 3,
+            fontSize: 12,
             fontWeight: 700,
             color: delta >= 0 ? '#2EA84A' : '#E5554F',
             background: delta >= 0 ? 'rgba(46,168,74,0.12)' : 'rgba(229,85,79,0.12)',
             border: `1px solid ${delta >= 0 ? 'rgba(46,168,74,0.25)' : 'rgba(229,85,79,0.25)'}`,
-            borderRadius: 5,
-            padding: '2px 6px',
-            fontFamily: 'Inter, sans-serif',
-            marginBottom: 5,
+            borderRadius: 6,
+            padding: '3px 8px',
+            fontFamily: 'DM Sans, sans-serif',
+            marginBottom: 7,
             flexShrink: 0,
           }}>
             {delta >= 0 ? '↑' : '↓'} {Math.abs(delta)}%
@@ -117,16 +128,16 @@ function StatPill({ value, label, accentColor, delta }) {
         )}
       </div>
       <div style={{
-        fontSize: 10,
+        fontSize: 11,
         color: '#797D80',
         textTransform: 'uppercase',
-        letterSpacing: '0.08em',
-        fontFamily: 'Inter, sans-serif',
+        letterSpacing: '0.1em',
+        fontFamily: 'DM Sans, sans-serif',
         lineHeight: 1.3,
       }}>
         {label}
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -153,155 +164,179 @@ export default function SlideWave({ transforms, wave }) {
   const n          = responseCounts[i]?.n ?? 0;
 
   const pills = [
-    { value: n,              label: 'Responses',          accentColor: accent, delta: null       },
-    { value: `${posPct}%`,  label: 'Positive Sentiment', accentColor: accent, delta: posDelta   },
-    { value: `${confPct}%`, label: 'Confident or Above', accentColor: accent, delta: confDelta  },
-    { value: `${dailyPct}%`,label: 'Daily Usage',         accentColor: accent, delta: dailyDelta },
+    { value: `${dailyPct}%`,  label: 'Daily Usage',         accentColor: accent,     delta: dailyDelta },
+    { value: `${posPct}%`,   label: 'Positive Sentiment',  accentColor: accent,     delta: posDelta   },
+    { value: `${confPct}%`,  label: 'Confident or Higher', accentColor: accent,     delta: confDelta  },
+    { value: n,               label: 'Voices This Wave',   accentColor: '#797D80',  delta: null       },
   ];
 
   if (i === 2) {
     const ownPocketPct    = transforms.ownPocketS3?.yesPct ?? 0;
     const acceleratingPct = transforms.momentumS3?.find(m => m.label === 'Accelerating')?.pct ?? 0;
-    const topBenefitLabel = transforms.benefitsS3?.[0]?.label ?? 'Time Savings';
-    const topBenefitPct   = transforms.benefitsS3?.[0]?.pct ?? 0;
     pills.push(
-      { value: `${ownPocketPct}%`, label: 'Paying Own Pocket', accentColor: '#E5554F', delta: null },
-      {
-        value: acceleratingPct > 0 ? `${acceleratingPct}%` : `${topBenefitPct}%`,
-        label: acceleratingPct > 0 ? 'See Momentum Accelerating' : topBenefitLabel,
-        accentColor: '#7DE69B',
-        delta: null,
-      },
+      { value: `${ownPocketPct}%`, label: 'Paying Own Pocket',          accentColor: '#E5554F', delta: null },
+      { value: acceleratingPct > 0 ? `${acceleratingPct}%` : '—', label: 'See Momentum Accelerating', accentColor: '#7DE69B', delta: null },
     );
   }
-
-  const pillCols = pills.length > 4 ? 3 : 2;
 
   return (
     <div style={{
       height: '100%',
       display: 'flex',
       flexDirection: 'column',
-      padding: '36px 56px',
+      padding: '40px 56px 36px',
       boxSizing: 'border-box',
       overflow: 'hidden',
+      position: 'relative',
     }}>
-      {/* Header row */}
+      {/* Ambient glow behind stats */}
+      <div style={{
+        position: 'absolute',
+        right: '5%',
+        top: '20%',
+        width: 360,
+        height: 360,
+        borderRadius: '50%',
+        background: `radial-gradient(ellipse, rgba(${hexToRgb(accent)},0.07) 0%, transparent 70%)`,
+        pointerEvents: 'none',
+      }} />
+
+      {/* Wave badge + date */}
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
+        initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45 }}
-        style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28, flexShrink: 0 }}
+        transition={{ duration: 0.4 }}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 14,
+          marginBottom: 20,
+          flexShrink: 0,
+        }}
       >
         <div style={{
           fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
-          fontSize: 10,
+          fontSize: 11,
           color: accent,
-          letterSpacing: '0.2em',
+          letterSpacing: '0.22em',
           textTransform: 'uppercase',
-          flexShrink: 0,
+          background: `rgba(${hexToRgb(accent)},0.1)`,
+          border: `1px solid rgba(${hexToRgb(accent)},0.25)`,
+          borderRadius: 6,
+          padding: '4px 10px',
         }}>
           {chapter.waveLabel}
         </div>
-
-        <div style={{ width: 1, height: 16, background: `${accent}33`, flexShrink: 0 }} />
-
-        <h2 style={{
-          fontFamily: 'Inter, sans-serif',
-          fontSize: 28,
-          fontWeight: 800,
-          color: '#ffffff',
-          letterSpacing: '-0.02em',
-          margin: 0,
-          flexShrink: 0,
-        }}>
-          {chapter.title}
-        </h2>
-
         <div style={{
+          width: 1, height: 16,
+          background: `rgba(${hexToRgb(accent)},0.25)`,
+          flexShrink: 0,
+        }} />
+        <div style={{
+          fontFamily: 'DM Sans, sans-serif',
           fontSize: 12,
           color: '#797D80',
-          background: 'rgba(125,230,155,0.06)',
-          border: '1px solid rgba(125,230,155,0.1)',
-          borderRadius: 6,
-          padding: '4px 10px',
-          fontFamily: 'Inter, sans-serif',
-          flexShrink: 0,
+          letterSpacing: '0.04em',
         }}>
           {chapter.dateRange}
         </div>
       </motion.div>
 
-      {/* 2-column content */}
+      {/* 2-column body */}
       <div style={{
         display: 'flex',
-        gap: 48,
+        gap: 52,
         flex: 1,
-        alignItems: 'center',
         overflow: 'hidden',
         minHeight: 0,
       }}>
-        {/* Left — narrative + sentiment bar */}
+        {/* Left — title + narrative + sentiment */}
         <motion.div
-          initial={{ opacity: 0, x: -20 }}
+          initial={{ opacity: 0, x: -24 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
           style={{
-            flex: '0 0 52%',
+            flex: '0 0 50%',
             display: 'flex',
             flexDirection: 'column',
             position: 'relative',
             overflow: 'hidden',
           }}
         >
-          {/* Left accent line */}
+          {/* Vertical accent bar */}
           <div style={{
             position: 'absolute',
-            left: -20,
+            left: -24,
             top: 0,
             bottom: 0,
             width: 3,
-            background: `linear-gradient(to bottom, ${accent}, transparent)`,
+            background: `linear-gradient(to bottom, ${accent}, transparent 80%)`,
             borderRadius: 2,
           }} />
 
+          {/* Eyebrow */}
+          <div style={{
+            fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+            fontSize: 10,
+            color: `${accent}99`,
+            letterSpacing: '0.18em',
+            textTransform: 'uppercase',
+            marginBottom: 10,
+          }}>
+            {chapter.eyebrow}
+          </div>
+
+          {/* Giant title */}
+          <h2 style={{
+            fontFamily: "'Plus Jakarta Sans', DM Sans, sans-serif",
+            fontSize: 'clamp(48px, 5.5vw, 68px)',
+            fontWeight: 900,
+            color: '#ffffff',
+            letterSpacing: '-0.03em',
+            lineHeight: 1.0,
+            margin: '0 0 22px',
+          }}>
+            {chapter.title}
+          </h2>
+
+          {/* Narrative */}
           <p style={{
-            fontFamily: 'Inter, sans-serif',
-            fontSize: 15,
-            color: '#c0c8d0',
+            fontFamily: 'DM Sans, sans-serif',
+            fontSize: 'clamp(14px, 1.5vw, 17px)',
+            color: '#b8c4cc',
             lineHeight: 1.75,
-            margin: '0 0 0 8px',
+            margin: '0',
             overflow: 'hidden',
             display: '-webkit-box',
-            WebkitLineClamp: 7,
+            WebkitLineClamp: 6,
             WebkitBoxOrient: 'vertical',
+            flex: 1,
           }}>
             {chapter.narrative}
           </p>
 
-          <div style={{ marginLeft: 8 }}>
-            <MiniSentimentBar
-              sentimentTrend={transforms.sentimentTrend}
-              surveyKey={`s${i + 1}`}
-            />
-          </div>
+          {/* Sentiment bar */}
+          <SentimentBar
+            sentimentTrend={transforms.sentimentTrend}
+            surveyKey={`s${i + 1}`}
+          />
         </motion.div>
 
-        {/* Right — stat pills grid */}
+        {/* Right — stat grid */}
         <motion.div
-          initial={{ opacity: 0, x: 20 }}
+          initial={{ opacity: 0, x: 24 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.15 }}
+          transition={{ duration: 0.5, delay: 0.18 }}
           style={{
             flex: 1,
             display: 'grid',
-            gridTemplateColumns: `repeat(${pillCols}, 1fr)`,
-            gap: 12,
+            gridTemplateColumns: pills.length > 4 ? 'repeat(3, 1fr)' : 'repeat(2, 1fr)',
+            gap: 14,
             alignContent: 'center',
           }}
         >
-          {pills.map((pill) => (
-            <StatPill key={pill.label} {...pill} />
+          {pills.map((pill, idx) => (
+            <BigStat key={pill.label} {...pill} delay={0.22 + idx * 0.06} />
           ))}
         </motion.div>
       </div>

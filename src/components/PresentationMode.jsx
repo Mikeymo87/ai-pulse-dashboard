@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import SlideCover    from './slides/SlideCover';
 import SlideOverview  from './slides/SlideOverview';
 import SlideWave      from './slides/SlideWave';
 import SlideTrends    from './slides/SlideTrends';
@@ -8,6 +9,7 @@ import SlideSpotlight from './slides/SlideSpotlight';
 
 // ── All available slides ───────────────────────────────────────────────────────
 const SLIDES_ALL = [
+  { id: 'cover',     label: 'Cover' },
   { id: 'overview',  label: 'Overview' },
   { id: 'wave-0',    label: 'Wave 01 — The Baseline' },
   { id: 'wave-1',    label: 'Wave 02 — The Momentum' },
@@ -24,6 +26,7 @@ const SLIDE_SETS = {
   // 'team' slide excluded from all lenses — scatter/role data lives in Leadership Vault only
   council: SLIDES_ALL.filter(s => s.id !== 'team').map(s => s.id),
   exec: [
+    'cover',       // Cinematic opening
     'overview',    // The full picture in 30 seconds
     'wave-1',      // Momentum — where the shift happened
     'wave-2',      // New Normal — where we are today
@@ -31,6 +34,7 @@ const SLIDE_SETS = {
     'spotlight',   // Recommendations — The Ask
   ],
   dept: [
+    'cover',       // Cinematic opening
     'overview',    // Your team, your story
     'wave-0',      // Where you started
     'wave-1',      // The momentum you built
@@ -315,6 +319,7 @@ export default function PresentationMode({ transforms, surveys, onClose }) {
   }, [current, goTo, onClose, lens]);
 
   function renderSlide(id) {
+    if (id === 'cover')     return <SlideCover     transforms={transforms} />;
     if (id === 'overview')  return <SlideOverview  transforms={transforms} />;
     if (id === 'wave-0')    return <SlideWave       transforms={transforms} wave={0} />;
     if (id === 'wave-1')    return <SlideWave       transforms={transforms} wave={1} />;
