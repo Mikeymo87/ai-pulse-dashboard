@@ -325,7 +325,7 @@ function CardFront({ def, data, revealed, onPortraitClick }) {
 
         {/* Archetype name */}
         <div style={{
-          fontSize: 11, fontWeight: 800, color: '#fff',
+          fontSize: 13, fontWeight: 800, color: '#fff',
           letterSpacing: '0.07em', textTransform: 'uppercase', lineHeight: 1.2,
           fontFamily: 'DM Sans, sans-serif',
         }}>
@@ -341,7 +341,7 @@ function CardFront({ def, data, revealed, onPortraitClick }) {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.45, delay: 0.65 }}
               style={{
-                margin: 0, fontSize: 12, fontStyle: 'italic',
+                margin: 0, fontSize: 13, fontStyle: 'italic',
                 color: '#e8f0f5', lineHeight: 1.55,
                 fontFamily: 'DM Sans, sans-serif',
                 textShadow: '0 1px 6px rgba(0,0,0,0.9)',
