@@ -351,72 +351,300 @@ export function buildTransforms({ survey1, survey2, survey3 }) {
     })(),
   };
 
-  // ── Archetype classification (S3 row-level, 16-dimension clustering) ─────────
-  // Priority waterfall: first matching rule wins.
-  // No rubric scores exposed — behavioral signals only.
+  // ── Archetype classification — Claritas-style multi-dimensional affinity scoring ──
+  //
+  // Every S3 respondent receives a score (0–100) for each of the 5 archetypes.
+  // The archetype with the highest score is assigned. No binary gates — all 16
+  // dimensions contribute to at least one scorer. Near-ties promote the more
+  // advanced archetype (higher _adoptionScore).
+  //
+  // HOW TO TUNE AFTER EACH NEW SURVEY WAVE:
+  //   1. Log archetype counts (see console output in dev mode below).
+  //      Flag any archetype below 5% or above 45% of respondents.
+  //   2. Adjust ***PRIMARY*** weights first — supporting weights only if needed.
+  //   3. No single signal should exceed 40 pts — over-weighting reverts to a waterfall.
+  //   4. Add a dated comment next to any weight you change, e.g.:
+  //      frequency_daily: 30, // S4 2026-09: was 28, daily users over-landing in Experimenter
+  //   5. The `benefits` stubs in ARCHETYPE_WEIGHTS.multiplier are ready to activate for S4.
+  //   6. Re-run on all survey waves after any weight change to check for drift.
 
-  const BLOCKED_BARRIERS = [
-    'Limited access', 'IT / access blocks', 'Privacy / compliance',
-    'Unclear guidelines', 'Too many tools',
+  const ARCHETYPE_WEIGHTS = {
+
+    // Multiplier — builder/architect. Uses AI as infrastructure, not just a tool.
+    // DESIGN NOTE: all 4 primary gates must be met — daily use, own-pocket spend,
+    // max importance, AND systems-level open text. Missing any one primary triggers
+    // a stiff penalty that drops the score below what competing archetypes can reach.
+    multiplier: {
+      // ***PRIMARY*** — 4 required gates; base weights kept modest; penalties do the filtering
+      frequency_daily:          15,  // must use daily — gate enforced by penalty_not_daily
+      stage_advanced:            5,  // Integration or Transformation; supporting only
+      own_pocket:               22,  // revealed financial commitment — highest conviction signal
+      importance_5:             18,  // max-importance declaration
+      voice_systems:            15,  // open text contains systems-level keywords (strict list)
+      voice_systems_count:       6,  // +per additional keyword hit, capped at 3
+      // Supporting signals
+      confidence_high:           5,  // confidence >= 4
+      familiarity_high:          4,  // familiarity >= 4
+      excitement_themes_auto:    3,  // excitementThemes includes 'automation_agents'
+      momentum_accelerating:     3,
+      role_director_bonus:       2,  // role === 'Director'
+      function_web_bonus:        2,  // function === 'Web & Technology'
+      // S4-ready benefit stubs (uncomment and assign after observing S4 distribution):
+      // benefits_strategic:     4,  // 'Strategic thought partner' in benefits
+      // benefits_enablement:    4,  // 'Enablement of new capabilities' in benefits
+      // Missing-primary penalties — hard gates; any absent primary makes Multiplier un-winnable
+      penalty_not_daily:       -30,  // S3 2026: not daily disqualifies — Multipliers are daily users
+      penalty_no_own_pocket:   -40,  // ownPocket !== true: hard disqualifier
+      penalty_no_importance_5: -28,  // importance < 5: hard disqualifier
+      penalty_no_voice:        -22,  // no systems-level keywords: hard disqualifier
+      // Other penalties
+      penalty_rarely_never:    -20,
+      penalty_curiosity_stage: -12,
+      penalty_no_tools:        -10,  // tools.length === 0
+    },
+
+    // Experimenter — curious explorer. Multi-tool trialler, learning curve is the barrier.
+    experimenter: {
+      // ***PRIMARY***
+      stage_experimentation:    30,  // S3: boosted from 22 — core identity signal
+      stage_understanding:      16,  // S3: boosted from 14
+      tools_2plus:              22,  // S3: boosted from 18 — breadth of tool use is key
+      tools_3plus:               6,  // bonus, additive with tools_2plus
+      barrier_learning:         12,  // S3: boosted from 10
+      barrier_too_many_tools:    8,  // S3: boosted from 6
+      // Supporting signals
+      frequency_weekly:          8,
+      frequency_daily:           5,  // daily experimenters exist — softened from penalty to mild reward
+      frequency_monthly:         4,
+      struggle_learning_curve:   5,  // struggleThemes includes 'learning_curve'
+      excitement_personal_growth: 4, // excitementThemes includes 'personal_growth'
+      confidence_moderate:       4,  // confidence === 3
+      familiarity_moderate:      3,  // familiarity === 3
+      // Penalties
+      penalty_advanced_stage:  -18,  // S3: strengthened from -15 — Integration/Transformation disqualifies
+      penalty_own_pocket:       -8,
+    },
+
+    // Blocked Believer — enthusiast stopped by org friction. Positive + blocked = signature.
+    'blocked-believer': {
+      // ***PRIMARY*** — positive sentiment + org-friction barrier = the signature combination
+      sentiment_positive:       20,
+      importance_4plus:         16,  // importance >= 4
+      barrier_it_access:        18,  // 'IT / access blocks'
+      barrier_privacy:          10,  // 'Privacy / compliance'
+      barrier_unclear_guidelines: 8,
+      barrier_limited_access:    6,
+      // Supporting signals
+      frequency_weekly:         10,
+      frequency_monthly:         5,
+      excitement_access_tools:   5,  // excitementThemes includes 'access_tools'
+      struggle_it_blocks:        5,  // struggleThemes includes 'it_access_blocks'
+      confidence_high:           3,
+      // Penalties
+      penalty_daily:            -5,
+      penalty_negative_sentiment: -20,
+      penalty_no_barrier:       -28,  // No org barriers = definitively not Blocked Believer
+    },
+
+    // Thoughtful Skeptic — active user with earned critical distance. Text richness is key.
+    'thoughtful-skeptic': {
+      // ***PRIMARY*** — mixed/negative sentiment + active use + detailed open-text
+      sentiment_mixed:          24,
+      sentiment_negative:       18,
+      frequency_daily:           8,  // daily skeptic = most informed critic
+      frequency_weekly:         14,
+      frequency_monthly:         8,
+      barrier_accuracy:         12,  // 'Accuracy concerns'
+      barrier_fear_mistakes:     6,
+      text_length_long:          8,  // combined struggle+excitement > 150 chars
+      text_length_very_long:     4,  // bonus > 300 chars, additive with above
+      struggle_accuracy:         6,  // struggleThemes includes 'accuracy_reliability'
+      barrier_count_2plus:       4,  // 2+ barriers listed
+      familiarity_moderate:      3,  // familiarity 3–4
+      // Penalties
+      penalty_positive_sentiment: -18,
+      penalty_never_rarely:      -16,
+      penalty_importance_1_2:     -8,  // importance <= 2
+    },
+
+    // Confident Bystander — aware, not activated. No barriers + no action = the paradox.
+    'confident-bystander': {
+      // ***PRIMARY*** — low frequency + no barriers + no investment
+      frequency_rarely:         30,  // S3: boosted from 24 — rarely is the strongest signal
+      frequency_never:          30,  // S3: boosted from 20
+      frequency_monthly:        12,
+      barrier_none:             25,  // S3: boosted from 18 — no barriers is the defining paradox
+      own_pocket_no:            14,  // S3: boosted from 10
+      confidence_moderate_high:  8,  // confidence >= 3 while using rarely/never
+      tools_zero:               10,  // S3: boosted from 8
+      stage_curiosity:           6,
+      importance_1_3:            5,  // S3: boosted from 4
+      // Penalties
+      penalty_daily_weekly:    -28,  // S3: strengthened from -20
+      penalty_advanced_stage:  -22,  // S3: strengthened from -18
+      penalty_own_pocket:      -16,  // S3: strengthened from -12
+      penalty_blocked_barrier: -20,  // S3: strengthened from -10 — org barriers = Blocked Believer territory
+    },
+  };
+
+  // Org-friction barriers (used in Blocked Believer and Bystander penalty)
+  const ORG_BLOCK_BARRIERS = ['IT / access blocks', 'Privacy / compliance', 'Unclear guidelines', 'Limited access'];
+
+  // Systems-level language in open text — "I build with it", not just "I use it"
+  // STRICT: only terms a builder/architect would use; "build", "gpt", "scaling" removed as too generic
+  const VOICE_KEYWORDS = [
+    'agent', 'agentic', 'workflow', 'automat', 'integrat',
+    'pipeline', 'orchestrat', 'custom gpt', 'deploy', 'mapping',
   ];
 
-  // Keywords that mark systems-level thinking in open-text — not "I use it daily"
-  // but "I build with it": agents, workflows, GPTs, automation, scaling, integration.
-  const MULTIPLIER_VOICE_KEYWORDS = [
-    'agent', 'workflow', 'gpt', 'automat', 'integrat',
-    'scaling', 'deploy', 'mapping', 'pipeline', 'build',
-  ];
-
-  function hasMultiplierVoice(r) {
+  function voiceKeywordCount(r) {
     const text = ((r.struggle || '') + ' ' + (r.excitement || '')).toLowerCase();
-    return MULTIPLIER_VOICE_KEYWORDS.some(kw => text.includes(kw));
+    return VOICE_KEYWORDS.filter(kw => text.includes(kw)).length;
   }
 
+  function combinedTextLength(r) {
+    return ((r.struggle || '') + ' ' + (r.excitement || '')).trim().length;
+  }
+
+  // ── Five scorer functions ─────────────────────────────────────────────────
+
+  function scoreMultiplier(r) {
+    const W = ARCHETYPE_WEIGHTS.multiplier;
+    let score = 0;
+    if (r.frequency === 'Daily')                                          score += W.frequency_daily;
+    if (r.stage === 'Integration' || r.stage === 'Transformation')        score += W.stage_advanced;
+    if (r.ownPocket === true)                                             score += W.own_pocket;
+    if (r.importance === 5)                                               score += W.importance_5;
+    const kwCount = voiceKeywordCount(r);
+    if (kwCount >= 1)                                                     score += W.voice_systems;
+    score += Math.min(kwCount, 3) * (W.voice_systems_count / 3);
+    if ((r.confidence ?? 0) >= 4)                                         score += W.confidence_high;
+    if ((r.familiarity ?? 0) >= 4)                                        score += W.familiarity_high;
+    if (r.excitementThemes?.includes('automation_agents'))                score += W.excitement_themes_auto;
+    if (r.momentum === 'Accelerating')                                    score += W.momentum_accelerating;
+    if (r.role === 'Director')                                            score += W.role_director_bonus;
+    if (r.function === 'Web & Technology')                                score += W.function_web_bonus;
+    // Missing-primary penalties — any absent primary makes Multiplier score un-winnable
+    if (r.frequency !== 'Daily')                                          score += W.penalty_not_daily;
+    if (r.ownPocket !== true)                                             score += W.penalty_no_own_pocket;
+    if ((r.importance ?? 0) < 5)                                          score += W.penalty_no_importance_5;
+    if (kwCount === 0)                                                    score += W.penalty_no_voice;
+    if (r.frequency === 'Rarely' || r.frequency === 'Never')              score += W.penalty_rarely_never;
+    if (r.stage === 'Curiosity')                                          score += W.penalty_curiosity_stage;
+    if (r.tools.length === 0)                                             score += W.penalty_no_tools;
+    return Math.max(0, Math.min(100, score));
+  }
+
+  function scoreExperimenter(r) {
+    const W = ARCHETYPE_WEIGHTS.experimenter;
+    let score = 0;
+    if (r.stage === 'Experimentation')                                    score += W.stage_experimentation;
+    if (r.stage === 'Understanding')                                      score += W.stage_understanding;
+    if (r.tools.length >= 2)                                              score += W.tools_2plus;
+    if (r.tools.length >= 3)                                              score += W.tools_3plus;
+    if (r.barriers.includes('Lack of training'))                          score += W.barrier_learning;
+    if (r.barriers.includes('Too many tools'))                            score += W.barrier_too_many_tools;
+    if (r.frequency === 'Daily')                                          score += W.frequency_daily;
+    if (r.frequency === 'Weekly')                                         score += W.frequency_weekly;
+    if (r.frequency === 'Monthly')                                        score += W.frequency_monthly;
+    if (r.struggleThemes?.includes('learning_curve'))                     score += W.struggle_learning_curve;
+    if (r.excitementThemes?.includes('personal_growth'))                  score += W.excitement_personal_growth;
+    if (r.confidence === 3)                                               score += W.confidence_moderate;
+    if (r.familiarity === 3)                                              score += W.familiarity_moderate;
+    if (r.stage === 'Integration' || r.stage === 'Transformation')        score += W.penalty_advanced_stage;
+    if (r.ownPocket === true)                                             score += W.penalty_own_pocket;
+    return Math.max(0, Math.min(100, score));
+  }
+
+  function scoreBlockedBeliever(r) {
+    const W = ARCHETYPE_WEIGHTS['blocked-believer'];
+    let score = 0;
+    if (r.sentiment === 'Positive')                                       score += W.sentiment_positive;
+    if ((r.importance ?? 0) >= 4)                                         score += W.importance_4plus;
+    if (r.barriers.includes('IT / access blocks'))                        score += W.barrier_it_access;
+    if (r.barriers.includes('Privacy / compliance'))                      score += W.barrier_privacy;
+    if (r.barriers.includes('Unclear guidelines'))                        score += W.barrier_unclear_guidelines;
+    if (r.barriers.includes('Limited access'))                            score += W.barrier_limited_access;
+    if (r.frequency === 'Weekly')                                         score += W.frequency_weekly;
+    if (r.frequency === 'Monthly')                                        score += W.frequency_monthly;
+    if (r.excitementThemes?.includes('access_tools'))                     score += W.excitement_access_tools;
+    if (r.struggleThemes?.includes('it_access_blocks'))                   score += W.struggle_it_blocks;
+    if ((r.confidence ?? 0) >= 4)                                         score += W.confidence_high;
+    if (r.frequency === 'Daily')                                          score += W.penalty_daily;
+    if (r.sentiment === 'Negative')                                       score += W.penalty_negative_sentiment;
+    const noBarrier = r.barriers.length === 0 || r.barriers.includes('No barriers');
+    if (noBarrier)                                                        score += W.penalty_no_barrier;
+    return Math.max(0, Math.min(100, score));
+  }
+
+  function scoreThoughtfulSkeptic(r) {
+    const W = ARCHETYPE_WEIGHTS['thoughtful-skeptic'];
+    let score = 0;
+    if (r.sentiment === 'Mixed')                                          score += W.sentiment_mixed;
+    if (r.sentiment === 'Negative')                                       score += W.sentiment_negative;
+    if (r.frequency === 'Daily')                                          score += W.frequency_daily;
+    if (r.frequency === 'Weekly')                                         score += W.frequency_weekly;
+    if (r.frequency === 'Monthly')                                        score += W.frequency_monthly;
+    if (r.barriers.includes('Accuracy concerns'))                         score += W.barrier_accuracy;
+    if (r.barriers.includes('Fear of mistakes'))                          score += W.barrier_fear_mistakes;
+    const textLen = combinedTextLength(r);
+    if (textLen > 150)                                                    score += W.text_length_long;
+    if (textLen > 300)                                                    score += W.text_length_very_long;
+    if (r.struggleThemes?.includes('accuracy_reliability'))               score += W.struggle_accuracy;
+    if (r.barriers.length >= 2)                                           score += W.barrier_count_2plus;
+    if ((r.familiarity ?? 0) >= 3 && (r.familiarity ?? 0) <= 4)          score += W.familiarity_moderate;
+    if (r.sentiment === 'Positive')                                       score += W.penalty_positive_sentiment;
+    if (r.frequency === 'Rarely' || r.frequency === 'Never')              score += W.penalty_never_rarely;
+    if (r.importance !== null && (r.importance ?? 99) <= 2)              score += W.penalty_importance_1_2;
+    return Math.max(0, Math.min(100, score));
+  }
+
+  function scoreConfidentBystander(r) {
+    const W = ARCHETYPE_WEIGHTS['confident-bystander'];
+    let score = 0;
+    if (r.frequency === 'Rarely')                                         score += W.frequency_rarely;
+    if (r.frequency === 'Never')                                          score += W.frequency_never;
+    if (r.frequency === 'Monthly')                                        score += W.frequency_monthly;
+    const noBarrier = r.barriers.length === 0 || r.barriers.includes('No barriers');
+    if (noBarrier)                                                        score += W.barrier_none;
+    if (r.ownPocket === false)                                            score += W.own_pocket_no;
+    if ((r.confidence ?? 0) >= 3)                                         score += W.confidence_moderate_high;
+    if (r.tools.length === 0)                                             score += W.tools_zero;
+    if (r.stage === 'Curiosity')                                          score += W.stage_curiosity;
+    if (r.importance !== null && (r.importance ?? 99) <= 3)              score += W.importance_1_3;
+    if (r.frequency === 'Daily' || r.frequency === 'Weekly')              score += W.penalty_daily_weekly;
+    if (r.stage === 'Integration' || r.stage === 'Transformation')        score += W.penalty_advanced_stage;
+    if (r.ownPocket === true)                                             score += W.penalty_own_pocket;
+    if (r.barriers.some(b => ORG_BLOCK_BARRIERS.includes(b)))            score += W.penalty_blocked_barrier;
+    return Math.max(0, Math.min(100, score));
+  }
+
+  // ── Classify: highest affinity score wins; tie → more advanced archetype ──
+
+  // Internal adoption order for tiebreaking — never displayed in UI
+  const ARCHETYPE_ADOPTION_ORDER = {
+    multiplier: 5, experimenter: 4, 'blocked-believer': 3,
+    'thoughtful-skeptic': 2, 'confident-bystander': 1,
+  };
+
   function classifyRow(r) {
-    const isDaily    = r.frequency === 'Daily';
-    const isWeekly   = r.frequency === 'Weekly';
-    const isMonthly  = r.frequency === 'Monthly';
-    const isRarely   = r.frequency === 'Rarely';
-    const isNever    = r.frequency === 'Never';
-    const advStage   = r.stage === 'Integration' || r.stage === 'Transformation';
-    const highImport = r.importance >= 4;
-    const hasBarrier = r.barriers.length > 0 && !r.barriers.includes('No barriers');
-    const isBlocked  = r.barriers.some(b => BLOCKED_BARRIERS.includes(b));
-    const isMixed    = r.sentiment === 'Mixed' || r.sentiment === 'Negative';
-
-    // 1 — Multiplier: ALL five gates required — the rarest classification.
-    // Behavioral: daily + advanced stage + paying own pocket + importance 5
-    // Voice: open-text shows systems-level thinking (agents, workflows, GPTs, automation)
-    if (isDaily && advStage && r.ownPocket === true && r.importance === 5 && hasMultiplierVoice(r)) {
-      return 'multiplier';
+    const scores = {
+      multiplier:            scoreMultiplier(r),
+      experimenter:          scoreExperimenter(r),
+      'blocked-believer':    scoreBlockedBeliever(r),
+      'thoughtful-skeptic':  scoreThoughtfulSkeptic(r),
+      'confident-bystander': scoreConfidentBystander(r),
+    };
+    const ranked = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+    const [topKey, topScore] = ranked[0];
+    const [secondKey] = ranked[1];
+    const secondScore = ranked[1][1];
+    // Near-tie within 10%: promote to the more advanced archetype
+    if (topScore > 0 && (topScore - secondScore) <= topScore * 0.10) {
+      return ARCHETYPE_ADOPTION_ORDER[topKey] >= ARCHETYPE_ADOPTION_ORDER[secondKey]
+        ? topKey : secondKey;
     }
-
-    // 2 — Blocked Believer: positive + high importance + active but org-constrained
-    if (
-      r.sentiment === 'Positive' &&
-      highImport &&
-      (isWeekly || isMonthly) &&
-      isBlocked
-    ) {
-      return 'blocked-believer';
-    }
-
-    // 3 — Thoughtful Skeptic: mixed/negative sentiment but still actively using
-    if (isMixed && !isRarely && !isNever) {
-      return 'thoughtful-skeptic';
-    }
-
-    // 4 — Experimenter: exploration stage or multi-tool trialler not yet in a routine
-    if (
-      r.stage === 'Experimentation' ||
-      r.stage === 'Understanding' ||
-      (r.tools.length >= 1 && (isWeekly || isMonthly) && !hasBarrier)
-    ) {
-      return 'experimenter';
-    }
-
-    // 5 — Confident Bystander: everyone else (low freq, no barriers, no conviction signals)
-    return 'confident-bystander';
+    return topKey;
   }
 
   const ARCHETYPE_KEYS = ['multiplier', 'blocked-believer', 'thoughtful-skeptic', 'experimenter', 'confident-bystander'];
@@ -427,6 +655,20 @@ export function buildTransforms({ survey1, survey2, survey3 }) {
   for (const row of survey3) {
     const key = classifyRow(row);
     archetypeGroups[key].push(row);
+  }
+
+  if (import.meta.env.DEV) {
+    const n3 = survey3.length;
+    console.log('[Archetypes] Distribution:');
+    for (const k of ARCHETYPE_KEYS) {
+      const c = archetypeGroups[k].length;
+      console.log(`  ${k}: ${c} (${n3 ? Math.round(c/n3*100) : 0}%)`);
+    }
+    // Log Multiplier profiles for inspection
+    console.log('[Archetypes] Multiplier profiles:');
+    archetypeGroups.multiplier.forEach(r =>
+      console.log(`  freq=${r.frequency} stage=${r.stage} pocket=${r.ownPocket} imp=${r.importance} kw=${voiceKeywordCount(r)}`)
+    );
   }
 
   const archetypes = {};
