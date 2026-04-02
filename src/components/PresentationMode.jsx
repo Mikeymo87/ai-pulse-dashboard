@@ -3,24 +3,28 @@ import { motion, AnimatePresence } from 'framer-motion';
 import SlideCover       from './slides/SlideCover';
 import SlideOverview    from './slides/SlideOverview';
 import SlideArchetypes  from './slides/SlideArchetypes';
-import SlideWave      from './slides/SlideWave';
-import SlideTrends    from './slides/SlideTrends';
-import SlideTeam      from './slides/SlideTeam';
-import SlideSpotlight from './slides/SlideSpotlight';
+import SlideBellCurve   from './slides/SlideBellCurve';
+import SlideStruggle    from './slides/SlideStruggle';
+import SlideWave        from './slides/SlideWave';
+import SlideTrends      from './slides/SlideTrends';
+import SlideTeam        from './slides/SlideTeam';
+import SlideSpotlight   from './slides/SlideSpotlight';
 
 // ── All available slides ───────────────────────────────────────────────────────
 const SLIDES_ALL = [
-  { id: 'cover',     label: 'Cover' },
-  { id: 'overview',  label: 'Overview' },
-  { id: 'wave-0',    label: 'Wave 01 — The Baseline' },
-  { id: 'wave-1',    label: 'Wave 02 — The Momentum' },
+  { id: 'cover',       label: 'Cover' },
+  { id: 'overview',    label: 'Overview — Participation + Transformation' },
+  { id: 'wave-0',      label: 'Wave 01 — The Baseline' },
+  { id: 'wave-1',      label: 'Wave 02 — The Momentum' },
   { id: 'wave-2',      label: 'Wave 03 — The New Normal' },
+  { id: 'bell-curve',  label: 'The Adoption Arc' },
   { id: 'archetypes',  label: 'The Team — Five Personas' },
+  { id: 'struggle',    label: 'Friction & Excitement' },
   { id: 'trends-a',    label: 'Trends — Adoption' },
-  { id: 'trends-b',  label: 'Trends — Readiness' },
-  { id: 'trends-c',  label: 'Trends — Landscape' },
-  { id: 'team',      label: 'Team Readiness' },
-  { id: 'spotlight', label: 'Opportunity Spotlight' },
+  { id: 'trends-b',    label: 'Trends — Readiness' },
+  { id: 'trends-c',    label: 'Trends — Landscape' },
+  { id: 'team',        label: 'Team Readiness' },
+  { id: 'spotlight',   label: 'Opportunity Spotlight' },
 ];
 
 // ── Lens-specific sequences (IDs reference SLIDES_ALL) ────────────────────────
@@ -28,22 +32,26 @@ const SLIDE_SETS = {
   // 'team' slide excluded from all lenses — scatter/role data lives in Leadership Vault only
   council: SLIDES_ALL.filter(s => s.id !== 'team').map(s => s.id),
   exec: [
-    'cover',       // Cinematic opening
-    'overview',    // The full picture in 30 seconds
-    'wave-1',      // Momentum — where the shift happened
-    'wave-2',      // New Normal — where we are today
-    'trends-a',    // Adoption proof — the numbers that land
-    'spotlight',   // Recommendations — The Ask
+    'cover',        // Cinematic opening
+    'overview',     // Participation story + transformation in one slide
+    'wave-1',       // The momentum — where the shift happened
+    'wave-2',       // The new normal — where we are today
+    'bell-curve',   // The adoption arc shift visualized
+    'archetypes',   // Who these people are
+    'struggle',     // What's holding them back and pulling them forward
+    'spotlight',    // Recommendations — The Ask
   ],
   dept: [
-    'cover',       // Cinematic opening
-    'overview',    // Your team, your story
-    'wave-0',      // Where you started
-    'wave-1',      // The momentum you built
-    'wave-2',      // Where you are now
-    'archetypes',  // Five ways to be on this team
-    'trends-b',    // How you feel about it — confidence, readiness
-    'spotlight',   // What comes next
+    'cover',        // Cinematic opening
+    'overview',     // Your story — who showed up + what changed
+    'wave-0',       // Where you started
+    'wave-1',       // The shift you didn't know was happening
+    'wave-2',       // Who you are now
+    'bell-curve',   // The shape of your adoption arc
+    'archetypes',   // Five ways to be on this team
+    'struggle',     // Your friction and your fuel
+    'trends-b',     // How you feel about where you are
+    'spotlight',    // What comes next — for you
   ],
 };
 
@@ -53,9 +61,9 @@ const LENSES = [
     key: 'council',
     title: 'AI Council',
     subtitle: 'Full deep dive',
-    duration: '~25 min',
+    duration: '~30 min',
     slides: SLIDE_SETS.council.length,
-    description: 'Every chart, every data point. Strategy, readiness, and the full adoption arc.',
+    description: 'Every chart, every data point. The full adoption arc, personas, friction map, and strategic recommendations.',
     accent: '#59BEC9',
     icon: '◈',
   },
@@ -63,9 +71,9 @@ const LENSES = [
     key: 'exec',
     title: 'Executive Leadership',
     subtitle: 'The headline story',
-    duration: '~8 min',
+    duration: '~12 min',
     slides: SLIDE_SETS.exec.length,
-    description: 'Momentum, conviction signal, and a clear recommendation. Built for decision-makers.',
+    description: 'Momentum, conviction signal, who the team is, and a clear recommendation. Built for decision-makers.',
     accent: '#7DE69B',
     icon: '◆',
   },
@@ -73,9 +81,9 @@ const LENSES = [
     key: 'dept',
     title: 'Full Department',
     subtitle: 'Your team, your story',
-    duration: '~12 min',
+    duration: '~18 min',
     slides: SLIDE_SETS.dept.length,
-    description: 'The arc from where you started to where you are — told in your own words.',
+    description: 'The full arc — where you started, who you became, and what comes next. Your story, in your own data.',
     accent: '#FFCD00',
     icon: '◉',
   },
@@ -322,9 +330,11 @@ export default function PresentationMode({ transforms, surveys, onClose }) {
   }, [current, goTo, onClose, lens]);
 
   function renderSlide(id) {
-    if (id === 'cover')      return <SlideCover      transforms={transforms} />;
-    if (id === 'overview')   return <SlideOverview   transforms={transforms} />;
-    if (id === 'archetypes') return <SlideArchetypes transforms={transforms} />;
+    if (id === 'cover')       return <SlideCover      transforms={transforms} />;
+    if (id === 'overview')    return <SlideOverview   transforms={transforms} />;
+    if (id === 'archetypes')  return <SlideArchetypes transforms={transforms} />;
+    if (id === 'bell-curve')  return <SlideBellCurve  transforms={transforms} />;
+    if (id === 'struggle')    return <SlideStruggle   transforms={transforms} />;
     if (id === 'wave-0')    return <SlideWave       transforms={transforms} wave={0} />;
     if (id === 'wave-1')    return <SlideWave       transforms={transforms} wave={1} />;
     if (id === 'wave-2')    return <SlideWave       transforms={transforms} wave={2} />;

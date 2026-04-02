@@ -14,7 +14,7 @@ const CHAPTERS = [
     heroValue: '42%',
     heroLabel: 'Daily Usage — the starting point',
     narrative: `When we launched the first AI Pulse Survey in January 2025, just over half the team reported positive feelings about AI, and 42% were using it daily. Confidence averaged 3.6 out of 5 — solid, but with real room to grow. Curiosity was the dominant theme: people were interested and experimenting. But barriers like limited training, access gaps, and uncertainty about what was allowed were still slowing adoption down.`,
-    speakerNote: "\"Fourteen months ago, we didn't know what this team was capable of. Neither did they.\" Let the 42% land. It's not a bad number — it's an honest starting point. The story we're about to tell is what happened from here.",
+    thesis: 'In January 2025, the story began with an honest snapshot. The team was curious, engaged — and just barely getting started. Every number you see after this was built on that foundation.',
   },
   {
     waveLabel: 'Wave 02',
@@ -24,7 +24,7 @@ const CHAPTERS = [
     heroValue: '+43pp',
     heroLabel: 'Daily usage jump in 7 months',
     narrative: `By August, something had shifted. Daily usage nearly doubled — jumping from 42% to 85% — as AI moved from something team members explored to something they relied on. Positive sentiment climbed to 67%, and the range of tools in use expanded well beyond the company's endorsed subscriptions. Experimentation had given way to integration, and integration was starting to look like transformation.`,
-    speakerNote: "\"Between January and August, something irreversible happened. Daily usage nearly doubled. Not because they were told to. Because it started working.\" Pause on the +43pp. That's not a gradual climb. That's a team that made a collective decision.",
+    thesis: 'Between January and August, something irreversible happened. The tools that once felt experimental became essential. This is the slide that answers the question: when did this team decide?',
   },
   {
     waveLabel: 'Wave 03',
@@ -34,7 +34,7 @@ const CHAPTERS = [
     heroValue: '92%',
     heroLabel: 'Daily usage — 14 months later',
     narrative: `Fourteen months in, AI is woven into the daily rhythm of how this team works. 92% use it every day. Positive sentiment held strong at 69%, and confidence continued climbing. A significant share of the team is spending their own money on AI tools — not because they were asked to, but because they're convinced it makes their work better. This is no longer an experiment. It's identity.`,
-    speakerNote: "\"92% daily. They didn't wait for permission. They decided.\" Pause here. Let them feel the weight of that number. Then: \"One in three people on this team is paying out of their own pocket. That's not compliance. That's conviction.\"",
+    thesis: '92% daily. They didn\'t wait for permission — they decided. One in three is paying out of their own pocket to keep going. That\'s not compliance. That\'s conviction.',
   },
 ];
 
@@ -98,79 +98,26 @@ function SupportStat({ value, label, accentColor, delta, delay = 0 }) {
       }}
     >
       <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, flexWrap: 'wrap' }}>
-        <div style={{
-          fontFamily: SANS,
-          fontSize: 'clamp(28px, 3vw, 40px)',
-          fontWeight: 900,
-          color: accentColor,
-          lineHeight: 1,
-          letterSpacing: '-0.03em',
-        }}>
+        <div style={{ fontFamily: SANS, fontSize: 'clamp(28px, 3vw, 40px)', fontWeight: 900, color: accentColor, lineHeight: 1, letterSpacing: '-0.03em' }}>
           {value}
         </div>
         {delta !== null && delta !== undefined && (
           <div style={{
-            fontSize: 11,
-            fontWeight: 700,
+            fontSize: 11, fontWeight: 700,
             color: delta >= 0 ? '#2EA84A' : '#E5554F',
             background: delta >= 0 ? 'rgba(46,168,74,0.12)' : 'rgba(229,85,79,0.12)',
             border: `1px solid ${delta >= 0 ? 'rgba(46,168,74,0.25)' : 'rgba(229,85,79,0.25)'}`,
-            borderRadius: 5,
-            padding: '2px 7px',
-            fontFamily: 'DM Sans, sans-serif',
-            marginBottom: 4,
-            flexShrink: 0,
+            borderRadius: 5, padding: '2px 7px',
+            fontFamily: 'DM Sans, sans-serif', marginBottom: 4, flexShrink: 0,
           }}>
             {delta >= 0 ? '↑' : '↓'} {Math.abs(delta)}%
           </div>
         )}
       </div>
-      <div style={{
-        fontSize: 10,
-        color: '#797D80',
-        textTransform: 'uppercase',
-        letterSpacing: '0.1em',
-        fontFamily: 'DM Sans, sans-serif',
-      }}>
+      <div style={{ fontSize: 10, color: '#797D80', textTransform: 'uppercase', letterSpacing: '0.1em', fontFamily: 'DM Sans, sans-serif' }}>
         {label}
       </div>
     </motion.div>
-  );
-}
-
-function SpeakerNote({ text }) {
-  return (
-    <div style={{
-      borderTop: '1px solid rgba(125,230,155,0.08)',
-      paddingTop: 10,
-      flexShrink: 0,
-      display: 'flex',
-      alignItems: 'flex-start',
-      gap: 12,
-    }}>
-      <span style={{
-        fontFamily: MONO,
-        fontSize: 9,
-        color: 'rgba(125,230,155,0.45)',
-        letterSpacing: '0.18em',
-        textTransform: 'uppercase',
-        flexShrink: 0,
-        marginTop: 2,
-        whiteSpace: 'nowrap',
-      }}>
-        Say this
-      </span>
-      <p style={{
-        fontFamily: 'DM Sans, sans-serif',
-        fontSize: 12,
-        color: 'rgba(255,255,255,0.3)',
-        fontStyle: 'italic',
-        margin: 0,
-        lineHeight: 1.55,
-      }}>
-        {text}
-      </p>
-    </div>
   );
 }
 
@@ -196,9 +143,9 @@ export default function SlideWave({ transforms, wave }) {
   const n         = responseCounts[i]?.n ?? 0;
 
   const supportStats = [
-    { value: `${posPct}%`,  label: 'Positive Sentiment', accentColor: accent,    delta: posDelta  },
-    { value: `${confPct}%`, label: 'Confident or Higher', accentColor: accent,   delta: confDelta },
-    { value: n,              label: 'Voices This Wave',   accentColor: '#797D80', delta: null      },
+    { value: `${posPct}%`,  label: 'Positive Sentiment',  accentColor: accent,     delta: posDelta  },
+    { value: `${confPct}%`, label: 'Confident or Higher', accentColor: accent,     delta: confDelta },
+    { value: n,              label: 'Voices This Wave',   accentColor: '#797D80',  delta: null      },
   ];
 
   if (i === 2) {
@@ -211,163 +158,96 @@ export default function SlideWave({ transforms, wave }) {
       height: '100%',
       display: 'flex',
       flexDirection: 'column',
-      padding: '32px 56px 24px',
+      padding: '28px 56px 24px',
       boxSizing: 'border-box',
       overflow: 'hidden',
       position: 'relative',
     }}>
       {/* Ambient glow */}
       <div style={{
-        position: 'absolute',
-        right: '10%', top: '15%',
-        width: 400, height: 400,
-        borderRadius: '50%',
+        position: 'absolute', right: '8%', top: '15%',
+        width: 380, height: 380, borderRadius: '50%',
         background: `radial-gradient(ellipse, rgba(${rgb},0.08) 0%, transparent 70%)`,
         pointerEvents: 'none',
       }} />
 
-      {/* ── TOP BAND — wave badge + date + eyebrow ── */}
+      {/* ── TOP BAND ── */}
       <motion.div
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 20, flexShrink: 0 }}
+        style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 18, flexShrink: 0 }}
       >
         <div style={{
-          fontFamily: MONO,
-          fontSize: 11,
-          color: accent,
-          letterSpacing: '0.22em',
-          textTransform: 'uppercase',
-          background: `rgba(${rgb},0.1)`,
-          border: `1px solid rgba(${rgb},0.25)`,
-          borderRadius: 6,
-          padding: '4px 11px',
+          fontFamily: MONO, fontSize: 11, color: accent,
+          letterSpacing: '0.22em', textTransform: 'uppercase',
+          background: `rgba(${rgb},0.1)`, border: `1px solid rgba(${rgb},0.25)`,
+          borderRadius: 6, padding: '4px 11px',
         }}>
           {chapter.waveLabel}
         </div>
         <div style={{ width: 1, height: 16, background: `rgba(${rgb},0.25)`, flexShrink: 0 }} />
-        <div style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: '#797D80' }}>
-          {chapter.dateRange}
-        </div>
+        <div style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: '#797D80' }}>{chapter.dateRange}</div>
         <div style={{ width: 1, height: 16, background: 'rgba(255,255,255,0.06)', flexShrink: 0 }} />
-        <div style={{
-          fontFamily: MONO,
-          fontSize: 10,
-          color: `rgba(${rgb},0.7)`,
-          letterSpacing: '0.16em',
-          textTransform: 'uppercase',
-        }}>
+        <div style={{ fontFamily: MONO, fontSize: 10, color: `rgba(${rgb},0.7)`, letterSpacing: '0.16em', textTransform: 'uppercase' }}>
           {chapter.eyebrow}
         </div>
       </motion.div>
 
-      {/* ── HERO BAND — title left, one giant number right ── */}
+      {/* ── HERO BAND ── */}
       <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 48,
-        marginBottom: 24,
-        flexShrink: 0,
-        paddingBottom: 24,
+        display: 'flex', alignItems: 'center', gap: 40,
+        marginBottom: 18, flexShrink: 0,
+        paddingBottom: 18,
         borderBottom: `1px solid rgba(${rgb},0.12)`,
       }}>
-        {/* Left: title */}
+        {/* Title */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          style={{ flex: 1 }}
+          style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 16 }}
         >
-          {/* Vertical accent bar */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 16,
-          }}>
-            <div style={{
-              width: 4,
-              height: 72,
-              background: `linear-gradient(to bottom, ${accent}, transparent)`,
-              borderRadius: 2,
-              flexShrink: 0,
-            }} />
-            <h2 style={{
-              fontFamily: SANS,
-              fontSize: 'clamp(52px, 6vw, 76px)',
-              fontWeight: 900,
-              color: '#ffffff',
-              letterSpacing: '-0.035em',
-              lineHeight: 0.95,
-              margin: 0,
-            }}>
-              {chapter.title}
-            </h2>
-          </div>
+          <div style={{ width: 4, height: 68, background: `linear-gradient(to bottom, ${accent}, transparent)`, borderRadius: 2, flexShrink: 0 }} />
+          <h2 style={{ fontFamily: SANS, fontSize: 'clamp(48px, 6vw, 72px)', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.035em', lineHeight: 0.95, margin: 0 }}>
+            {chapter.title}
+          </h2>
         </motion.div>
 
-        {/* Right: hero number */}
+        {/* Hero number */}
         <motion.div
           initial={{ opacity: 0, scale: 0.85 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.55, delay: 0.18, ease: [0.22, 1, 0.36, 1] }}
-          style={{
-            textAlign: 'right',
-            flexShrink: 0,
-          }}
+          style={{ textAlign: 'right', flexShrink: 0 }}
         >
           <div style={{
-            fontFamily: SANS,
-            fontSize: 'clamp(72px, 9vw, 108px)',
-            fontWeight: 900,
-            color: accent,
-            lineHeight: 0.95,
+            fontFamily: SANS, fontSize: 'clamp(68px, 8.5vw, 100px)',
+            fontWeight: 900, color: accent, lineHeight: 0.95,
             letterSpacing: '-0.04em',
-            textShadow: `0 0 60px rgba(${rgb},0.4), 0 0 120px rgba(${rgb},0.2)`,
+            textShadow: `0 0 60px rgba(${rgb},0.4), 0 0 120px rgba(${rgb},0.18)`,
           }}>
             {chapter.heroValue}
           </div>
-          <div style={{
-            fontFamily: 'DM Sans, sans-serif',
-            fontSize: 11,
-            color: '#797D80',
-            textTransform: 'uppercase',
-            letterSpacing: '0.1em',
-            marginTop: 6,
-            textAlign: 'right',
-          }}>
+          <div style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: '#797D80', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 5, textAlign: 'right' }}>
             {chapter.heroLabel}
           </div>
         </motion.div>
       </div>
 
-      {/* ── CONTENT BAND — narrative left, supporting stats right ── */}
-      <div style={{
-        display: 'flex',
-        gap: 48,
-        flex: 1,
-        overflow: 'hidden',
-        minHeight: 0,
-      }}>
+      {/* ── CONTENT BAND ── */}
+      <div style={{ display: 'flex', gap: 44, flex: 1, overflow: 'hidden', minHeight: 0 }}>
         {/* Left: narrative + sentiment */}
         <motion.div
-          initial={{ opacity: 0, x: -16 }}
+          initial={{ opacity: 0, x: -14 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.22 }}
-          style={{
-            flex: '0 0 52%',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 16,
-            overflow: 'hidden',
-          }}
+          style={{ flex: '0 0 52%', display: 'flex', flexDirection: 'column', gap: 14, overflow: 'hidden' }}
         >
           <p style={{
             fontFamily: 'DM Sans, sans-serif',
-            fontSize: 'clamp(14px, 1.5vw, 16px)',
-            color: '#b0bcc8',
-            lineHeight: 1.8,
-            margin: 0,
+            fontSize: 'clamp(13px, 1.4vw, 15px)',
+            color: '#b0bcc8', lineHeight: 1.8, margin: 0,
             flex: 1,
             overflow: 'hidden',
             display: '-webkit-box',
@@ -376,22 +256,19 @@ export default function SlideWave({ transforms, wave }) {
           }}>
             {chapter.narrative}
           </p>
-          <SentimentBar
-            sentimentTrend={transforms.sentimentTrend}
-            surveyKey={`s${i + 1}`}
-          />
+          <SentimentBar sentimentTrend={transforms.sentimentTrend} surveyKey={`s${i + 1}`} />
         </motion.div>
 
         {/* Right: supporting stats */}
         <motion.div
-          initial={{ opacity: 0, x: 16 }}
+          initial={{ opacity: 0, x: 14 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.28 }}
           style={{
             flex: 1,
             display: 'grid',
             gridTemplateColumns: supportStats.length > 3 ? 'repeat(2, 1fr)' : '1fr',
-            gap: 12,
+            gap: 10,
             alignContent: 'start',
           }}
         >
@@ -401,10 +278,28 @@ export default function SlideWave({ transforms, wave }) {
         </motion.div>
       </div>
 
-      {/* ── SPEAKER NOTE ── */}
-      <div style={{ marginTop: 16, flexShrink: 0 }}>
-        <SpeakerNote text={chapter.speakerNote} />
-      </div>
+      {/* ── THESIS LINE ── */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.42 }}
+        style={{
+          marginTop: 14, flexShrink: 0,
+          borderLeft: `3px solid rgba(${rgb},0.4)`,
+          paddingLeft: 14,
+        }}
+      >
+        <p style={{
+          fontFamily: 'DM Sans, sans-serif',
+          fontSize: 13,
+          color: 'rgba(255,255,255,0.58)',
+          fontStyle: 'italic',
+          lineHeight: 1.6,
+          margin: 0,
+        }}>
+          {chapter.thesis}
+        </p>
+      </motion.div>
     </div>
   );
 }
