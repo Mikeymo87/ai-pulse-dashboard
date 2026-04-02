@@ -341,9 +341,10 @@ function CardFront({ def, data, revealed, onPortraitClick }) {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.45, delay: 0.65 }}
               style={{
-                margin: 0, fontSize: 10, fontStyle: 'italic',
-                color: def.accentColor, lineHeight: 1.5,
+                margin: 0, fontSize: 12, fontStyle: 'italic',
+                color: '#e8f0f5', lineHeight: 1.55,
                 fontFamily: 'DM Sans, sans-serif',
+                textShadow: '0 1px 6px rgba(0,0,0,0.9)',
                 display: '-webkit-box', WebkitLineClamp: 3,
                 WebkitBoxOrient: 'vertical', overflow: 'hidden',
               }}
@@ -703,7 +704,7 @@ export default function Archetypes({ transforms }) {
   const focusedData = focusedKey ? archetypes[focusedKey] : null;
 
   return (
-    <section style={{ padding: '80px 0 100px', maxWidth: 1400, margin: '0 auto' }}>
+    <section style={{ padding: '80px 0 100px', width: '100%', boxSizing: 'border-box' }}>
 
       {/* ── Section header ── */}
       <div style={{ padding: '0 40px', marginBottom: 48 }}>
@@ -765,13 +766,14 @@ export default function Archetypes({ transforms }) {
         )}
       </div>
 
-      {/* ── Arc spread — horizontal scroll, centered ── */}
-      <div style={{ overflowX: 'auto', overflowY: 'visible', padding: '0 0 110px' }}>
+      {/* ── Arc spread — full-width, no scroll ── */}
+      <div style={{ overflowX: 'hidden', overflowY: 'visible', padding: '0 0 110px', width: '100%' }}>
         <motion.div style={{
-          display: 'flex', gap: 16,
+          display: 'flex', gap: 8,
           justifyContent: 'center', alignItems: 'flex-end',
-          width: 'max-content', minWidth: '100%',
-          paddingBottom: 24, paddingLeft: 24, paddingRight: 24,
+          width: '100%',
+          paddingBottom: 24, paddingLeft: 16, paddingRight: 16,
+          boxSizing: 'border-box',
         }}>
           {ARCHETYPE_DEFS.map((def, i) => (
             <motion.div
