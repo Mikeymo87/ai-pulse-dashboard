@@ -706,8 +706,8 @@ export default function Archetypes({ transforms }) {
   return (
     <section style={{ padding: '80px 0 100px', width: '100%', boxSizing: 'border-box' }}>
 
-      {/* ── Section header ── */}
-      <div style={{ padding: '0 40px', marginBottom: 48 }}>
+      {/* ── Section header — constrained to match DeepDive alignment ── */}
+      <div style={{ maxWidth: 1360, margin: '0 auto', padding: '0 32px', marginBottom: 48 }}>
         <div style={{
           display: 'inline-block',
           padding: '4px 12px',
@@ -798,7 +798,7 @@ export default function Archetypes({ transforms }) {
       {/* ── Footer note ── */}
       <p style={{
         textAlign: 'center', fontSize: 12, color: '#3a4048',
-        margin: '0 40px', lineHeight: 1.6,
+        maxWidth: 1360, margin: '0 auto', padding: '0 32px', lineHeight: 1.6,
         fontFamily: 'DM Sans, sans-serif',
       }}>
         Each respondent scores 0–100 across all five archetypes via 16-dimension affinity scoring.
