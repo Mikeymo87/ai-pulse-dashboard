@@ -148,5 +148,15 @@ React + Vite · Tailwind CSS · Recharts · Framer Motion · Papa Parse · Claud
 
 ---
 
+## Tomorrow's Work (April 3, 2026)
+
+1. **Replit env var** — Set `VITE_VAULT_PASSWORD` in Replit Secrets so the vault password isn't exposed in the public GitHub repo
+2. **Presentation slide polish** — Test bell curve + struggle map slides in all 3 lenses live; fix any internal padding/overflow issues from embedding the full interactive components inside the presentation container
+3. **SlideTeam cleanup** — Ghost slide still in `SLIDES_ALL` (filtered out of all lenses); either repurpose or remove
+4. **OpportunitySpotlight QA** — Verify Claude API output quality now that archetypes + open text context is injected into the prompt
+5. **Mobile** — Dashboard is desktop-only; assess whether any responsive work is needed before the actual presentation date
+
+---
+
 ## To Continue in a New Session
 Open Claude Code from this folder → CLAUDE.md auto-loads → say **"continue the build"**
