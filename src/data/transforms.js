@@ -372,8 +372,9 @@ export function buildTransforms({ survey1, survey2, survey3 }) {
     const isBlocked  = r.barriers.some(b => BLOCKED_BARRIERS.includes(b));
     const isMixed    = r.sentiment === 'Mixed' || r.sentiment === 'Negative';
 
-    // 1 — Multiplier: daily + advanced stage + strong conviction (own pocket OR importance 5)
-    if (isDaily && advStage && (r.ownPocket === true || r.importance === 5)) {
+    // 1 — Multiplier: ALL four signals required — the rarest classification
+    // Daily use + advanced stage + paying own pocket + importance rated 5
+    if (isDaily && advStage && r.ownPocket === true && r.importance === 5) {
       return 'multiplier';
     }
 
