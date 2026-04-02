@@ -2,38 +2,34 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-const TOTAL     = 117;
-const COLS      = 13; // 13 × 9 = 117
-const DOT_SIZE  = 14;
-const DOT_GAP   = 8;
-const FONT      = 'DM Sans, sans-serif';
+const TOTAL    = 117;
+const COLS     = 13; // 13 × 9 = 117
+const DOT_SIZE = 14;
+const DOT_GAP  = 8;
+const FONT     = 'DM Sans, sans-serif';
 
-const WAVES = [
-  {
-    label: 'Jan–Feb 2025',
-    shortLabel: 'Survey 1',
-    respondents: 97,
-    pct: 83,
-    delta: null,
-    color: '#7DE69B',
-  },
-  {
-    label: 'Aug–Sep 2025',
-    shortLabel: 'Survey 2',
-    respondents: 106,
-    pct: 91,
-    delta: '+8pp',
-    color: '#59BEC9',
-  },
-  {
-    label: 'Mar 2026',
-    shortLabel: 'Survey 3',
-    respondents: 89,
-    pct: 76,
-    delta: '−15pp',
-    color: '#7DE69B',
-  },
+const WAVE_META = [
+  { label: 'Jan–Feb 2025', shortLabel: 'Survey 1', color: '#7DE69B' },
+  { label: 'Aug–Sep 2025', shortLabel: 'Survey 2', color: '#59BEC9' },
+  { label: 'Mar 2026',     shortLabel: 'Survey 3', color: '#7DE69B' },
 ];
+
+// Build WAVES array from live responseCounts (S2 + S3 come from Google Sheets)
+function buildWaves(responseCounts) {
+  return WAVE_META.map((meta, i) => {
+    const n = responseCounts?.[i]?.n ?? [97, 106, 89][i];
+    const pct = Math.round((n / TOTAL) * 100);
+    const prev = i > 0 ? (responseCounts?.[i - 1]?.n ?? [97, 106][i - 1]) : null;
+    const prevPct = prev !== null ? Math.round((prev / TOTAL) * 100) : null;
+    const diff = prevPct !== null ? pct - prevPct : null;
+    return {
+      ...meta,
+      respondents: n,
+      pct,
+      delta: diff !== null ? (diff >= 0 ? `+${diff}pp` : `${diff}pp`) : null,
+    };
+  });
+}
 
 // ─── Single dot ───────────────────────────────────────────────────────────────
 function Dot({ active, color, delay }) {
@@ -59,7 +55,8 @@ function Dot({ active, color, delay }) {
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
-export default function ParticipationStory() {
+export default function ParticipationStory({ transforms }) {
+  const WAVES = buildWaves(transforms?.responseCounts);
   const [wave, setWave]           = useState(0);
   const [autoPlayed, setAutoPlayed] = useState(false);
   const timerRef                  = useRef(null);

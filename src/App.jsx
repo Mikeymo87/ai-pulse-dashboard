@@ -122,7 +122,7 @@ export default function App() {
           )}
           {activeTab === 'team' && (
             <>
-              <ParticipationStory />
+              <ParticipationStory transforms={transforms} />
               <Archetypes transforms={transforms} />
 
               {/* Leadership Vault — password-protected */}
