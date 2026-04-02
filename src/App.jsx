@@ -1,6 +1,6 @@
 import './index.css';
 import { useState, useEffect } from 'react';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useSurveyData } from './hooks/useSurveyData';
 import Nav from './components/Nav';
 import Hero from './components/Hero';
@@ -9,6 +9,7 @@ import TrendCharts from './components/TrendCharts';
 import OpportunitySpotlight from './components/OpportunitySpotlight';
 import ChatPanel from './components/ChatPanel';
 import DeepDive from './components/DeepDive';
+import Archetypes from './components/Archetypes';
 import ConvictionMoment from './components/ConvictionMoment';
 import PresentationMode from './components/PresentationMode';
 
@@ -16,6 +17,7 @@ export default function App() {
   const { surveys, transforms, loading, error } = useSurveyData();
   const [chatOpen, setChatOpen]       = useState(false);
   const [presentMode, setPresentMode] = useState(false);
+  const [activeTab, setActiveTab]     = useState('story');
 
   // P key toggles presentation mode
   useEffect(() => {
@@ -39,7 +41,7 @@ export default function App() {
         justifyContent: 'center',
         flexDirection: 'column',
         gap: 12,
-        fontFamily: 'Inter, sans-serif',
+        fontFamily: 'DM Sans, sans-serif',
       }}
     >
       <div
@@ -63,7 +65,7 @@ export default function App() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        fontFamily: 'Inter, sans-serif',
+        fontFamily: 'DM Sans, sans-serif',
       }}
     >
       <p style={{ color: '#E5554F' }}>Error loading data — check console.</p>
@@ -72,13 +74,45 @@ export default function App() {
 
   return (
     <div style={{ background: '#1a1d1e', minHeight: '100vh' }}>
-      <Nav onOpenChat={() => setChatOpen(true)} onPresent={() => setPresentMode(true)} />
-      <Hero transforms={transforms} />
-      <GrowthStory transforms={transforms} />
-      <ConvictionMoment transforms={transforms} />
-      <TrendCharts transforms={transforms} />
-      <DeepDive surveys={surveys} transforms={transforms} />
-      <OpportunitySpotlight transforms={transforms} />
+      <Nav
+        onOpenChat={() => setChatOpen(true)}
+        onPresent={() => setPresentMode(true)}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+      />
+
+      {/* Tab content — fade transition on tab change */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={activeTab}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          {activeTab === 'story' && (
+            <>
+              <Hero transforms={transforms} />
+              <GrowthStory transforms={transforms} />
+              <ConvictionMoment transforms={transforms} />
+            </>
+          )}
+          {activeTab === 'numbers' && (
+            <TrendCharts transforms={transforms} />
+          )}
+          {activeTab === 'team' && (
+            <>
+              <DeepDive surveys={surveys} transforms={transforms} />
+              <Archetypes transforms={transforms} />
+            </>
+          )}
+          {activeTab === 'whats-next' && (
+            <OpportunitySpotlight transforms={transforms} />
+          )}
+        </motion.div>
+      </AnimatePresence>
+
+      {/* Always-mounted overlays — available from any tab */}
       <ChatPanel transforms={transforms} open={chatOpen} setOpen={setChatOpen} />
 
       {/* Presentation mode overlay */}

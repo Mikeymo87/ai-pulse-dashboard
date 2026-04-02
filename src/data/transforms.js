@@ -351,6 +351,103 @@ export function buildTransforms({ survey1, survey2, survey3 }) {
     })(),
   };
 
+  // ── Archetype classification (S3 row-level, 16-dimension clustering) ─────────
+  // Priority waterfall: first matching rule wins.
+  // No rubric scores exposed — behavioral signals only.
+
+  const BLOCKED_BARRIERS = [
+    'Limited access', 'IT / access blocks', 'Privacy / compliance',
+    'Unclear guidelines', 'Too many tools',
+  ];
+
+  function classifyRow(r) {
+    const isDaily    = r.frequency === 'Daily';
+    const isWeekly   = r.frequency === 'Weekly';
+    const isMonthly  = r.frequency === 'Monthly';
+    const isRarely   = r.frequency === 'Rarely';
+    const isNever    = r.frequency === 'Never';
+    const advStage   = r.stage === 'Integration' || r.stage === 'Transformation';
+    const highImport = r.importance >= 4;
+    const hasBarrier = r.barriers.length > 0 && !r.barriers.includes('No barriers');
+    const isBlocked  = r.barriers.some(b => BLOCKED_BARRIERS.includes(b));
+    const isMixed    = r.sentiment === 'Mixed' || r.sentiment === 'Negative';
+
+    // 1 — Multiplier: daily + advanced stage + strong conviction (own pocket OR importance 5)
+    if (isDaily && advStage && (r.ownPocket === true || r.importance === 5)) {
+      return 'multiplier';
+    }
+
+    // 2 — Blocked Believer: positive + high importance + active but org-constrained
+    if (
+      r.sentiment === 'Positive' &&
+      highImport &&
+      (isWeekly || isMonthly) &&
+      isBlocked
+    ) {
+      return 'blocked-believer';
+    }
+
+    // 3 — Thoughtful Skeptic: mixed/negative sentiment but still actively using
+    if (isMixed && !isRarely && !isNever) {
+      return 'thoughtful-skeptic';
+    }
+
+    // 4 — Experimenter: exploration stage or multi-tool trialler not yet in a routine
+    if (
+      r.stage === 'Experimentation' ||
+      r.stage === 'Understanding' ||
+      (r.tools.length >= 1 && (isWeekly || isMonthly) && !hasBarrier)
+    ) {
+      return 'experimenter';
+    }
+
+    // 5 — Confident Bystander: everyone else (low freq, no barriers, no conviction signals)
+    return 'confident-bystander';
+  }
+
+  const ARCHETYPE_KEYS = ['multiplier', 'blocked-believer', 'thoughtful-skeptic', 'experimenter', 'confident-bystander'];
+
+  const archetypeGroups = {};
+  for (const key of ARCHETYPE_KEYS) archetypeGroups[key] = [];
+
+  for (const row of survey3) {
+    const key = classifyRow(row);
+    archetypeGroups[key].push(row);
+  }
+
+  const archetypes = {};
+  for (const key of ARCHETYPE_KEYS) {
+    const rows = archetypeGroups[key];
+    const n = survey3.length;
+
+    // Pull 1 representative quote (struggle or excitement, whichever is more specific)
+    const quotes = rows
+      .map(r => (r.excitement || r.struggle || '').trim())
+      .filter(q => q.length > 20)
+      .sort((a, b) => b.length - a.length); // prefer more detailed quotes
+
+    // Behavioral stats for pill generation
+    const dailyPct = n ? Math.round((rows.filter(r => r.frequency === 'Daily').length / rows.length) * 100) : 0;
+    const ownPocketPct = rows.length ? Math.round((rows.filter(r => r.ownPocket === true).length / rows.length) * 100) : 0;
+    const positivePct = rows.length ? Math.round((rows.filter(r => r.sentiment === 'Positive').length / rows.length) * 100) : 0;
+    const topBarrier = (() => {
+      const bc = {};
+      for (const r of rows) for (const b of r.barriers) if (b !== 'No barriers') bc[b] = (bc[b] || 0) + 1;
+      const sorted = Object.entries(bc).sort((a, b) => b[1] - a[1]);
+      return sorted[0]?.[0] || null;
+    })();
+    const toolCount = rows.length ? Math.round(rows.reduce((s, r) => s + r.tools.length, 0) / rows.length * 10) / 10 : 0;
+
+    archetypes[key] = {
+      key,
+      count: rows.length,
+      pct: n ? Math.round((rows.length / n) * 100) : 0,
+      rows,
+      quotes: quotes.slice(0, 5),
+      stats: { dailyPct, ownPocketPct, positivePct, topBarrier, toolCount },
+    };
+  }
+
   return {
     // Cross-survey trends (the core story)
     responseCounts,
@@ -375,5 +472,7 @@ export function buildTransforms({ survey1, survey2, survey3 }) {
     ownPocketS3,
     byRole,
     byFunction,
+    // S3 persona clustering
+    archetypes,
   };
 }
