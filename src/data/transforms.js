@@ -704,6 +704,91 @@ export function buildTransforms({ survey1, survey2, survey3 }) {
     };
   }
 
+  // ── Open Text Intelligence — 4 cross-dimensional insights from S3 ───────────
+  //
+  // Patterns visible only when cross-referencing open text with behavioral data
+  // on the same respondent. No aggregation reveals these — they require looking
+  // at the whole person.
+
+  const TEAM_KEYWORDS = [
+    'team', 'colleague', 'teammate', 'others ', 'staff',
+    'getting my', 'getting the ', 'getting others', 'co-worker', 'coworker',
+    'department', 'buy-in', 'buy in', 'help others', 'others to use',
+    'peers', 'group', 'members to', 'everyone to',
+  ];
+
+  // 1. Aspiration-Action Gap: rich excitement text + low frequency
+  const aspirationGapRows = survey3.filter(r =>
+    r.excitement && r.excitement.trim().length > 80 &&
+    (r.frequency === 'Monthly' || r.frequency === 'Rarely' || r.frequency === 'Never')
+  );
+  const aspirationGap = {
+    count: aspirationGapRows.length,
+    pct: survey3.length ? Math.round((aspirationGapRows.length / survey3.length) * 100) : 0,
+    byFreq: ['Monthly', 'Rarely', 'Never'].map(f => ({
+      freq: f,
+      count: aspirationGapRows.filter(r => r.frequency === f).length,
+    })).filter(d => d.count > 0),
+    quotes: aspirationGapRows
+      .map(r => ({ text: r.excitement.trim(), freq: r.frequency }))
+      .filter(q => q.text.length > 30)
+      .slice(0, 4),
+  };
+
+  // 2. Tool-to-Mindset Link: Claude vs ChatGPT — different mental models of what AI is FOR
+  const toolMindset = (() => {
+    const claudeRows = survey3.filter(r => r.tools.some(t => /claude/i.test(t)));
+    const chatgptRows = survey3.filter(r => r.tools.some(t => /chatgpt/i.test(t)));
+    return {
+      claude: {
+        count: claudeRows.length,
+        quotes: claudeRows
+          .map(r => (r.excitement || '').trim())
+          .filter(q => q.length > 30)
+          .slice(0, 3),
+      },
+      chatgpt: {
+        count: chatgptRows.length,
+        quotes: chatgptRows
+          .map(r => (r.excitement || '').trim())
+          .filter(q => q.length > 30)
+          .slice(0, 3),
+      },
+      bothCount: survey3.filter(r =>
+        r.tools.some(t => /claude/i.test(t)) && r.tools.some(t => /chatgpt/i.test(t))
+      ).length,
+    };
+  })();
+
+  // 3. Leadership Voices: struggle text reveals informal adoption leaders
+  const leadershipRows = survey3.filter(r =>
+    r.struggle && TEAM_KEYWORDS.some(kw => r.struggle.toLowerCase().includes(kw))
+  );
+  const leadershipVoices = {
+    count: leadershipRows.length,
+    pct: survey3.length ? Math.round((leadershipRows.length / survey3.length) * 100) : 0,
+    quotes: leadershipRows
+      .map(r => r.struggle.trim())
+      .filter(q => q.length > 20)
+      .slice(0, 4),
+  };
+
+  // 4. Blocked Investors: paying out of pocket AND facing org friction barriers
+  const blockedInvestorRows = survey3.filter(r =>
+    r.ownPocket === true &&
+    r.barriers.some(b => ORG_BLOCK_BARRIERS.includes(b))
+  );
+  const blockedInvestors = {
+    count: blockedInvestorRows.length,
+    pct: survey3.length ? Math.round((blockedInvestorRows.length / survey3.length) * 100) : 0,
+    quotes: blockedInvestorRows
+      .map(r => (r.struggle || '').trim())
+      .filter(q => q.length > 20)
+      .slice(0, 4),
+  };
+
+  const openTextInsights = { aspirationGap, toolMindset, leadershipVoices, blockedInvestors };
+
   return {
     // Cross-survey trends (the core story)
     responseCounts,
@@ -730,5 +815,7 @@ export function buildTransforms({ survey1, survey2, survey3 }) {
     byFunction,
     // S3 persona clustering
     archetypes,
+    // S3 open text intelligence (cross-dimensional hidden insights)
+    openTextInsights,
   };
 }

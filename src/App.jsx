@@ -12,6 +12,7 @@ import DeepDive from './components/DeepDive';
 import Archetypes from './components/Archetypes';
 import ConvictionMoment from './components/ConvictionMoment';
 import PresentationMode from './components/PresentationMode';
+import OpenTextIntelligence from './components/OpenTextIntelligence';
 
 export default function App() {
   const { surveys, transforms, loading, error } = useSurveyData();
@@ -107,7 +108,10 @@ export default function App() {
             </>
           )}
           {activeTab === 'whats-next' && (
-            <OpportunitySpotlight transforms={transforms} />
+            <>
+              <OpportunitySpotlight transforms={transforms} />
+              <OpenTextIntelligence transforms={transforms} />
+            </>
           )}
         </motion.div>
       </AnimatePresence>
