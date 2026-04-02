@@ -13,12 +13,14 @@ import Archetypes from './components/Archetypes';
 import ConvictionMoment from './components/ConvictionMoment';
 import PresentationMode from './components/PresentationMode';
 import OpenTextIntelligence from './components/OpenTextIntelligence';
+import ParticipationStory from './components/ParticipationStory';
 
 export default function App() {
   const { surveys, transforms, loading, error } = useSurveyData();
-  const [chatOpen, setChatOpen]       = useState(false);
-  const [presentMode, setPresentMode] = useState(false);
-  const [activeTab, setActiveTab]     = useState('story');
+  const [chatOpen, setChatOpen]         = useState(false);
+  const [presentMode, setPresentMode]   = useState(false);
+  const [activeTab, setActiveTab]       = useState('story');
+  const [vaultOpen, setVaultOpen]       = useState(false);
 
   // P key toggles presentation mode
   useEffect(() => {
@@ -103,8 +105,58 @@ export default function App() {
           )}
           {activeTab === 'team' && (
             <>
-              <DeepDive surveys={surveys} transforms={transforms} />
+              <ParticipationStory />
               <Archetypes transforms={transforms} />
+
+              {/* Leadership Vault — hidden by default */}
+              <div style={{ padding: '0 32px 64px', maxWidth: 1360, margin: '0 auto' }}>
+                <button
+                  onClick={() => setVaultOpen(v => !v)}
+                  style={{
+                    background: 'transparent',
+                    border: '1px solid rgba(125,230,155,0.15)',
+                    borderRadius: 8,
+                    padding: '8px 16px',
+                    fontFamily: 'DM Sans, sans-serif',
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: '#797D80',
+                    cursor: 'pointer',
+                    letterSpacing: '0.08em',
+                    textTransform: 'uppercase',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    transition: 'color 0.2s, border-color 0.2s',
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.color = '#7DE69B';
+                    e.currentTarget.style.borderColor = 'rgba(125,230,155,0.4)';
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.color = '#797D80';
+                    e.currentTarget.style.borderColor = 'rgba(125,230,155,0.15)';
+                  }}
+                >
+                  <span style={{ fontSize: 9, opacity: 0.6 }}>◈</span>
+                  Leadership Vault
+                  <span style={{ fontSize: 10, opacity: 0.5 }}>{vaultOpen ? '▲' : '▼'}</span>
+                </button>
+
+                <AnimatePresence>
+                  {vaultOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3 }}
+                      style={{ overflow: 'hidden' }}
+                    >
+                      <DeepDive surveys={surveys} transforms={transforms} />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </>
           )}
           {activeTab === 'whats-next' && (
