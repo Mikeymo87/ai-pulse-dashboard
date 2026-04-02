@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 // ─── Card dimensions ──────────────────────────────────────────────────────────
 const CARD_W = 260;
-const CARD_H = 450;
+const CARD_H = 520;
 
 // ─── Arc layout: outer cards tilt outward and dip lower, center stands upright ─
 const ARC_CONFIG = [
@@ -17,15 +17,15 @@ const ARC_CONFIG = [
 // ─── Oracle readings (live count + pct injected) ──────────────────────────────
 const ORACLE_LINES = {
   'confident-bystander': (n, pct) =>
-    `${n} teammates — ${pct}% of your team — are ready. They just haven't had their first meaningful AI experience yet.`,
+    `${n} teammates — ${pct}% of your team — have the confidence but haven't yet had a moment that made it real. No barriers in their way. No friction to remove. All they need is the right first experience to turn potential into momentum.`,
   'thoughtful-skeptic': (n, pct) =>
-    `${n} teammates (${pct}%) are your most valuable critics. Earn their trust and the rest of the org follows.`,
+    `${n} teammates (${pct}%) ask the hardest questions in the room — and they deserve real answers, not enthusiasm. Earn their trust with transparency and rigor, and the rest of the department will follow their lead.`,
   'blocked-believer': (n, pct) =>
-    `${n} teammates (${pct}%) are being held back by systems, not their own will. One policy change unlocks this entire group.`,
+    `${n} teammates (${pct}%) want to go further than the system allows. The will is there. The barrier is institutional — access, policy, tooling. One well-placed decision unlocks this entire group at once.`,
   'experimenter': (n, pct) =>
-    `${n} teammates (${pct}%) are actively in motion. The right training converts them into your next Multipliers.`,
+    `${n} teammates (${pct}%) are already in motion — trying tools, building habits, figuring out what works. They are the highest-ROI training investment in the department. The right support converts them into Multipliers.`,
   'multiplier': (n, pct) =>
-    `${n} teammates — ${pct}% of your team — are already building with AI. Protect their time and amplify their reach.`,
+    `${n} teammates — ${pct}% of your team — are already building with AI, not just using it. They pay out of pocket, work at the frontier, and pull the rest of the department forward. Protect their time and amplify their reach.`,
 };
 
 // ─── Archetype static definitions — rainbow spectrum I→V (cool → warm) ────────
@@ -342,7 +342,7 @@ function CardFront({ def, data, revealed, onPortraitClick }) {
               transition={{ duration: 0.45, delay: 0.65 }}
               style={{
                 margin: 0, fontSize: 13, fontStyle: 'italic',
-                color: '#e8f0f5', lineHeight: 1.55,
+                color: '#e8f0f5', lineHeight: 1.35,
                 fontFamily: 'DM Sans, sans-serif',
                 textShadow: '0 1px 6px rgba(0,0,0,0.9)',
                 display: '-webkit-box', WebkitLineClamp: 3,
@@ -358,26 +358,26 @@ function CardFront({ def, data, revealed, onPortraitClick }) {
       {/* SVG ornate border frame */}
       <svg
         style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 2 }}
-        viewBox="0 0 260 450"
+        viewBox="0 0 260 520"
         preserveAspectRatio="none"
       >
-        <rect x="5" y="5" width="250" height="440" rx="13"
+        <rect x="5" y="5" width="250" height="510" rx="13"
           fill="none" stroke={def.accentColor} strokeWidth="1" strokeOpacity="0.5" />
-        <rect x="9" y="9" width="242" height="432" rx="10"
+        <rect x="9" y="9" width="242" height="502" rx="10"
           fill="none" stroke={def.accentColor} strokeWidth="0.5" strokeOpacity="0.22" />
         {/* Corner diamonds */}
         <rect x="1.5" y="1.5" width="9" height="9" fill={def.accentColor} opacity="0.8"
           transform="rotate(45 6 6)" />
         <rect x="249.5" y="1.5" width="9" height="9" fill={def.accentColor} opacity="0.8"
           transform="rotate(45 254 6)" />
-        <rect x="1.5" y="439.5" width="9" height="9" fill={def.accentColor} opacity="0.8"
-          transform="rotate(45 6 444)" />
-        <rect x="249.5" y="439.5" width="9" height="9" fill={def.accentColor} opacity="0.8"
-          transform="rotate(45 254 444)" />
+        <rect x="1.5" y="509.5" width="9" height="9" fill={def.accentColor} opacity="0.8"
+          transform="rotate(45 6 514)" />
+        <rect x="249.5" y="509.5" width="9" height="9" fill={def.accentColor} opacity="0.8"
+          transform="rotate(45 254 514)" />
         {/* Mid-side marks */}
-        <line x1="5" y1="225" x2="15" y2="225"
+        <line x1="5" y1="260" x2="15" y2="260"
           stroke={def.accentColor} strokeWidth="1.2" strokeOpacity="0.45" />
-        <line x1="245" y1="225" x2="255" y2="225"
+        <line x1="245" y1="260" x2="255" y2="260"
           stroke={def.accentColor} strokeWidth="1.2" strokeOpacity="0.45" />
       </svg>
     </div>
