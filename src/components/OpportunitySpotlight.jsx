@@ -78,7 +78,7 @@ function InsightCard({ card, index }) {
           fontWeight: 700,
           letterSpacing: '0.12em',
           color: cfg.color,
-          fontFamily: 'Inter, sans-serif',
+          fontFamily: 'DM Sans, sans-serif',
           textTransform: 'uppercase',
         }}>
           <span style={{ fontSize: 8 }}>{cfg.icon}</span>
@@ -89,10 +89,11 @@ function InsightCard({ card, index }) {
       {/* headline */}
       <p style={{
         margin: 0,
-        fontFamily: 'Inter, sans-serif',
+        fontFamily: 'DM Sans, sans-serif',
         fontSize: 17,
         fontWeight: 800,
         color: '#f0f2f4',
+        letterSpacing: '0.01em',
         lineHeight: 1.35,
       }}>
         {card.headline}
@@ -101,11 +102,11 @@ function InsightCard({ card, index }) {
       {/* body */}
       <p style={{
         margin: 0,
-        fontFamily: 'Inter, sans-serif',
-        fontSize: 13.5,
+        fontFamily: 'DM Sans, sans-serif',
+        fontSize: 15,
         fontWeight: 400,
         color: '#b0b8c0',
-        lineHeight: 1.65,
+        lineHeight: 1.7,
         flex: 1,
       }}>
         {card.body}
@@ -125,11 +126,12 @@ function InsightCard({ card, index }) {
           <span style={{ color: cfg.color, fontSize: 12, fontWeight: 700, flexShrink: 0, paddingTop: 1 }}>→</span>
           <p style={{
             margin: 0,
-            fontFamily: 'Inter, sans-serif',
-            fontSize: 12.5,
+            fontFamily: 'DM Sans, sans-serif',
+            fontSize: 14,
             fontWeight: 500,
             color: '#d0d8e0',
-            lineHeight: 1.55,
+            letterSpacing: '0.015em',
+            lineHeight: 1.6,
           }}>
             {card.action}
           </p>
@@ -140,8 +142,8 @@ function InsightCard({ card, index }) {
       <div style={{
         paddingTop: 14,
         borderTop: '1px solid rgba(255,255,255,0.07)',
-        fontFamily: 'Inter, sans-serif',
-        fontSize: 12,
+        fontFamily: 'DM Sans, sans-serif',
+        fontSize: 14,
         fontWeight: 600,
         color: cfg.color,
         letterSpacing: '0.03em',
@@ -169,7 +171,7 @@ function Spinner() {
       />
       <p style={{
         margin: 0,
-        fontFamily: 'Inter, sans-serif',
+        fontFamily: 'DM Sans, sans-serif',
         fontSize: 13,
         color: '#797D80',
       }}>
@@ -199,6 +201,8 @@ export default function OpportunitySpotlight({ transforms }) {
         ownPocketS3,
         momentumS3,
         benefitsS3,
+        archetypes,
+        openTextInsights,
       } = transforms;
 
       // ── Compute stats for prompt ──────────────────────────────────────────
@@ -254,6 +258,46 @@ export default function OpportunitySpotlight({ transforms }) {
         familiarityAvg: f.familiarityAvg,
       }));
 
+      // Archetypes summary (count + pct + 1 representative quote per persona)
+      const ARCHETYPE_KEYS = ['multiplier', 'blocked-believer', 'thoughtful-skeptic', 'experimenter', 'confident-bystander'];
+      const archetypesSummary = ARCHETYPE_KEYS.map(key => {
+        const a = archetypes?.[key];
+        return {
+          name: key,
+          count: a?.count ?? 0,
+          pct: a?.pct ?? 0,
+          topQuote: a?.quotes?.[0] ?? null,
+          stats: a?.stats ?? {},
+        };
+      });
+
+      // Open text cross-reference findings
+      const openTextSummary = openTextInsights ? {
+        aspirationGap: {
+          count: openTextInsights.aspirationGap.count,
+          pct: openTextInsights.aspirationGap.pct,
+          note: 'wrote inspiring excitement text but use AI less than weekly',
+          sampleQuote: openTextInsights.aspirationGap.quotes?.[0]?.text ?? null,
+        },
+        toolMindset: {
+          claudeUsers: openTextInsights.toolMindset.claude.count,
+          chatgptUsers: openTextInsights.toolMindset.chatgpt.count,
+          note: 'Claude users describe AI as thought partner; ChatGPT users describe speed/efficiency',
+        },
+        leadershipVoices: {
+          count: openTextInsights.leadershipVoices.count,
+          pct: openTextInsights.leadershipVoices.pct,
+          note: 'struggle text reveals informal adoption leaders pulling colleagues forward',
+          sampleQuote: openTextInsights.leadershipVoices.quotes?.[0] ?? null,
+        },
+        blockedInvestors: {
+          count: openTextInsights.blockedInvestors.count,
+          pct: openTextInsights.blockedInvestors.pct,
+          note: 'paying out of pocket AND facing org-friction barriers (IT, compliance, unclear guidelines)',
+          sampleQuote: openTextInsights.blockedInvestors.quotes?.[0] ?? null,
+        },
+      } : null;
+
       const ctx = {
         totalResponses: 292,
         surveys: [
@@ -295,6 +339,8 @@ export default function OpportunitySpotlight({ transforms }) {
           byRole: roleBreakdown,
           byFunction: functionBreakdown,
         },
+        archetypes: archetypesSummary,
+        openTextInsights: openTextSummary,
       };
 
       // ── API call ──────────────────────────────────────────────────────────
@@ -311,21 +357,29 @@ export default function OpportunitySpotlight({ transforms }) {
             model: 'claude-sonnet-4-6',
             max_tokens: 1800,
             system: `You are a strategic advisor for Baptist Health's Marketing & Communications department.
-You will receive structured survey data from 3 pulse surveys (Jan–Feb 2025, Aug–Sep 2025, Mar 2026)
-covering AI adoption across the department (292 total responses). The data also includes a team readiness
-breakdown by role and function from Survey 3.
+You will receive the full dataset from 3 pulse surveys (292 total responses, Jan 2025–Mar 2026), including:
+- Quantitative trends (sentiment, frequency, familiarity, confidence, importance, stage, barriers)
+- Team readiness by role and function
+- 5 behavioral archetypes derived from row-level S3 data (Multiplier, Blocked Believer, Thoughtful Skeptic, Experimenter, Confident Bystander)
+- Open text cross-reference findings (aspiration-action gap, tool-to-mindset patterns, informal leadership voices, blocked investors)
+
+Your job is to synthesize ALL of this — quantitative trends, persona distributions, and open text signals — into 5 strategic opportunity cards that tell leadership WHERE to invest and WHY.
+
 Return ONLY a valid JSON array of exactly 5 insight objects. No explanation, no markdown, no wrapper text.
-Each object must have: { "category": string, "headline": string, "body": string, "action": string, "stat": string }
+Each object: { "category": string, "headline": string, "body": string, "action": string, "stat": string }
 category must be one of: ENABLEMENT, ADOPTION, RISK, MOMENTUM, READINESS
-The 5th card must use category READINESS and focus specifically on which roles or functions show the highest
-and lowest readiness (confidence + importance scores), and what leadership should do to close the gaps.
-headline: 8–12 words, punchy, declarative, present-tense
-body: 2–3 sentences describing what the data shows — grounded strictly in the numbers provided, no invented figures
-action: 1–2 sentences with a specific, actionable recommendation for department leadership — what to do next based on this insight
-stat: one key supporting data point as a short string, e.g. "↑ 34% daily use in Survey 3"`,
+
+Rules:
+- Do NOT treat each category in isolation — the best insights cross-reference multiple data layers (e.g., archetype count + open text quote + trend delta)
+- The READINESS card must name specific roles or functions with the highest and lowest readiness gaps
+- The ENABLEMENT card should reference the blocked investors or aspiration-gap finding if relevant
+- headline: 8–12 words, punchy, declarative, present-tense
+- body: 2–3 sentences grounded strictly in the data provided — cite actual numbers, name actual archetypes or patterns
+- action: 1–2 sentences with a specific, concrete leadership recommendation — not a platitude
+- stat: one short supporting data point, e.g. "↑ 34% daily use in Survey 3" or "23 Blocked Believers waiting on IT access"`,
             messages: [{
               role: 'user',
-              content: `Here is the structured survey data. Generate 5 insight cards — one each for ENABLEMENT, ADOPTION, RISK, MOMENTUM, and READINESS:\n\n${JSON.stringify(ctx, null, 2)}`,
+              content: `Here is the full dataset. Generate 5 insight cards — one each for ENABLEMENT, ADOPTION, RISK, MOMENTUM, and READINESS — synthesizing across all layers:\n\n${JSON.stringify(ctx, null, 2)}`,
             }],
           }),
         });
@@ -369,10 +423,10 @@ stat: one key supporting data point as a short string, e.g. "↑ 34% daily use i
     <section
       id="spotlight"
       style={{
-        padding: '96px 24px 80px',
-        maxWidth: 1120,
+        padding: '96px 32px 80px',
+        maxWidth: 1360,
         margin: '0 auto',
-        fontFamily: 'Inter, sans-serif',
+        fontFamily: 'DM Sans, sans-serif',
       }}
     >
       {/* Section header */}
@@ -381,36 +435,37 @@ stat: one key supporting data point as a short string, e.g. "↑ 34% daily use i
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.5 }}
-        style={{ marginBottom: 52, textAlign: 'center' }}
+        style={{ marginBottom: 56, textAlign: 'center' }}
       >
         <span style={{
           display: 'inline-block',
-          fontSize: 10,
+          fontSize: 11,
           fontWeight: 700,
-          letterSpacing: '0.18em',
+          letterSpacing: '0.13em',
           color: '#7DE69B',
           textTransform: 'uppercase',
-          marginBottom: 14,
+          marginBottom: 12,
         }}>
           AI-Powered Insights
         </span>
         <h2 style={{
-          margin: '0 0 14px',
-          fontSize: 'clamp(28px, 4vw, 40px)',
-          fontWeight: 900,
+          margin: '0 0 16px',
+          fontSize: 'clamp(30px, 4vw, 44px)',
+          fontWeight: 800,
           color: '#f0f2f4',
-          lineHeight: 1.15,
-          letterSpacing: '-0.02em',
+          lineHeight: 1.1,
+          letterSpacing: '-0.025em',
+          fontFamily: "'Plus Jakarta Sans', sans-serif",
         }}>
           Where the Opportunity Lives
         </h2>
         <p style={{
           margin: 0,
-          fontSize: 15,
+          fontSize: 16,
           color: '#797D80',
-          maxWidth: 520,
+          maxWidth: 560,
           marginInline: 'auto',
-          lineHeight: 1.6,
+          lineHeight: 1.65,
         }}>
           Claude analyzed 14 months of survey data to surface the patterns that matter most.
         </p>
@@ -433,7 +488,7 @@ stat: one key supporting data point as a short string, e.g. "↑ 34% daily use i
           border: '1px solid rgba(125,230,155,0.1)',
           borderRadius: 16,
           padding: '36px 28px',
-          fontFamily: 'Inter, sans-serif',
+          fontFamily: 'DM Sans, sans-serif',
           textAlign: 'center',
           display: 'flex',
           flexDirection: 'column',
@@ -451,7 +506,7 @@ stat: one key supporting data point as a short string, e.g. "↑ 34% daily use i
               borderRadius: 8,
               padding: '8px 20px',
               color: '#7DE69B',
-              fontFamily: 'Inter, sans-serif',
+              fontFamily: 'DM Sans, sans-serif',
               fontSize: 13,
               fontWeight: 600,
               cursor: 'pointer',

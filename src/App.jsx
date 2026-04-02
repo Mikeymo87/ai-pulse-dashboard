@@ -109,8 +109,8 @@ export default function App() {
           )}
           {activeTab === 'whats-next' && (
             <>
-              <OpportunitySpotlight transforms={transforms} />
               <OpenTextIntelligence transforms={transforms} />
+              <OpportunitySpotlight transforms={transforms} />
             </>
           )}
         </motion.div>
