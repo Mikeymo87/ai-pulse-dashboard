@@ -240,8 +240,8 @@ function CardBack({ accentColor }) {
   );
 }
 
-// ─── Card Front — portrait + color overlay + full info panel ──────────────────
-function CardFront({ def, data, dynamicPills, onPortraitClick }) {
+// ─── Card Front — portrait + color overlay + oracle in panel (no pills) ──────
+function CardFront({ def, data, revealed, onPortraitClick }) {
   return (
     <div style={{
       width: '100%', height: '100%',
@@ -260,9 +260,9 @@ function CardFront({ def, data, dynamicPills, onPortraitClick }) {
         zIndex: 3,
       }} />
 
-      {/* Portrait image — top 45%, clickable to open full-screen */}
+      {/* Portrait image — top 60%, clickable to open full-screen */}
       <div
-        style={{ position: 'relative', height: '45%', overflow: 'hidden', flexShrink: 0, cursor: 'zoom-in' }}
+        style={{ position: 'relative', height: '60%', overflow: 'hidden', flexShrink: 0, cursor: 'zoom-in' }}
         onClick={e => { e.stopPropagation(); onPortraitClick(); }}
         title="Click to view full portrait"
       >
@@ -271,11 +271,17 @@ function CardFront({ def, data, dynamicPills, onPortraitClick }) {
           alt={def.name}
           style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center', display: 'block' }}
         />
-        {/* Accent color tint overlay */}
+        {/* Layer 1: hue shift */}
         <div style={{
           position: 'absolute', inset: 0,
-          background: def.accentColor, opacity: 0.28,
+          background: def.accentColor, opacity: 0.45,
           mixBlendMode: 'color', pointerEvents: 'none',
+        }} />
+        {/* Layer 2: luminosity boost — makes color pop on dark images */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: def.accentColor, opacity: 0.12,
+          mixBlendMode: 'screen', pointerEvents: 'none',
         }} />
         {/* Gradient fade into info panel */}
         <div style={{
@@ -285,55 +291,67 @@ function CardFront({ def, data, dynamicPills, onPortraitClick }) {
         }} />
       </div>
 
-      {/* Info panel — bottom 55% */}
+      {/* Info panel — bottom 40% */}
       <div style={{
         flex: 1,
         display: 'flex', flexDirection: 'column',
-        padding: '10px 14px 14px',
-        justifyContent: 'space-between',
+        padding: '8px 14px 12px',
+        gap: 6,
         minHeight: 0,
       }}>
-        {/* Header: roman numeral + count */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        {/* Roman numeral */}
+        <span style={{
+          fontSize: 10, fontWeight: 700, color: def.accentColor,
+          letterSpacing: '0.2em', fontFamily: 'DM Sans, sans-serif',
+        }}>
+          {def.roman}
+        </span>
+
+        {/* Thin accent divider */}
+        <div style={{ height: 1, background: `${def.accentColor}40`, flexShrink: 0 }} />
+
+        {/* Count + % — the visual anchor */}
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
           <span style={{
-            fontSize: 11, fontWeight: 700, color: def.accentColor,
-            letterSpacing: '0.18em', fontFamily: 'DM Sans, sans-serif',
+            fontSize: 48, fontWeight: 900, color: def.accentColor,
+            lineHeight: 1, fontFamily: 'DM Sans, sans-serif',
           }}>
-            {def.roman}
+            {data.count}
           </span>
-          <span style={{ fontSize: 10, color: '#797D80', fontFamily: 'DM Sans, sans-serif' }}>
-            <span style={{ fontSize: 22, fontWeight: 900, color: def.accentColor, lineHeight: 1 }}>
-              {data.count}
-            </span>
-            {' '}· {data.pct}% of team
+          <span style={{ fontSize: 12, color: '#797D80', fontFamily: 'DM Sans, sans-serif' }}>
+            · {data.pct}% of team
           </span>
         </div>
 
-        {/* Name */}
+        {/* Archetype name */}
         <div style={{
-          fontSize: 12, fontWeight: 800, color: '#fff',
+          fontSize: 11, fontWeight: 800, color: '#fff',
           letterSpacing: '0.07em', textTransform: 'uppercase', lineHeight: 1.2,
           fontFamily: 'DM Sans, sans-serif',
         }}>
           {def.name.replace('The ', '')}
         </div>
 
-        {/* Thin accent divider */}
-        <div style={{ height: 1, background: `${def.accentColor}40` }} />
-
-        {/* Tagline — 2-line clamp */}
-        <p style={{
-          margin: 0, fontSize: 10, fontStyle: 'italic', color: '#aab4bc', lineHeight: 1.5,
-          fontFamily: 'DM Sans, sans-serif',
-          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
-        }}>
-          {def.tagline}
-        </p>
-
-        {/* Dynamic pills */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-          {dynamicPills.map((p, i) => <Pill key={i} label={p.label} type={p.type} />)}
-        </div>
+        {/* Oracle reading — fades in after flip */}
+        <AnimatePresence>
+          {revealed && (
+            <motion.p
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.45, delay: 0.65 }}
+              style={{
+                margin: 0, fontSize: 10, fontStyle: 'italic',
+                color: def.accentColor, lineHeight: 1.5,
+                fontFamily: 'DM Sans, sans-serif',
+                display: '-webkit-box', WebkitLineClamp: 3,
+                WebkitBoxOrient: 'vertical', overflow: 'hidden',
+              }}
+            >
+              {ORACLE_LINES[def.key]?.(data.count, data.pct)}
+            </motion.p>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* SVG ornate border frame */}
@@ -362,34 +380,6 @@ function CardFront({ def, data, dynamicPills, onPortraitClick }) {
           stroke={def.accentColor} strokeWidth="1.2" strokeOpacity="0.45" />
       </svg>
     </div>
-  );
-}
-
-// ─── Oracle text — fades in below card after flip ─────────────────────────────
-function OracleText({ def, data, visible }) {
-  return (
-    <AnimatePresence>
-      {visible && (
-        <motion.p
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.5, delay: 0.65 }}
-          style={{
-            width: CARD_W,
-            margin: '10px 0 0',
-            fontSize: 11,
-            fontStyle: 'italic',
-            color: def.accentColor,
-            lineHeight: 1.55,
-            textAlign: 'center',
-            fontFamily: 'DM Sans, sans-serif',
-          }}
-        >
-          {ORACLE_LINES[def.key]?.(data.count, data.pct)}
-        </motion.p>
-      )}
-    </AnimatePresence>
   );
 }
 
@@ -606,7 +596,6 @@ function ArchetypeCard({ def, data, index, revealed, onReveal, onFocus }) {
   const arc = ARC_CONFIG[index] ?? { rotate: 0, dip: 0 };
 
   if (!data) return null;
-  const dynamicPills = buildDynamicPills(def.key, data);
 
   function handleMouseMove(e) {
     if (revealed) return;
@@ -667,7 +656,7 @@ function ArchetypeCard({ def, data, index, revealed, onReveal, onFocus }) {
                 <CardFront
                   def={def}
                   data={data}
-                  dynamicPills={dynamicPills}
+                  revealed={revealed}
                   onPortraitClick={() => onFocus(def.key)}
                 />
               </div>
@@ -675,9 +664,6 @@ function ArchetypeCard({ def, data, index, revealed, onReveal, onFocus }) {
           </motion.div>
         </div>
       </div>
-
-      {/* Oracle text — fades in after flip completes */}
-      <OracleText def={def} data={data} visible={revealed} />
     </div>
   );
 }
@@ -780,12 +766,12 @@ export default function Archetypes({ transforms }) {
       </div>
 
       {/* ── Arc spread — horizontal scroll, centered ── */}
-      <div style={{ overflowX: 'auto', overflowY: 'visible', padding: '0 40px 110px' }}>
+      <div style={{ overflowX: 'auto', overflowY: 'visible', padding: '0 0 110px' }}>
         <motion.div style={{
           display: 'flex', gap: 16,
           justifyContent: 'center', alignItems: 'flex-end',
           width: 'max-content', minWidth: '100%',
-          paddingBottom: 24,
+          paddingBottom: 24, paddingLeft: 24, paddingRight: 24,
         }}>
           {ARCHETYPE_DEFS.map((def, i) => (
             <motion.div
