@@ -18,12 +18,13 @@ const FOLLOW_UP_CHIPS = [
 ];
 
 // ─── Build system prompt from live transforms ────────────────────────────────
-function buildSystemPrompt(transforms) {
+function buildSystemPrompt(transforms, vaultUnlocked = false) {
   const {
     sentimentTrend, confidenceTrend, familiarityTrend,
     importanceTrend, frequencyTrend, stageTrend,
     barriersTrend, byRole, byFunction,
     toolsS2, toolsS3, benefitsS3, momentumS3, ownPocketS3,
+    archetypes, openTextInsights,
   } = transforms;
 
   const posS1 = sentimentTrend.find(e => e.sentiment === 'Positive')?.s1.pct ?? 0;
@@ -118,10 +119,31 @@ TOOLS USED — Survey 3 (personal/non-endorsed tools):
 ${topToolsS3 || 'No data'}
 
 TEAM READINESS BY ROLE (S3 only — confidence avg / importance avg):
-${topRoles || 'No role data'}
+${vaultUnlocked ? (topRoles || 'No role data') : '[Role-level data available in Leadership Vault]'}
 
 TEAM READINESS BY FUNCTION (S3 only):
+${vaultUnlocked ? (topFunctions || 'No function data') : '[Function-level data available in Leadership Vault]'}
+${vaultUnlocked && archetypes ? `
+--- LEADERSHIP VAULT DATA ---
+
+BEHAVIORAL ARCHETYPES (S3 row-level classification — 5 personas):
+${['multiplier','blocked-believer','experimenter','thoughtful-skeptic','confident-bystander'].map(k => {
+  const a = archetypes[k];
+  return `${k}: ${a?.count ?? 0} people (${a?.pct ?? 0}%) — daily:${a?.stats?.dailyPct ?? 0}%, own-pocket:${a?.stats?.ownPocketPct ?? 0}%, positive:${a?.stats?.positivePct ?? 0}%, top barrier:${a?.stats?.topBarrier ?? 'none'}`;
+}).join('\n')}
+
+OPEN TEXT CROSS-REFERENCE FINDINGS:
+Aspiration-Action Gap: ${openTextInsights?.aspirationGap?.count ?? 0} people (${openTextInsights?.aspirationGap?.pct ?? 0}%) wrote rich excitement text but use AI less than weekly
+Leadership Voices in Struggle: ${openTextInsights?.leadershipVoices?.count ?? 0} people (${openTextInsights?.leadershipVoices?.pct ?? 0}%) are managing team adoption, not just personal skill gaps
+Blocked Investors: ${openTextInsights?.blockedInvestors?.count ?? 0} people (${openTextInsights?.blockedInvestors?.pct ?? 0}%) pay out of pocket while facing org-level access barriers
+Tool Mindset: Claude users (${openTextInsights?.toolMindset?.claude?.count ?? 0}) describe AI as thought partner; ChatGPT users (${openTextInsights?.toolMindset?.chatgpt?.count ?? 0}) describe speed/efficiency
+
+FULL ROLE BREAKDOWN:
+${topRoles || 'No role data'}
+
+FULL FUNCTION BREAKDOWN:
 ${topFunctions || 'No function data'}
+--- END VAULT DATA ---` : ''}
 --- END DATA ---`;
 }
 
@@ -254,7 +276,7 @@ function Message({ msg }) {
         borderRadius: isUser ? '14px 14px 4px 14px' : '14px 14px 14px 4px',
         background: isUser ? 'rgba(125,230,155,0.18)' : 'rgba(29,77,82,0.55)',
         border: isUser ? '1px solid rgba(125,230,155,0.3)' : '1px solid rgba(125,230,155,0.1)',
-        fontFamily: 'Inter, sans-serif',
+        fontFamily: 'DM Sans, sans-serif',
       }}>
         {isUser
           ? <p style={{ margin: 0, fontSize: 13, lineHeight: 1.55, color: '#e0f5e8' }}>{msg.content}</p>
@@ -266,7 +288,7 @@ function Message({ msg }) {
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
-export default function ChatPanel({ transforms, open, setOpen }) {
+export default function ChatPanel({ transforms, open, setOpen, vaultUnlocked = false }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [thinking, setThinking] = useState(false);
@@ -304,7 +326,7 @@ export default function ChatPanel({ transforms, open, setOpen }) {
         body: JSON.stringify({
           model: 'claude-sonnet-4-6',
           max_tokens: 1024,
-          system: buildSystemPrompt(transforms),
+          system: buildSystemPrompt(transforms, vaultUnlocked),
           messages: newMessages.map(m => ({ role: m.role, content: m.content })),
         }),
       });
@@ -405,10 +427,10 @@ export default function ChatPanel({ transforms, open, setOpen }) {
                 boxShadow: '0 0 8px rgba(125,230,155,0.7)',
               }} />
               <div>
-                <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: '#f0f2f4', fontFamily: 'Inter, sans-serif' }}>
+                <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: '#f0f2f4', fontFamily: 'DM Sans, sans-serif' }}>
                   Ask the Data
                 </p>
-                <p style={{ margin: 0, fontSize: 10, color: '#797D80', fontFamily: 'Inter, sans-serif' }}>
+                <p style={{ margin: 0, fontSize: 10, color: '#797D80', fontFamily: 'DM Sans, sans-serif' }}>
                   Answers grounded in survey data only
                 </p>
               </div>
@@ -425,7 +447,7 @@ export default function ChatPanel({ transforms, open, setOpen }) {
               {showChips && (
                 <div style={{ marginBottom: 16 }}>
                   <p style={{
-                    fontFamily: 'Inter, sans-serif',
+                    fontFamily: 'DM Sans, sans-serif',
                     fontSize: 12,
                     color: '#797D80',
                     marginBottom: 10,
@@ -445,7 +467,7 @@ export default function ChatPanel({ transforms, open, setOpen }) {
                           padding: '7px 12px',
                           textAlign: 'left',
                           cursor: 'pointer',
-                          fontFamily: 'Inter, sans-serif',
+                          fontFamily: 'DM Sans, sans-serif',
                           fontSize: 12,
                           color: '#b0c8b8',
                           transition: 'background 0.15s',
@@ -471,7 +493,7 @@ export default function ChatPanel({ transforms, open, setOpen }) {
                       transition={{ duration: 0.3, delay: 0.2 }}
                       style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 10, paddingLeft: 4 }}
                     >
-                      <span style={{ fontSize: 10, color: '#797D80', fontFamily: 'Inter, sans-serif', letterSpacing: '0.06em' }}>
+                      <span style={{ fontSize: 10, color: '#797D80', fontFamily: 'DM Sans, sans-serif', letterSpacing: '0.06em' }}>
                         Want to go deeper?
                       </span>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
@@ -485,7 +507,7 @@ export default function ChatPanel({ transforms, open, setOpen }) {
                               borderRadius: 20,
                               padding: '4px 11px',
                               cursor: 'pointer',
-                              fontFamily: 'Inter, sans-serif',
+                              fontFamily: 'DM Sans, sans-serif',
                               fontSize: 11,
                               color: '#7DE69B',
                               whiteSpace: 'nowrap',
@@ -541,7 +563,7 @@ export default function ChatPanel({ transforms, open, setOpen }) {
                   border: '1px solid rgba(125,230,155,0.2)',
                   borderRadius: 10,
                   padding: '8px 12px',
-                  fontFamily: 'Inter, sans-serif',
+                  fontFamily: 'DM Sans, sans-serif',
                   fontSize: 13,
                   color: '#e0e0e0',
                   resize: 'none',

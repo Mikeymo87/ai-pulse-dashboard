@@ -21,7 +21,8 @@ const SLIDES_ALL = [
 
 // ── Lens-specific sequences (IDs reference SLIDES_ALL) ────────────────────────
 const SLIDE_SETS = {
-  council: SLIDES_ALL.map(s => s.id), // All 9 — deep dive
+  // 'team' slide excluded from all lenses — scatter/role data lives in Leadership Vault only
+  council: SLIDES_ALL.filter(s => s.id !== 'team').map(s => s.id),
   exec: [
     'overview',    // The full picture in 30 seconds
     'wave-1',      // Momentum — where the shift happened
@@ -35,7 +36,6 @@ const SLIDE_SETS = {
     'wave-1',      // The momentum you built
     'wave-2',      // Where you are now
     'trends-b',    // How you feel about it — confidence, readiness
-    'team',        // Who's doing what, which tools you're using
     'spotlight',   // What comes next
   ],
 };
@@ -93,7 +93,7 @@ function LensSelect({ onSelect }) {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        fontFamily: 'Inter, sans-serif',
+        fontFamily: 'DM Sans, sans-serif',
         padding: '48px 32px',
         boxSizing: 'border-box',
       }}
@@ -358,7 +358,7 @@ export default function PresentationMode({ transforms, surveys, onClose }) {
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
-        fontFamily: 'Inter, sans-serif',
+        fontFamily: 'DM Sans, sans-serif',
       }}
     >
       {/* ── Top bar ─────────────────────────────────────────────────────────── */}
