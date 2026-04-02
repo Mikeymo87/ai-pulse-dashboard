@@ -29,7 +29,7 @@ React + Vite · Tailwind CSS · Recharts · Framer Motion · Papa Parse · Claud
 
 ---
 
-## Component Map (current as of April 1, 2026)
+## Component Map (current as of April 2, 2026)
 
 | File | What it does |
 |------|-------------|
@@ -45,6 +45,7 @@ React + Vite · Tailwind CSS · Recharts · Framer Motion · Papa Parse · Claud
 | `src/components/OpportunitySpotlight.jsx` | 5 Claude API insight cards (ENABLEMENT/ADOPTION/RISK/MOMENTUM/READINESS) |
 | `src/components/ChatPanel.jsx` | Floating Claude chat — prompt chips, multi-turn, markdown render |
 | `src/components/PresentationMode.jsx` | P-key fullscreen slides — 7 slides, Audience Lens pre-flight (AI Council/Exec/Dept) |
+| `src/components/Archetypes.jsx` | Centerpiece tarot card experience — 5 archetype cards in arc fan spread, 3D tilt parallax, sequential reveal ritual, oracle readings inside card, full-screen portrait modal |
 | `src/components/StageFlow.jsx` | Unused — replaced by AdoptionCurve; leave in place |
 | `src/data/parseCSVs.js` | Papa Parse loader + normalization for all 3 surveys |
 | `src/data/transforms.js` | All aggregate stats — sentiment, confidence, frequency, familiarity, importance, stage, barriers, themes, tools, benefits, momentum, own-pocket, by role, by function; `s3OwnPocketQuotes` for ConvictionMoment |
@@ -85,25 +86,39 @@ React + Vite · Tailwind CSS · Recharts · Framer Motion · Papa Parse · Claud
 
 ---
 
-## What's Next — Idea #2 (not started)
+## Idea #2 — In Progress (April 2, 2026)
 
 Full detail in: `/Users/michaelmora/.claude/plans/twinkly-bouncing-pnueli.md`
 
-| # | What | Description | Priority |
-|---|------|-------------|----------|
-| 1 | **Tab Navigation** | 4 "museum rooms": Story / Numbers / Team / What's Next — kills the infinite scroll | ⭐ First |
-| 2 | **Adoption Scorecard** | Summary tiles that expand to full charts instead of 7 flat charts | High |
-| 3 | **Archetypes** | 5 personas from S3 row-level data (16 dimensions per person) | High |
-| 4 | **Open Text Intelligence** | Aspiration-action gap, tool-to-mindset links from open text | Medium |
-| 5 | **Participation Story** | 117-dot grid replacing scatter plot for public view | Medium |
+| # | What | Description | Priority | Status |
+|---|------|-------------|----------|--------|
+| 1 | **Tab Navigation** | 4 "museum rooms": Story / Numbers / Team / What's Next — kills the infinite scroll | ⭐ First | ✅ DONE |
+| 2 | **Adoption Scorecard** | 4 expandable metric tiles (Sentiment, Familiarity, Confidence, Importance) — "View full chart" expand; Frequency stays always-visible | High | ✅ DONE |
+| 3 | **Archetypes** | 5 personas from S3 row-level data (16 dimensions per person) | High | ✅ DONE |
+| 4 | **Open Text Intelligence** | Aspiration-action gap, tool-to-mindset links from open text | Medium | Next |
+| 5 | **Participation Story** | 117-dot grid replacing scatter plot for public view | Medium | |
 
-**Tab structure (when built):**
+**Tab structure (live):**
 | Tab | Contents |
 |-----|---------|
 | The Story | Hero + ThenNowDiptych + GrowthStory + ConvictionMoment |
-| The Numbers | AdoptionCurve + 5 trend charts + StruggleMap |
-| The Team | DeepDive (scatter + roles + tools) + Archetypes |
-| What's Next | OpportunitySpotlight + Claude Chat |
+| The Numbers | AdoptionScorecard (4 tiles) + Frequency chart (always-visible) + AdoptionCurve + StruggleMap |
+| The Team | DeepDive (scatter + roles + tools) + Archetypes (tarot cards) |
+| What's Next | OpportunitySpotlight + Claude Chat (floating) |
+
+**Component map additions:**
+| File | What it does |
+|------|-------------|
+| `src/components/AdoptionScorecard.jsx` | 4 metric tiles — Sentiment/Familiarity/Confidence/Importance — each with sparkline + expand-to-full-chart |
+| `src/components/Archetypes.jsx` | 5 archetype cards — arc fan spread, 3D tilt (back face), flip reveal, oracle text inside card, full-screen portrait modal; rainbow accent colors I→V (violet/blue/teal/mint/gold) |
+
+**Archetypes card details (live):**
+- CARD_W=260, CARD_H=520; arc config: rotate ±10/±5/0deg, dip 40/15/0px
+- Accent colors: confident-bystander=#A78BFA, thoughtful-skeptic=#60A5FA, blocked-believer=#59BEC9, experimenter=#7DE69B, multiplier=#FFCD00
+- Dual color overlay on portraits: mix-blend-mode:color at 45% + screen at 12%
+- Oracle text: 13px italic #e8f0f5, line-height 1.35, fades in at 0.65s delay after flip
+- Affinity scoring: 16 dimensions per respondent, 5 scorer functions 0–100, highest wins; near-ties → more advanced stage
+- Pills only in full-screen modal, not on card face
 
 ---
 
