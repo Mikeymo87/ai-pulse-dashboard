@@ -293,7 +293,7 @@ export default function TrendCharts({ transforms }) {
                 {s1Daily}% → {s3Daily}%
               </p>
               <p style={{
-                color: '#e0e0e0',
+                color: 'var(--text-primary)',
                 fontSize: 17,
                 fontWeight: 500,
                 fontFamily: 'DM Sans, sans-serif',
