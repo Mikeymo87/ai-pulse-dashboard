@@ -180,17 +180,44 @@ React + Vite · Tailwind CSS · Recharts · Framer Motion · Papa Parse · Claud
 | **SlideTeam cleanup** | Ghost slide still in `SLIDES_ALL` (filtered from all lenses); either repurpose or remove |
 | **OpportunitySpotlight QA** | Verify Claude API card quality with archetypes + open text injected |
 
-## Next Session — Monday Startup
+## Additional fixes (April 3 EOD)
+- `lucide-react` replaced with self-contained `src/components/Icons.jsx` — no external package, zero install risk on Replit, icons identical
+- All 5 components updated to import from `./Icons` instead of `lucide-react`
+- "What this tells us" callouts standardized to `fontSize: 13` + `var(--text-bridge)` across all 4 instances
+- "Daily AI use across the team" heading fixed: was hardcoded `#e0e0e0` (invisible in light mode) → `var(--text-primary)`
+- Tarot card back pineapple: inlined as SVG paths with `fill={ac}` — matches each archetype's accent color
+- Tarot card backs: each archetype's own accent color (red / orange / yellow / green / teal) — removed forced-green override
 
-Say **"continue the build"** — CLAUDE.md auto-loads.
+---
 
-**First thing to do Monday:**
-1. `npm run dev` → open http://localhost:5000
-2. View on mobile (Chrome DevTools → toggle device toolbar, 390px width)
-3. QA the mobile layout top to bottom across all 4 tabs
-4. Then tackle the Deferred list above in order
+## ✅ CURRENT PLAN — Monday (say "continue with current plan")
+
+### 1. Mobile QA pass — first priority
+`npm run dev` → Chrome DevTools → 390px width → scroll all 4 tabs top to bottom and note anything that looks off.
+
+### 2. Replit env var — security fix
+In Replit → Secrets tab → add `VITE_VAULT_PASSWORD` = `TGSD26`
+This removes the vault password from the public GitHub repo.
+
+### 3. Presentation slide polish
+Open Presentation Mode (P key) → test all 3 lenses (AI Council / Executive / Full Dept).
+Check: bell curve slide, archetypes slide, struggle map slide — any overflow or padding issues inside the presentation container.
+
+### 4. SlideTeam cleanup
+`SlideTeam` is a ghost slide in `SLIDES_ALL` but filtered from all 3 lenses. Either repurpose it or delete it.
+
+### 5. Blue sky ideation session
+Step back from execution — generate 10–15 ideas to make the dashboard more cohesive, more impressive, and better functioning. Score by impact vs. effort. Pick the top 3–5 to build.
+Topics: visual cohesion, storytelling arcs, interactivity gaps, AI integration depth, brand elevation.
+
+### 6. Phase 9 — Humanization & Media layer
+Add real human texture: pull-quote cards from open text, testimonial carousel (S1 hoping → S3 conviction), "behind the number" editorial callouts.
+Assets (photos/video) need to come from Michael.
+
+### Deferred (do not start until user says so)
+- Mobile Presentation Mode
 
 ---
 
 ## To Continue in a New Session
-Open Claude Code from this folder → CLAUDE.md auto-loads → say **"continue the build"**
+Open Claude Code from this folder → CLAUDE.md auto-loads → say **"continue with current plan"**
