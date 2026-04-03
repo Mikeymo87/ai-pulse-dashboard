@@ -154,11 +154,11 @@ function inlineFormat(text, key) {
     <span key={key}>
       {parts.map((part, i) => {
         if (part.startsWith('**') && part.endsWith('**'))
-          return <strong key={i} style={{ color: '#e8f5ec', fontWeight: 700 }}>{part.slice(2, -2)}</strong>;
+          return <strong key={i} style={{ color: 'var(--text-primary)', fontWeight: 700 }}>{part.slice(2, -2)}</strong>;
         if (part.startsWith('*') && part.endsWith('*'))
           return <em key={i} style={{ color: '#c8e0d0' }}>{part.slice(1, -1)}</em>;
         if (part.startsWith('`') && part.endsWith('`'))
-          return <code key={i} style={{ background: 'rgba(125,230,155,0.1)', borderRadius: 4, padding: '1px 5px', fontSize: 11, color: '#7DE69B', fontFamily: 'monospace' }}>{part.slice(1, -1)}</code>;
+          return <code key={i} style={{ background: 'rgba(125,230,155,0.1)', borderRadius: 4, padding: '1px 5px', fontSize: 11, color: 'var(--accent-mint)', fontFamily: 'monospace' }}>{part.slice(1, -1)}</code>;
         return part;
       })}
     </span>
@@ -180,7 +180,7 @@ function renderMarkdown(text) {
     if (/^#{2,3}\s/.test(line)) {
       const content = line.replace(/^#{2,3}\s/, '');
       elements.push(
-        <p key={i} style={{ margin: '10px 0 4px', fontWeight: 800, fontSize: 13, color: '#e8f5ec', letterSpacing: '0.01em' }}>
+        <p key={i} style={{ margin: '10px 0 4px', fontWeight: 800, fontSize: 13, color: 'var(--text-primary)', letterSpacing: '0.01em' }}>
           {inlineFormat(content, 0)}
         </p>
       );
@@ -197,8 +197,8 @@ function renderMarkdown(text) {
       elements.push(
         <ul key={`ul-${i}`} style={{ margin: '6px 0', paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 4 }}>
           {items.map((item, j) => (
-            <li key={j} style={{ fontSize: 13, color: '#c8d8d0', lineHeight: 1.55, listStyleType: 'none', display: 'flex', gap: 8 }}>
-              <span style={{ color: '#7DE69B', flexShrink: 0, marginTop: 1 }}>›</span>
+            <li key={j} style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.55, listStyleType: 'none', display: 'flex', gap: 8 }}>
+              <span style={{ color: 'var(--accent-mint)', flexShrink: 0, marginTop: 1 }}>›</span>
               <span>{inlineFormat(item, j)}</span>
             </li>
           ))}
@@ -218,8 +218,8 @@ function renderMarkdown(text) {
       elements.push(
         <ol key={`ol-${i}`} style={{ margin: '6px 0', paddingLeft: 0, display: 'flex', flexDirection: 'column', gap: 4, listStyle: 'none' }}>
           {items.map((item, j) => (
-            <li key={j} style={{ fontSize: 13, color: '#c8d8d0', lineHeight: 1.55, display: 'flex', gap: 8 }}>
-              <span style={{ color: '#7DE69B', fontWeight: 700, flexShrink: 0, minWidth: 16 }}>{j + 1}.</span>
+            <li key={j} style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.55, display: 'flex', gap: 8 }}>
+              <span style={{ color: 'var(--accent-mint)', fontWeight: 700, flexShrink: 0, minWidth: 16 }}>{j + 1}.</span>
               <span>{inlineFormat(item, j)}</span>
             </li>
           ))}
@@ -230,7 +230,7 @@ function renderMarkdown(text) {
 
     // Regular paragraph
     elements.push(
-      <p key={i} style={{ margin: '0 0 6px', fontSize: 13, color: '#c8d8d0', lineHeight: 1.6 }}>
+      <p key={i} style={{ margin: '0 0 6px', fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6 }}>
         {inlineFormat(line, 0)}
       </p>
     );
@@ -249,7 +249,7 @@ function TypingIndicator() {
           key={i}
           animate={{ opacity: [0.3, 1, 0.3] }}
           transition={{ repeat: Infinity, duration: 1, delay: i * 0.2 }}
-          style={{ width: 6, height: 6, borderRadius: '50%', background: '#7DE69B' }}
+          style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--accent-mint)' }}
         />
       ))}
     </div>
@@ -274,12 +274,12 @@ function Message({ msg }) {
         maxWidth: '86%',
         padding: '10px 14px',
         borderRadius: isUser ? '14px 14px 4px 14px' : '14px 14px 14px 4px',
-        background: isUser ? 'rgba(125,230,155,0.18)' : 'rgba(29,77,82,0.55)',
-        border: isUser ? '1px solid rgba(125,230,155,0.3)' : '1px solid rgba(125,230,155,0.1)',
+        background: isUser ? 'rgba(125,230,155,0.18)' : 'var(--card-bg)',
+        border: isUser ? '1px solid rgba(125,230,155,0.3)' : '1px solid var(--border)',
         fontFamily: 'DM Sans, sans-serif',
       }}>
         {isUser
-          ? <p style={{ margin: 0, fontSize: 13, lineHeight: 1.55, color: '#e0f5e8' }}>{msg.content}</p>
+          ? <p style={{ margin: 0, fontSize: 13, lineHeight: 1.55, color: 'var(--text-primary)' }}>{msg.content}</p>
           : renderMarkdown(msg.content)
         }
       </div>
@@ -402,7 +402,7 @@ export default function ChatPanel({ transforms, open, setOpen, vaultUnlocked = f
               width: 380,
               maxWidth: 'calc(100vw - 40px)',
               height: 520,
-              background: '#16191a',
+              background: 'var(--tooltip-bg)',
               border: '1px solid rgba(125,230,155,0.2)',
               borderRadius: 18,
               boxShadow: '0 16px 48px rgba(0,0,0,0.5)',
@@ -423,14 +423,14 @@ export default function ChatPanel({ transforms, open, setOpen, vaultUnlocked = f
             }}>
               <div style={{
                 width: 8, height: 8, borderRadius: '50%',
-                background: '#7DE69B',
+                background: 'var(--accent-mint)',
                 boxShadow: '0 0 8px rgba(125,230,155,0.7)',
               }} />
               <div>
-                <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: '#f0f2f4', fontFamily: 'DM Sans, sans-serif' }}>
+                <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'DM Sans, sans-serif' }}>
                   Ask the Data
                 </p>
-                <p style={{ margin: 0, fontSize: 10, color: '#797D80', fontFamily: 'DM Sans, sans-serif' }}>
+                <p style={{ margin: 0, fontSize: 10, color: 'var(--text-support)', fontFamily: 'DM Sans, sans-serif' }}>
                   Answers grounded in survey data only
                 </p>
               </div>
@@ -449,7 +449,7 @@ export default function ChatPanel({ transforms, open, setOpen, vaultUnlocked = f
                   <p style={{
                     fontFamily: 'DM Sans, sans-serif',
                     fontSize: 12,
-                    color: '#797D80',
+                    color: 'var(--text-support)',
                     marginBottom: 10,
                     textAlign: 'center',
                   }}>
@@ -469,7 +469,7 @@ export default function ChatPanel({ transforms, open, setOpen, vaultUnlocked = f
                           cursor: 'pointer',
                           fontFamily: 'DM Sans, sans-serif',
                           fontSize: 12,
-                          color: '#b0c8b8',
+                          color: 'var(--text-bridge)',
                           transition: 'background 0.15s',
                         }}
                         onMouseEnter={e => e.currentTarget.style.background = 'rgba(125,230,155,0.13)'}
@@ -493,7 +493,7 @@ export default function ChatPanel({ transforms, open, setOpen, vaultUnlocked = f
                       transition={{ duration: 0.3, delay: 0.2 }}
                       style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 10, paddingLeft: 4 }}
                     >
-                      <span style={{ fontSize: 10, color: '#797D80', fontFamily: 'DM Sans, sans-serif', letterSpacing: '0.06em' }}>
+                      <span style={{ fontSize: 10, color: 'var(--text-support)', fontFamily: 'DM Sans, sans-serif', letterSpacing: '0.06em' }}>
                         Want to go deeper?
                       </span>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
@@ -509,7 +509,7 @@ export default function ChatPanel({ transforms, open, setOpen, vaultUnlocked = f
                               cursor: 'pointer',
                               fontFamily: 'DM Sans, sans-serif',
                               fontSize: 11,
-                              color: '#7DE69B',
+                              color: 'var(--accent-mint)',
                               whiteSpace: 'nowrap',
                               transition: 'background 0.15s',
                             }}
@@ -531,8 +531,8 @@ export default function ChatPanel({ transforms, open, setOpen, vaultUnlocked = f
                   marginBottom: 10,
                 }}>
                   <div style={{
-                    background: 'rgba(29,77,82,0.6)',
-                    border: '1px solid rgba(125,230,155,0.1)',
+                    background: 'var(--card-bg)',
+                    border: '1px solid var(--border)',
                     borderRadius: '14px 14px 14px 4px',
                   }}>
                     <TypingIndicator />
@@ -559,13 +559,13 @@ export default function ChatPanel({ transforms, open, setOpen, vaultUnlocked = f
                 rows={1}
                 style={{
                   flex: 1,
-                  background: 'rgba(255,255,255,0.05)',
+                  background: 'var(--card-bg-dark)',
                   border: '1px solid rgba(125,230,155,0.2)',
                   borderRadius: 10,
                   padding: '8px 12px',
                   fontFamily: 'DM Sans, sans-serif',
                   fontSize: 13,
-                  color: '#e0e0e0',
+                  color: 'var(--text-medium)',
                   resize: 'none',
                   outline: 'none',
                   lineHeight: 1.4,

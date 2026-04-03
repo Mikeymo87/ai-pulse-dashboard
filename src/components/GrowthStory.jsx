@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useTheme } from '../hooks/useTheme';
 
 // Wave accent colors ordered by story arc:
 //   Wave 1 (Baseline)   = turquoise — neutral starting point
@@ -59,7 +60,7 @@ function MiniSentimentBar({ sentimentTrend, surveyKey }) {
     <div style={{ marginTop: 24 }}>
       <div style={{
         fontSize: 12,
-        color: '#797D80',
+        color: 'var(--text-support)',
         letterSpacing: '0.08em',
         textTransform: 'uppercase',
         marginBottom: 8,
@@ -78,7 +79,7 @@ function MiniSentimentBar({ sentimentTrend, surveyKey }) {
           pct > 0 ? (
             <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
               <div style={{ width: 6, height: 6, borderRadius: 2, background: color, flexShrink: 0 }} />
-              <span style={{ fontSize: 12, color: '#797D80', fontFamily: 'DM Sans, sans-serif' }}>
+              <span style={{ fontSize: 12, color: 'var(--text-support)', fontFamily: 'DM Sans, sans-serif' }}>
                 {label} {pct}%
               </span>
             </div>
@@ -178,7 +179,7 @@ function ConnectorLine({ index }) {
           viewport={{ once: true }}
           transition={{ duration: 0.5, ease: 'easeOut' }}
           style={{
-            color: '#b0b8c0',
+            color: 'var(--text-bridge)',
             fontSize: 16,
             fontWeight: 400,
             fontStyle: 'italic',
@@ -206,6 +207,8 @@ function ConnectorLine({ index }) {
 // ── Main component ────────────────────────────────────────────────────────────
 // presentationWave: when 0/1/2, show only that chapter (no section header)
 export default function GrowthStory({ transforms, presentationWave }) {
+  const theme   = useTheme();
+  const isLight = theme === 'light';
   const positive       = transforms.sentimentTrend.find(e => e.sentiment === 'Positive');
   const confidence     = transforms.confidenceTrend;
   const frequency      = transforms.frequencyTrend;
@@ -281,7 +284,7 @@ export default function GrowthStory({ transforms, presentationWave }) {
             fontFamily: 'DM Sans, sans-serif',
             fontSize: 11,
             fontWeight: 700,
-            color: '#7DE69B',
+            color: 'var(--accent-mint)',
             letterSpacing: '0.13em',
             textTransform: 'uppercase',
             marginBottom: 12,
@@ -291,7 +294,7 @@ export default function GrowthStory({ transforms, presentationWave }) {
           <h2 style={{
             fontSize: 'clamp(30px, 4vw, 44px)',
             fontWeight: 800,
-            color: '#f0f2f4',
+            color: 'var(--text-primary)',
             letterSpacing: '-0.025em',
             lineHeight: 1.1,
             margin: '0 0 16px',
@@ -300,7 +303,7 @@ export default function GrowthStory({ transforms, presentationWave }) {
             Three Waves, One Story
           </h2>
           <p style={{
-            color: '#797D80',
+            color: 'var(--text-support)',
             fontSize: 16,
             lineHeight: 1.65,
             margin: 0,
@@ -325,7 +328,7 @@ export default function GrowthStory({ transforms, presentationWave }) {
               transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: i * 0.05 }}
               viewport={{ once: true, amount: 0.15 }}
               style={{
-                background: 'rgba(29,77,82,0.22)',
+                background: 'var(--card-bg)',
                 borderLeft: `3px solid ${accent}`,
                 borderTopLeftRadius: 4,
                 borderBottomLeftRadius: 4,
@@ -337,7 +340,7 @@ export default function GrowthStory({ transforms, presentationWave }) {
                 display: 'flex',
                 gap: 80,
                 alignItems: 'flex-start',
-                boxShadow: '0 2px 40px rgba(0,0,0,0.35)',
+                boxShadow: isLight ? '0 2px 16px rgba(0,0,0,0.08)' : '0 2px 40px rgba(0,0,0,0.35)',
               }}
             >
               {/* Watermark number */}
@@ -386,7 +389,7 @@ export default function GrowthStory({ transforms, presentationWave }) {
                 <h3 style={{
                   fontSize: 32,
                   fontWeight: 700,
-                  color: 'rgba(255,255,255,0.95)',
+                  color: 'var(--text-primary)',
                   letterSpacing: '-0.02em',
                   marginTop: 10,
                   marginBottom: 0,
@@ -458,7 +461,7 @@ export default function GrowthStory({ transforms, presentationWave }) {
             margin: '0 auto 32px',
           }} />
           <p style={{
-            color: '#b0b8c0',
+            color: 'var(--text-bridge)',
             fontSize: 17,
             fontWeight: 400,
             fontStyle: 'italic',

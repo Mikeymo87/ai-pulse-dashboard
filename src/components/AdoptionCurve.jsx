@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
+import { useTheme } from '../hooks/useTheme';
 
 // ─── Wave data ────────────────────────────────────────────────────────────────
 // S1 + S2 hardcoded from beating_the_curve.md
@@ -111,12 +112,12 @@ const SEGMENTS = [
 // ─── Styles ───────────────────────────────────────────────────────────────────
 const FONT = 'DM Sans, sans-serif';
 
-const waveBtn = (active) => ({
+const waveBtn = (active, isLight) => ({
   padding: '7px 16px',
   borderRadius: 20,
-  border: active ? '1.5px solid #7DE69B' : '1.5px solid rgba(125,230,155,0.2)',
-  background: active ? 'rgba(125,230,155,0.1)' : 'rgba(255,255,255,0.03)',
-  color: active ? '#7DE69B' : '#797D80',
+  border: active ? '1.5px solid var(--accent-mint)' : '1.5px solid rgba(125,230,155,0.2)',
+  background: active ? 'rgba(125,230,155,0.1)' : (isLight ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.03)'),
+  color: active ? 'var(--accent-mint)' : 'var(--text-support)',
   fontSize: 12,
   fontWeight: active ? 700 : 500,
   fontFamily: FONT,
@@ -126,7 +127,18 @@ const waveBtn = (active) => ({
 });
 
 // ─── Component ────────────────────────────────────────────────────────────────
-export default function AdoptionCurve({ familiarityTrend }) {
+export default function AdoptionCurve({ familiarityTrend, compact = false }) {
+  const theme = useTheme();
+  const isLight = theme === 'light';
+  const svgTextFill = isLight ? 'rgba(26,29,30,0.97)' : 'rgba(255,255,255,0.97)';
+  const svgSubFill  = isLight ? 'rgba(26,29,30,0.65)' : 'rgba(255,255,255,0.65)';
+
+  // Theme-aware SVG colors
+  const pillBg        = isLight ? 'rgba(255,255,255,0.88)' : 'rgba(20,24,26,0.42)';
+  const dividerColor  = isLight ? 'rgba(0,0,0,0.18)'       : 'rgba(255,255,255,0.25)';
+  const outlineColor  = isLight ? 'rgba(0,0,0,0.10)'       : 'rgba(255,255,255,0.18)';
+  const baselineColor = isLight ? 'rgba(46,168,74,0.15)'   : 'rgba(125,230,155,0.08)';
+
   const containerRef  = useRef(null);
   const inView        = useInView(containerRef, { once: true, margin: '-80px' });
   const autoPlayedRef = useRef(false);
@@ -171,7 +183,12 @@ export default function AdoptionCurve({ familiarityTrend }) {
   } : null;
   // arrow + absolute % — for Laggards fewer is good (inverted)
   function deltaArrow(n, invert) { return (invert ? n < 0 : n > 0) ? '↑' : '↓'; }
-  function deltaColor(n, invert) { return (invert ? n < 0 : n > 0) ? '#7DE69B' : '#E5554F'; }
+  function deltaColor(n, invert) { return (invert ? n < 0 : n > 0) ? (isLight ? '#1d8040' : '#7DE69B') : '#E5554F'; }
+  function segmentTextFill(brightColor) {
+    if (!isLight) return brightColor;
+    const map = { '#7DE69B': '#1d8040', '#59BEC9': '#1a7585', '#FFCD00': '#8a6500' };
+    return map[brightColor] || brightColor;
+  }
   function deltaBadge(n, invert) { return `${deltaArrow(n, invert)}${Math.abs(n)}%`; }
 
   // Label x-center positions — clamped so they stay readable inside the viewbox
@@ -183,32 +200,34 @@ export default function AdoptionCurve({ familiarityTrend }) {
   const lagW   = 600 - cfg.div2X;
 
   return (
-    <div ref={containerRef}>
+    <div ref={containerRef} style={compact ? { height: '100%', display: 'flex', flexDirection: 'column' } : {}}>
 
       {/* ── Section header ─────────────────────────────────────────────────── */}
-      <div style={{ textAlign: 'center', marginBottom: 20 }}>
-        <p style={{
-          color: '#7DE69B', fontSize: 11, fontWeight: 700,
-          letterSpacing: '0.12em', textTransform: 'uppercase',
-          margin: '0 0 8px', fontFamily: FONT,
-        }}>
-          The Technology Adoption Curve
-        </p>
-        <h3 style={{
-          color: '#e0e0e0', fontSize: 'clamp(16px, 2.5vw, 20px)',
-          fontWeight: 800, margin: 0, fontFamily: FONT, lineHeight: 1.2,
-        }}>
-          We're Beating the Curve
-        </h3>
-        <p style={{ color: '#797D80', fontSize: 13, margin: '6px 0 0', fontFamily: FONT }}>
-          Baptist Health MarCom AI adoption — shifting left across 14 months
-        </p>
-      </div>
+      {!compact && (
+        <div style={{ textAlign: 'center', marginBottom: 20 }}>
+          <p style={{
+            color: 'var(--accent-mint)', fontSize: 11, fontWeight: 700,
+            letterSpacing: '0.12em', textTransform: 'uppercase',
+            margin: '0 0 8px', fontFamily: FONT,
+          }}>
+            The Technology Adoption Curve
+          </p>
+          <h3 style={{
+            color: 'var(--text-medium)', fontSize: 'clamp(16px, 2.5vw, 20px)',
+            fontWeight: 800, margin: 0, fontFamily: FONT, lineHeight: 1.2,
+          }}>
+            We're Beating the Curve
+          </h3>
+          <p style={{ color: 'var(--text-support)', fontSize: 13, margin: '6px 0 0', fontFamily: FONT }}>
+            Baptist Health MarCom AI adoption — shifting left across 14 months
+          </p>
+        </div>
+      )}
 
       {/* ── Wave buttons ───────────────────────────────────────────────────── */}
-      <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginBottom: 20, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginBottom: compact ? 12 : 20, flexWrap: 'wrap', flexShrink: 0 }}>
         {WAVE_META.map((m, i) => (
-          <button key={i} style={waveBtn(wave === i)} onClick={() => handleWave(i)}>
+          <button key={i} style={waveBtn(wave === i, isLight)} onClick={() => handleWave(i)}>
             {m.label}
             <span style={{ opacity: 0.6, fontWeight: 400, marginLeft: 6 }}>{m.date}</span>
           </button>
@@ -216,10 +235,11 @@ export default function AdoptionCurve({ familiarityTrend }) {
       </div>
 
       {/* ── Bell curve SVG ─────────────────────────────────────────────────── */}
-      <div style={{ position: 'relative', width: '100%', overflow: 'hidden' }}>
+      <div style={{ position: 'relative', width: '100%', overflow: 'hidden', ...(compact ? { flex: 1, minHeight: 0 } : {}) }}>
         <svg
           viewBox="0 0 600 300"
           width="100%"
+          height={compact ? '100%' : undefined}
           style={{ display: 'block', overflow: 'hidden' }}
         >
           <defs>
@@ -265,7 +285,7 @@ export default function AdoptionCurve({ familiarityTrend }) {
           </defs>
 
           {/* Subtle grid baseline */}
-          <line x1={0} y1={BASE_Y} x2={600} y2={BASE_Y} stroke="rgba(125,230,155,0.08)" strokeWidth={1} />
+          <line x1={0} y1={BASE_Y} x2={600} y2={BASE_Y} stroke={baselineColor} strokeWidth={1} />
 
           {/* ── Curve group — peak shifts left wave-to-wave via animated path ── */}
           <g>
@@ -280,19 +300,19 @@ export default function AdoptionCurve({ familiarityTrend }) {
               fill="url(#grad-lag)" clipPath="url(#ac-clip-lag)" />
             {/* Curve outline */}
             <motion.path animate={{ d: bellPath }} transition={{ duration: 0.75, ease: 'easeInOut' }}
-              fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth={1.5} />
+              fill="none" stroke={outlineColor} strokeWidth={1.5} />
           </g>
 
           {/* ── Divider lines ─────────────────────────────────────────────── */}
           <motion.line
             x1={cfg.div1X} x2={cfg.div1X} y1={50} y2={BASE_Y}
-            stroke="rgba(255,255,255,0.25)" strokeWidth={1.5} strokeDasharray="4 3"
+            stroke={dividerColor} strokeWidth={1.5} strokeDasharray="4 3"
             animate={{ x1: cfg.div1X, x2: cfg.div1X }}
             transition={{ duration: 0.75, ease: 'easeInOut' }}
           />
           <motion.line
             x1={cfg.div2X} x2={cfg.div2X} y1={50} y2={BASE_Y}
-            stroke="rgba(255,255,255,0.25)" strokeWidth={1.5} strokeDasharray="4 3"
+            stroke={dividerColor} strokeWidth={1.5} strokeDasharray="4 3"
             animate={{ x1: cfg.div2X, x2: cfg.div2X }}
             transition={{ duration: 0.75, ease: 'easeInOut' }}
           />
@@ -309,16 +329,16 @@ export default function AdoptionCurve({ familiarityTrend }) {
                 <rect x={-55} y={innovW > 100 ? 140 : innovW > 60 ? 143 : 158}
                   width={110}
                   height={innovW > 100 ? 65 : innovW > 60 ? 38 : 24}
-                  rx={9} fill="rgba(20,24,26,0.42)" />
+                  rx={9} fill={pillBg} />
                 {innovW > 60 && (
                   <text x={0} y={152} textAnchor="middle"
-                    fill={SEGMENTS[0].color} fontSize={8} fontWeight={800} fontFamily={FONT}
+                    fill={segmentTextFill(SEGMENTS[0].color)} fontSize={8} fontWeight={800} fontFamily={FONT}
                     letterSpacing="0.1em">
                     {SEGMENTS[0].label}
                   </text>
                 )}
                 <text x={0} y={172} textAnchor="middle"
-                  fill="rgba(255,255,255,0.97)" fontSize={24} fontWeight={900} fontFamily={FONT}>
+                  fill={svgTextFill} fontSize={24} fontWeight={900} fontFamily={FONT}>
                   {data.Innovators}%
                 </text>
                 {deltas && (
@@ -330,11 +350,11 @@ export default function AdoptionCurve({ familiarityTrend }) {
                 {innovW > 100 && (
                   <>
                     <text x={0} y={186} textAnchor="middle"
-                      fill="rgba(255,255,255,0.65)" fontSize={7.5} fontFamily={FONT}>
+                      fill={svgSubFill} fontSize={7.5} fontFamily={FONT}>
                       {SEGMENTS[0].sub[0]}
                     </text>
                     <text x={0} y={197} textAnchor="middle"
-                      fill="rgba(255,255,255,0.65)" fontSize={7.5} fontFamily={FONT}>
+                      fill={svgSubFill} fontSize={7.5} fontFamily={FONT}>
                       {SEGMENTS[0].sub[1]}
                     </text>
                   </>
@@ -350,14 +370,14 @@ export default function AdoptionCurve({ familiarityTrend }) {
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                 transition={{ duration: 0.3 }}
               >
-                <rect x={-55} y={140} width={110} height={65} rx={9} fill="rgba(20,24,26,0.42)" />
+                <rect x={-55} y={140} width={110} height={65} rx={9} fill={pillBg} />
                 <text x={0} y={152} textAnchor="middle"
-                  fill={SEGMENTS[1].color} fontSize={8} fontWeight={800} fontFamily={FONT}
+                  fill={segmentTextFill(SEGMENTS[1].color)} fontSize={8} fontWeight={800} fontFamily={FONT}
                   letterSpacing="0.1em">
                   {SEGMENTS[1].label}
                 </text>
                 <text x={0} y={172} textAnchor="middle"
-                  fill="rgba(255,255,255,0.97)" fontSize={24} fontWeight={900} fontFamily={FONT}>
+                  fill={svgTextFill} fontSize={24} fontWeight={900} fontFamily={FONT}>
                   {data.Pragmatists}%
                 </text>
                 {deltas && (
@@ -367,11 +387,11 @@ export default function AdoptionCurve({ familiarityTrend }) {
                   </text>
                 )}
                 <text x={0} y={186} textAnchor="middle"
-                  fill="rgba(255,255,255,0.65)" fontSize={7.5} fontFamily={FONT}>
+                  fill={svgSubFill} fontSize={7.5} fontFamily={FONT}>
                   {SEGMENTS[1].sub[0]}
                 </text>
                 <text x={0} y={197} textAnchor="middle"
-                  fill="rgba(255,255,255,0.65)" fontSize={7.5} fontFamily={FONT}>
+                  fill={svgSubFill} fontSize={7.5} fontFamily={FONT}>
                   {SEGMENTS[1].sub[1]}
                 </text>
               </motion.g>
@@ -388,16 +408,16 @@ export default function AdoptionCurve({ familiarityTrend }) {
                 <rect x={-55} y={lagW > 100 ? 140 : lagW > 60 ? 143 : 158}
                   width={110}
                   height={lagW > 100 ? 65 : lagW > 60 ? 38 : 24}
-                  rx={9} fill="rgba(20,24,26,0.42)" />
+                  rx={9} fill={pillBg} />
                 {lagW > 60 && (
                   <text x={0} y={152} textAnchor="middle"
-                    fill={SEGMENTS[2].color} fontSize={8} fontWeight={800} fontFamily={FONT}
+                    fill={segmentTextFill(SEGMENTS[2].color)} fontSize={8} fontWeight={800} fontFamily={FONT}
                     letterSpacing="0.1em">
                     {SEGMENTS[2].label}
                   </text>
                 )}
                 <text x={0} y={172} textAnchor="middle"
-                  fill="rgba(255,255,255,0.97)" fontSize={24} fontWeight={900} fontFamily={FONT}>
+                  fill={svgTextFill} fontSize={24} fontWeight={900} fontFamily={FONT}>
                   {data.Laggards}%
                 </text>
                 {deltas && (
@@ -409,11 +429,11 @@ export default function AdoptionCurve({ familiarityTrend }) {
                 {lagW > 100 && (
                   <>
                     <text x={0} y={186} textAnchor="middle"
-                      fill="rgba(255,255,255,0.65)" fontSize={7.5} fontFamily={FONT}>
+                      fill={svgSubFill} fontSize={7.5} fontFamily={FONT}>
                       {SEGMENTS[2].sub[0]}
                     </text>
                     <text x={0} y={197} textAnchor="middle"
-                      fill="rgba(255,255,255,0.65)" fontSize={7.5} fontFamily={FONT}>
+                      fill={svgSubFill} fontSize={7.5} fontFamily={FONT}>
                       {SEGMENTS[2].sub[1]}
                     </text>
                   </>
@@ -423,109 +443,115 @@ export default function AdoptionCurve({ familiarityTrend }) {
           </motion.g>
 
           {/* ── X-axis labels ──────────────────────────────────────────────── */}
-          <text x={30}  y={290} fill="#797D80" fontSize={9.5} fontFamily={FONT} fontWeight={600}>
+          <text x={30}  y={290} fill="var(--chart-subtext)" fontSize={9.5} fontFamily={FONT} fontWeight={600}>
             ← More Innovative
           </text>
-          <text x={570} y={290} textAnchor="end" fill="#797D80" fontSize={9.5} fontFamily={FONT} fontWeight={600}>
+          <text x={570} y={290} textAnchor="end" fill="var(--chart-subtext)" fontSize={9.5} fontFamily={FONT} fontWeight={600}>
             Less Innovative →
           </text>
         </svg>
       </div>
 
       {/* ── Slider ─────────────────────────────────────────────────────────── */}
-      <div style={{ marginTop: 16, padding: '0 8px' }}>
-        <style>{`
-          .ac-slider {
-            -webkit-appearance: none;
-            width: 100%;
-            height: 4px;
-            border-radius: 2px;
-            background: rgba(125,230,155,0.15);
-            outline: none;
-            cursor: pointer;
-          }
-          .ac-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: #7DE69B;
-            box-shadow: 0 0 8px rgba(125,230,155,0.5);
-            cursor: pointer;
-          }
-          .ac-slider::-moz-range-thumb {
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: #7DE69B;
-            border: none;
-            box-shadow: 0 0 8px rgba(125,230,155,0.5);
-            cursor: pointer;
-          }
-        `}</style>
-        <input
-          type="range"
-          className="ac-slider"
-          min={0}
-          max={2}
-          step={1}
-          value={wave}
-          onChange={e => handleWave(Number(e.target.value))}
-        />
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
-          {WAVE_META.map((m, i) => (
-            <span key={i} style={{
-              fontSize: 9.5,
-              color: wave === i ? '#7DE69B' : '#797D80',
-              fontFamily: FONT,
-              fontWeight: wave === i ? 700 : 400,
-              transition: 'color 0.2s',
-            }}>
-              {m.label}
-            </span>
-          ))}
+      {!compact && (
+        <div style={{ marginTop: 16, padding: '0 8px' }}>
+          <style>{`
+            .ac-slider {
+              -webkit-appearance: none;
+              width: 100%;
+              height: 4px;
+              border-radius: 2px;
+              background: rgba(125,230,155,0.15);
+              outline: none;
+              cursor: pointer;
+            }
+            .ac-slider::-webkit-slider-thumb {
+              -webkit-appearance: none;
+              width: 18px;
+              height: 18px;
+              border-radius: 50%;
+              background: var(--accent-mint);
+              box-shadow: 0 0 8px rgba(125,230,155,0.5);
+              cursor: pointer;
+            }
+            .ac-slider::-moz-range-thumb {
+              width: 18px;
+              height: 18px;
+              border-radius: 50%;
+              background: var(--accent-mint);
+              border: none;
+              box-shadow: 0 0 8px rgba(125,230,155,0.5);
+              cursor: pointer;
+            }
+          `}</style>
+          <input
+            type="range"
+            className="ac-slider"
+            min={0}
+            max={2}
+            step={1}
+            value={wave}
+            onChange={e => handleWave(Number(e.target.value))}
+          />
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
+            {WAVE_META.map((m, i) => (
+              <span key={i} style={{
+                fontSize: 9.5,
+                color: wave === i ? 'var(--accent-mint)' : '#797D80',
+                fontFamily: FONT,
+                fontWeight: wave === i ? 700 : 400,
+                transition: 'color 0.2s',
+              }}>
+                {m.label}
+              </span>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── Survey label ───────────────────────────────────────────────────── */}
-      <AnimatePresence mode="wait">
-        <motion.p
-          key={wave}
-          initial={{ opacity: 0, y: 4 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -4 }}
-          transition={{ duration: 0.25 }}
-          style={{
-            textAlign: 'center', marginTop: 12,
-            color: '#e0e0e0', fontSize: 13, fontWeight: 700,
-            fontFamily: FONT,
-          }}
-        >
-          {meta.label}
-          <span style={{ color: '#797D80', fontWeight: 400, marginLeft: 8 }}>
-            {meta.date}
-          </span>
-        </motion.p>
-      </AnimatePresence>
+      {!compact && (
+        <AnimatePresence mode="wait">
+          <motion.p
+            key={wave}
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.25 }}
+            style={{
+              textAlign: 'center', marginTop: 12,
+              color: 'var(--text-medium)', fontSize: 13, fontWeight: 700,
+              fontFamily: FONT,
+            }}
+          >
+            {meta.label}
+            <span style={{ color: 'var(--text-support)', fontWeight: 400, marginLeft: 8 }}>
+              {meta.date}
+            </span>
+          </motion.p>
+        </AnimatePresence>
+      )}
 
       {/* ── Insight callout ────────────────────────────────────────────────── */}
-      <div style={{
-        marginTop: 16,
-        padding: '9px 12px',
-        borderLeft: '3px solid rgba(125,230,155,0.55)',
-        background: 'rgba(125,230,155,0.06)',
-        borderRadius: '0 8px 8px 0',
-      }}>
-        <p style={{
-          color: 'rgba(224,224,224,0.80)', fontSize: 11, fontStyle: 'italic',
-          margin: 0, lineHeight: 1.55, fontFamily: FONT,
+      {!compact && (
+        <div style={{
+          marginTop: 16,
+          padding: '9px 12px',
+          borderLeft: '3px solid rgba(125,230,155,0.55)',
+          background: 'rgba(125,230,155,0.06)',
+          borderRadius: '0 8px 8px 0',
         }}>
-          <span style={{ color: '#7DE69B', fontWeight: 700, fontStyle: 'normal', marginRight: 4 }}>
-            What this tells us:
-          </span>
-          The team shifted left — faster than most organizations ever do. Innovators grew from 16% → {s3.Innovators}% while Laggards virtually disappeared ({`25% → ${s3.Laggards}%`}). In Survey 3, even the Pragmatist group shrank — not because people fell behind, but because they graduated forward into Innovators. The curve isn't just shifting. It's changing shape.
-        </p>
-      </div>
+          <p style={{
+            color: 'var(--text-bridge)', fontSize: 11, fontStyle: 'italic',
+            margin: 0, lineHeight: 1.55, fontFamily: FONT,
+          }}>
+            <span style={{ color: 'var(--accent-mint)', fontWeight: 700, fontStyle: 'normal', marginRight: 4 }}>
+              What this tells us:
+            </span>
+            The team shifted left — faster than most organizations ever do. Innovators grew from 16% → {s3.Innovators}% while Laggards virtually disappeared ({`25% → ${s3.Laggards}%`}). In Survey 3, even the Pragmatist group shrank — not because people fell behind, but because they graduated forward into Innovators. The curve isn't just shifting. It's changing shape.
+          </p>
+        </div>
+      )}
 
     </div>
   );

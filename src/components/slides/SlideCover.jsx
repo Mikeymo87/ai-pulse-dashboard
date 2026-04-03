@@ -76,7 +76,7 @@ export default function SlideCover({ transforms }) {
           fontFamily: "'Plus Jakarta Sans', DM Sans, sans-serif",
           fontSize: 'clamp(68px, 9vw, 112px)',
           fontWeight: 900,
-          color: '#ffffff',
+          color: 'var(--text-primary)',
           lineHeight: 0.95,
           letterSpacing: '-0.04em',
         }}>
@@ -118,7 +118,7 @@ export default function SlideCover({ transforms }) {
                 fontFamily: 'DM Sans, sans-serif',
                 fontSize: 'clamp(36px, 4vw, 52px)',
                 fontWeight: 900,
-                color: '#f0f4f8',
+                color: 'var(--text-medium)',
                 lineHeight: 1,
                 letterSpacing: '-0.03em',
               }}>
@@ -150,7 +150,7 @@ export default function SlideCover({ transforms }) {
         style={{
           fontFamily: 'DM Sans, sans-serif',
           fontSize: 'clamp(15px, 1.6vw, 19px)',
-          color: '#9ca8b4',
+          color: 'var(--text-bridge)',
           lineHeight: 1.7,
           textAlign: 'center',
           maxWidth: 640,
@@ -173,7 +173,7 @@ export default function SlideCover({ transforms }) {
           bottom: 36,
           fontFamily: "'JetBrains Mono', monospace",
           fontSize: 11,
-          color: '#3a4048',
+          color: 'var(--text-support)',
           letterSpacing: '0.14em',
           textTransform: 'uppercase',
         }}

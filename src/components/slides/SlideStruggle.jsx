@@ -44,7 +44,7 @@ export default function SlideStruggle({ transforms }) {
           fontFamily: SANS,
           fontSize: 'clamp(26px, 3.2vw, 40px)',
           fontWeight: 900,
-          color: '#ffffff',
+          color: 'var(--text-primary)',
           letterSpacing: '-0.03em',
           lineHeight: 1.0,
           margin: '0 0 8px',
@@ -61,7 +61,7 @@ export default function SlideStruggle({ transforms }) {
           <p style={{
             fontFamily: 'DM Sans, sans-serif',
             fontSize: 13,
-            color: 'rgba(255,255,255,0.58)',
+            color: 'var(--text-dim)',
             fontStyle: 'italic',
             lineHeight: 1.65,
             margin: 0,

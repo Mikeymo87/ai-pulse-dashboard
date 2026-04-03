@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTheme } from '../hooks/useTheme';
 
 // ─── Card dimensions ──────────────────────────────────────────────────────────
 const CARD_W = 260;
@@ -95,8 +96,8 @@ const ARCHETYPE_DEFS = [
 // ─── Pill component ───────────────────────────────────────────────────────────
 function Pill({ label, type }) {
   const colors = {
-    green:  { bg: 'rgba(125,230,155,0.12)', border: 'rgba(125,230,155,0.35)', text: '#7DE69B' },
-    yellow: { bg: 'rgba(255,205,0,0.12)',   border: 'rgba(255,205,0,0.35)',   text: '#FFCD00' },
+    green:  { bg: 'var(--accent-mint-bg)',   border: 'rgba(125,230,155,0.35)', text: 'var(--accent-mint)' },
+    yellow: { bg: 'var(--accent-yellow-bg)', border: 'rgba(255,205,0,0.35)',   text: 'var(--accent-yellow)' },
   };
   const c = colors[type] || colors.yellow;
   return (
@@ -120,6 +121,9 @@ function Pill({ label, type }) {
 
 // ─── Card Back — ornate tarot back with accent-colored mandala ────────────────
 function CardBack({ accentColor }) {
+  const theme = useTheme();
+  const isLight = theme === 'light';
+  const ac = isLight ? '#2EA84A' : accentColor;
   const radials = [0, 30, 60, 90, 120, 150].map(deg => {
     const rad = (Math.PI * deg) / 180;
     return {
@@ -139,19 +143,19 @@ function CardBack({ accentColor }) {
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      boxShadow: `0 0 60px ${accentColor}22, inset 0 0 80px rgba(0,0,0,0.4)`,
+      boxShadow: `0 0 60px ${ac}22, inset 0 0 80px rgba(0,0,0,0.4)`,
     }}>
       {/* Outer ornate border */}
       <div style={{
         position: 'absolute', inset: 8,
-        border: `1px solid ${accentColor}55`,
+        border: `1px solid ${ac}55`,
         borderRadius: 10,
-        boxShadow: `inset 0 0 40px ${accentColor}0c`,
+        boxShadow: `inset 0 0 40px ${ac}0c`,
       }} />
       {/* Inner border */}
       <div style={{
         position: 'absolute', inset: 14,
-        border: `1px solid ${accentColor}28`,
+        border: `1px solid ${ac}28`,
         borderRadius: 7,
       }} />
 
@@ -165,7 +169,7 @@ function CardBack({ accentColor }) {
         <div key={i} style={{
           position: 'absolute', ...pos,
           width: 14, height: 14,
-          background: accentColor,
+          background: ac,
           transform: 'rotate(45deg)',
           opacity: 0.7,
         }} />
@@ -179,7 +183,7 @@ function CardBack({ accentColor }) {
         <div key={i} style={{
           position: 'absolute', ...s,
           width: 4, height: 22,
-          background: accentColor,
+          background: ac,
           opacity: 0.4,
           borderRadius: 2,
         }} />
@@ -191,7 +195,7 @@ function CardBack({ accentColor }) {
         <div key={i} style={{
           position: 'absolute', ...s,
           width: 22, height: 4,
-          background: accentColor,
+          background: ac,
           opacity: 0.4,
           borderRadius: 2,
         }} />
@@ -202,28 +206,28 @@ function CardBack({ accentColor }) {
         position: 'absolute',
         width: 220, height: 220,
         borderRadius: '50%',
-        background: `radial-gradient(ellipse, ${accentColor}1e 0%, transparent 70%)`,
+        background: `radial-gradient(ellipse, ${ac}1e 0%, transparent 70%)`,
         pointerEvents: 'none',
       }} />
 
       {/* Central mandala SVG */}
       <svg width="190" height="190" viewBox="0 0 120 120" style={{ opacity: 0.25 }}>
-        <circle cx="60" cy="60" r="55" stroke={accentColor} strokeWidth="0.8" fill="none" />
-        <circle cx="60" cy="60" r="44" stroke={accentColor} strokeWidth="0.6" fill="none" />
-        <circle cx="60" cy="60" r="32" stroke={accentColor} strokeWidth="0.8" fill="none" />
-        <circle cx="60" cy="60" r="20" stroke={accentColor} strokeWidth="0.6" fill="none" />
-        <circle cx="60" cy="60" r="8"  stroke={accentColor} strokeWidth="1"   fill="none" />
+        <circle cx="60" cy="60" r="55" stroke={ac} strokeWidth="0.8" fill="none" />
+        <circle cx="60" cy="60" r="44" stroke={ac} strokeWidth="0.6" fill="none" />
+        <circle cx="60" cy="60" r="32" stroke={ac} strokeWidth="0.8" fill="none" />
+        <circle cx="60" cy="60" r="20" stroke={ac} strokeWidth="0.6" fill="none" />
+        <circle cx="60" cy="60" r="8"  stroke={ac} strokeWidth="1"   fill="none" />
         {radials.map((l, i) => (
           <line key={i} x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2}
-            stroke={accentColor} strokeWidth="0.4" />
+            stroke={ac} strokeWidth="0.4" />
         ))}
         <polygon
           points="60,8 64,22 78,22 67,31 71,45 60,36 49,45 53,31 42,22 56,22"
-          stroke={accentColor} strokeWidth="0.7" fill="none"
+          stroke={ac} strokeWidth="0.7" fill="none"
         />
         <polygon
           points="60,40 62,47 70,47 64,52 66,59 60,55 54,59 56,52 50,47 58,47"
-          stroke={accentColor} strokeWidth="0.7" fill="none"
+          stroke={ac} strokeWidth="0.7" fill="none"
         />
       </svg>
 
@@ -231,7 +235,7 @@ function CardBack({ accentColor }) {
       <div style={{
         position: 'absolute', bottom: 24,
         fontSize: 9, fontWeight: 700, letterSpacing: '0.24em',
-        color: accentColor, opacity: 0.6, textTransform: 'uppercase',
+        color: ac, opacity: 0.6, textTransform: 'uppercase',
         fontFamily: 'DM Sans, sans-serif',
       }}>
         ✦ AI Pulse ✦
@@ -318,7 +322,7 @@ function CardFront({ def, data, revealed, onPortraitClick }) {
           }}>
             {data.count}
           </span>
-          <span style={{ fontSize: 12, color: '#797D80', fontFamily: 'DM Sans, sans-serif' }}>
+          <span style={{ fontSize: 12, color: 'var(--text-support)', fontFamily: 'DM Sans, sans-serif' }}>
             · {data.pct}% of team
           </span>
         </div>
@@ -459,7 +463,7 @@ function FullScreenPortrait({ def, data, dynamicPills, onClose }) {
               {def.name}
             </h2>
             <div style={{
-              marginTop: 6, fontSize: 13, color: '#797D80',
+              marginTop: 6, fontSize: 13, color: 'var(--text-support)',
               fontStyle: 'italic', fontFamily: 'DM Sans, sans-serif',
             }}>
               {def.tagline}
@@ -478,7 +482,7 @@ function FullScreenPortrait({ def, data, dynamicPills, onClose }) {
             }}>
               {data.count}
             </span>
-            <span style={{ fontSize: 13, color: '#797D80', marginLeft: 10, fontFamily: 'DM Sans, sans-serif' }}>
+            <span style={{ fontSize: 13, color: 'var(--text-support)', marginLeft: 10, fontFamily: 'DM Sans, sans-serif' }}>
               teammates · {data.pct}% of the team
             </span>
             <p style={{
@@ -712,9 +716,9 @@ export default function Archetypes({ transforms }) {
           display: 'inline-block',
           padding: '4px 12px',
           borderRadius: 20,
-          background: 'rgba(125,230,155,0.1)',
+          background: 'var(--accent-mint-bg)',
           border: '1px solid rgba(125,230,155,0.25)',
-          color: '#7DE69B',
+          color: 'var(--accent-mint)',
           fontSize: 11, fontWeight: 700,
           letterSpacing: '0.1em', textTransform: 'uppercase',
           marginBottom: 16,
@@ -726,7 +730,7 @@ export default function Archetypes({ transforms }) {
         <h2 style={{
           margin: '0 0 12px',
           fontSize: 'clamp(28px, 4vw, 40px)',
-          fontWeight: 900, color: '#fff',
+          fontWeight: 900, color: 'var(--text-primary)',
           letterSpacing: '-0.02em', lineHeight: 1.15,
           fontFamily: 'DM Sans, sans-serif',
         }}>
@@ -734,7 +738,7 @@ export default function Archetypes({ transforms }) {
         </h2>
 
         <p style={{
-          margin: '0 0 28px', fontSize: 15, color: '#797D80',
+          margin: '0 0 28px', fontSize: 15, color: 'var(--text-support)',
           maxWidth: 520, lineHeight: 1.7,
           fontFamily: 'DM Sans, sans-serif',
         }}>
@@ -754,7 +758,7 @@ export default function Archetypes({ transforms }) {
               background: 'linear-gradient(135deg, rgba(125,230,155,0.15), rgba(89,190,201,0.12))',
               border: '1px solid rgba(125,230,155,0.4)',
               borderRadius: 24,
-              color: '#7DE69B',
+              color: 'var(--accent-mint)',
               fontSize: 13, fontWeight: 700,
               cursor: revealing ? 'not-allowed' : 'pointer',
               letterSpacing: '0.04em',

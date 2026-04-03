@@ -28,7 +28,7 @@ export default function SlideBellCurve({ transforms }) {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45 }}
-        style={{ flexShrink: 0, marginBottom: 10 }}
+        style={{ flexShrink: 0, marginBottom: 8 }}
       >
         <div style={{
           fontFamily: MONO,
@@ -36,15 +36,15 @@ export default function SlideBellCurve({ transforms }) {
           color: 'rgba(125,230,155,0.6)',
           letterSpacing: '0.2em',
           textTransform: 'uppercase',
-          marginBottom: 8,
+          marginBottom: 6,
         }}>
           The Adoption Arc — Survey 1 → Survey 2 → Survey 3
         </div>
         <h1 style={{
           fontFamily: SANS,
-          fontSize: 'clamp(28px, 3.5vw, 44px)',
+          fontSize: 'clamp(24px, 3vw, 38px)',
           fontWeight: 900,
-          color: '#ffffff',
+          color: 'var(--text-primary)',
           letterSpacing: '-0.03em',
           lineHeight: 1.0,
           margin: '0 0 8px',
@@ -52,23 +52,16 @@ export default function SlideBellCurve({ transforms }) {
           The bell curve didn't just shift right —{' '}
           <span style={{ color: '#7DE69B' }}>it collapsed left.</span>
         </h1>
-
-        {/* Narrative */}
-        <div style={{
-          borderLeft: '3px solid rgba(125,230,155,0.35)',
-          paddingLeft: 14,
+        <p style={{
+          fontFamily: 'DM Sans, sans-serif',
+          fontSize: 12,
+          color: 'var(--text-dim)',
+          fontStyle: 'italic',
+          lineHeight: 1.5,
+          margin: 0,
         }}>
-          <p style={{
-            fontFamily: 'DM Sans, sans-serif',
-            fontSize: 13,
-            color: 'rgba(255,255,255,0.58)',
-            fontStyle: 'italic',
-            lineHeight: 1.65,
-            margin: 0,
-          }}>
-            As AI moved from novelty to necessity, the adoption profile of this team transformed. Watch the curve's peak shift left — from late majority toward early majority, and then toward the innovator edge. In 14 months, the shape of this team's relationship with AI changed completely.
-          </p>
-        </div>
+          Watch the peak shift left across three surveys — from late majority toward innovators. Use the buttons below to step through each wave.
+        </p>
       </motion.div>
 
       {/* AdoptionCurve fills the rest */}
@@ -83,7 +76,7 @@ export default function SlideBellCurve({ transforms }) {
           margin: '0 -56px',
         }}
       >
-        <AdoptionCurve familiarityTrend={transforms?.familiarityTrend ?? []} />
+        <AdoptionCurve familiarityTrend={transforms?.familiarityTrend ?? []} compact={true} />
       </motion.div>
     </div>
   );

@@ -3,10 +3,18 @@ import { motion } from 'framer-motion';
 
 // ─── Accent color per insight ID (fixed — not generated) ─────────────────────
 const ACCENT = {
-  'aspiration-gap':    '#FFCD00',
-  'tool-mindset':      '#59BEC9',
-  'leadership-voices': '#7DE69B',
+  'aspiration-gap':    'var(--accent-yellow)',
+  'tool-mindset':      'var(--accent-turq)',
+  'leadership-voices': 'var(--accent-mint)',
   'blocked-investors': '#E5554F',
+};
+
+// Background tint per insight ID (avoids hex-append opacity pattern)
+const BG_ACCENT = {
+  'aspiration-gap':    'var(--accent-yellow-bg)',
+  'tool-mindset':      'var(--accent-turq-bg)',
+  'leadership-voices': 'var(--accent-mint-bg)',
+  'blocked-investors': 'rgba(229,85,79,0.12)',
 };
 
 const LABEL = {
@@ -20,14 +28,14 @@ const ORDER = ['aspiration-gap', 'tool-mindset', 'leadership-voices', 'blocked-i
 
 // ─── Skeleton card ────────────────────────────────────────────────────────────
 function SkeletonCard({ delay = 0, id }) {
-  const accent = ACCENT[id] || '#7DE69B';
+  const accent = ACCENT[id] || 'var(--accent-mint)';
   return (
     <motion.div
       animate={{ opacity: [0.4, 0.75, 0.4] }}
       transition={{ repeat: Infinity, duration: 1.6, delay }}
       style={{
-        background: 'rgba(29,77,82,0.35)',
-        border: '1px solid rgba(125,230,155,0.15)',
+        background: 'var(--surface-green)',
+        border: '1px solid var(--border)',
         borderTop: `2px solid ${accent}`,
         borderRadius: 16,
         padding: '28px 28px 24px',
@@ -63,14 +71,14 @@ function Quotes({ quotes, accent, showFreq }) {
               fontFamily: 'DM Sans, sans-serif',
               fontSize: 12.5,
               lineHeight: 1.55,
-              color: '#c8d0d8',
+              color: 'var(--text-muted)',
               fontStyle: 'italic',
               margin: 0,
             }}>
               "{text}"
             </p>
             {showFreq && freq && (
-              <span style={{ display: 'inline-block', marginTop: 3, fontSize: 10, color: '#797D80', fontFamily: 'DM Sans, sans-serif' }}>
+              <span style={{ display: 'inline-block', marginTop: 3, fontSize: 10, color: 'var(--text-support)', fontFamily: 'DM Sans, sans-serif' }}>
                 — uses AI {freq}
               </span>
             )}
@@ -88,8 +96,8 @@ function ToolStat({ data }) {
   return (
     <div style={{ display: 'flex', gap: 10 }}>
       {[
-        { label: 'Claude users', count: claude.count, accent: '#59BEC9', quotes: claude.quotes, tag: 'Claude user' },
-        { label: 'ChatGPT users', count: chatgpt.count, accent: '#7DE69B', quotes: chatgpt.quotes, tag: 'ChatGPT user' },
+        { label: 'Claude users', count: claude.count, accent: 'var(--accent-turq)', quotes: claude.quotes, tag: 'Claude user' },
+        { label: 'ChatGPT users', count: chatgpt.count, accent: 'var(--accent-mint)', quotes: chatgpt.quotes, tag: 'ChatGPT user' },
       ].map(({ label, count, accent, quotes, tag }) => (
         <div key={label} style={{ flex: 1 }}>
           <div style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 22, fontWeight: 800, color: accent, lineHeight: 1 }}>{count}</div>
@@ -97,7 +105,7 @@ function ToolStat({ data }) {
           {quotes?.slice(0, 1).map((q, i) => (
             <div key={i} style={{ borderLeft: `2px solid ${accent}`, paddingLeft: 10 }}>
               <span style={{ display: 'block', fontSize: 9.5, fontFamily: 'DM Sans, sans-serif', color: accent, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>{tag}</span>
-              <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, lineHeight: 1.5, color: '#c8d0d8', fontStyle: 'italic', margin: 0 }}>"{q}"</p>
+              <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, lineHeight: 1.5, color: 'var(--text-muted)', fontStyle: 'italic', margin: 0 }}>"{q}"</p>
             </div>
           ))}
         </div>
@@ -108,8 +116,9 @@ function ToolStat({ data }) {
 
 // ─── Single insight card (AI copy + live data) ────────────────────────────────
 function InsightCard({ id, copy, data, index }) {
-  const accent = ACCENT[id];
-  const label  = LABEL[id];
+  const accent   = ACCENT[id];
+  const bgAccent = BG_ACCENT[id];
+  const label    = LABEL[id];
   return (
     <motion.div
       initial={{ opacity: 0, y: 28 }}
@@ -117,8 +126,8 @@ function InsightCard({ id, copy, data, index }) {
       viewport={{ once: true }}
       transition={{ duration: 0.55, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
       style={{
-        background: 'rgba(29,77,82,0.35)',
-        border: '1px solid rgba(125,230,155,0.15)',
+        background: 'var(--surface-green)',
+        border: '1px solid var(--border)',
         borderTop: `2px solid ${accent}`,
         borderRadius: 16,
         padding: '28px 28px 24px',
@@ -136,7 +145,7 @@ function InsightCard({ id, copy, data, index }) {
           fontSize: 10,
           fontWeight: 800,
           color: accent,
-          background: `${accent}18`,
+          background: bgAccent,
           borderRadius: 20,
           padding: '3px 10px',
           letterSpacing: '0.1em',
@@ -144,7 +153,7 @@ function InsightCard({ id, copy, data, index }) {
         }}>
           {label}
         </span>
-        <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 10.5, fontWeight: 700, color: '#797D80' }}>
+        <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 10.5, fontWeight: 700, color: 'var(--text-support)' }}>
           {String(index + 1).padStart(2, '0')} / 04
         </span>
       </div>
@@ -155,7 +164,7 @@ function InsightCard({ id, copy, data, index }) {
         fontFamily: 'DM Sans, sans-serif',
         fontSize: 17,
         fontWeight: 800,
-        color: '#f0f4f8',
+        color: 'var(--text-primary)',
         lineHeight: 1.35,
         letterSpacing: '0.01em',
       }}>
@@ -168,7 +177,7 @@ function InsightCard({ id, copy, data, index }) {
         fontFamily: 'DM Sans, sans-serif',
         fontSize: 14,
         lineHeight: 1.7,
-        color: '#b0b8c0',
+        color: 'var(--text-bridge)',
         flex: 1,
       }}>
         {copy.body}
@@ -369,7 +378,7 @@ Do not add markdown. Do not wrap in code fences. Return raw JSON only.`,
           fontSize: 11,
           fontWeight: 700,
           letterSpacing: '0.13em',
-          color: '#7DE69B',
+          color: 'var(--accent-mint)',
           textTransform: 'uppercase',
           marginBottom: 12,
         }}>
@@ -389,7 +398,7 @@ Do not add markdown. Do not wrap in code fences. Return raw JSON only.`,
         <p style={{
           margin: 0,
           fontSize: 15,
-          color: '#797D80',
+          color: 'var(--text-support)',
           maxWidth: 560,
           marginInline: 'auto',
           lineHeight: 1.7,
@@ -415,7 +424,7 @@ Do not add markdown. Do not wrap in code fences. Return raw JSON only.`,
           padding: '36px 28px',
           textAlign: 'center',
         }}>
-          <p style={{ margin: 0, color: '#797D80', fontSize: 14 }}>
+          <p style={{ margin: 0, color: 'var(--text-support)', fontSize: 14 }}>
             Insights couldn't load — check API key or try reloading.
           </p>
         </div>

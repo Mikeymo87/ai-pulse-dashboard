@@ -81,7 +81,7 @@ function ArchetypeCard({ archetype, data, delay = 0 }) {
 
       <div style={{ fontFamily: MONO, fontSize: 12, color: `rgba(${rgb},0.8)`, letterSpacing: '0.2em' }}>{roman}</div>
 
-      <div style={{ fontFamily: SANS, fontSize: 'clamp(13px, 1.3vw, 16px)', fontWeight: 800, color: '#ffffff', lineHeight: 1.2, letterSpacing: '-0.01em', whiteSpace: 'pre-line' }}>
+      <div style={{ fontFamily: SANS, fontSize: 'clamp(13px, 1.3vw, 16px)', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.2, letterSpacing: '-0.01em', whiteSpace: 'pre-line' }}>
         {name}
       </div>
 
@@ -95,7 +95,7 @@ function ArchetypeCard({ archetype, data, delay = 0 }) {
         </div>
       </div>
 
-      <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: '#9ca8b4', fontStyle: 'italic', lineHeight: 1.5, margin: 0 }}>
+      <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: 'var(--text-bridge)', fontStyle: 'italic', lineHeight: 1.5, margin: 0 }}>
         {tagline}
       </p>
 
@@ -138,14 +138,14 @@ export default function SlideArchetypes({ transforms }) {
         <div style={{ fontFamily: MONO, fontSize: 10, color: 'rgba(125,230,155,0.6)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 8 }}>
           The Team — {totalVoices} Voices · 16 Behavioral Dimensions · 5 Personas
         </div>
-        <h1 style={{ fontFamily: SANS, fontSize: 'clamp(30px, 4vw, 50px)', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.03em', lineHeight: 1.0, margin: '0 0 10px' }}>
+        <h1 style={{ fontFamily: SANS, fontSize: 'clamp(30px, 4vw, 50px)', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.03em', lineHeight: 1.0, margin: '0 0 10px' }}>
           Meet the team{' '}
           <span style={{ color: '#7DE69B' }}>behind the data.</span>
         </h1>
 
         {/* Narrative */}
         <div style={{ borderLeft: '3px solid rgba(125,230,155,0.3)', paddingLeft: 14 }}>
-          <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.55)', fontStyle: 'italic', lineHeight: 1.6, margin: 0 }}>
+          <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: 'var(--text-dim)', fontStyle: 'italic', lineHeight: 1.6, margin: 0 }}>
             Five archetypes, scored from 16 behavioral dimensions — not self-reported, not assumed. Every person on this team was placed by their actual usage patterns, sentiment, and investment signals. Each one has a different reason for being where they are, and a different path forward.
           </p>
         </div>

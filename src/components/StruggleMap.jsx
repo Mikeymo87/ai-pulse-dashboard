@@ -14,15 +14,15 @@ function getIntensity(pct, maxPct) {
 // Struggle: low mint → mid amber → high coral (friction scale)
 const STRUGGLE_COLORS = {
   high: { bg: 'rgba(229,85,79,0.25)',   border: 'rgba(229,85,79,0.55)',   accent: '#E5554F' },
-  mid:  { bg: 'rgba(255,205,0,0.18)',   border: 'rgba(255,205,0,0.45)',   accent: '#FFCD00' },
-  low:  { bg: 'rgba(125,230,155,0.10)', border: 'rgba(125,230,155,0.28)', accent: '#7DE69B' },
+  mid:  { bg: 'rgba(255,205,0,0.18)',   border: 'rgba(255,205,0,0.45)',   accent: 'var(--accent-yellow)' },
+  low:  { bg: 'rgba(125,230,155,0.10)', border: 'rgba(125,230,155,0.28)', accent: 'var(--accent-mint)' },
 };
 
 // Excitement: low mint → mid BH green → high turquoise (energy scale)
 const EXCITEMENT_COLORS = {
-  high: { bg: 'rgba(89,190,201,0.25)',  border: 'rgba(89,190,201,0.55)',  accent: '#59BEC9' },
+  high: { bg: 'rgba(89,190,201,0.25)',  border: 'rgba(89,190,201,0.55)',  accent: 'var(--accent-turq)' },
   mid:  { bg: 'rgba(46,168,74,0.20)',   border: 'rgba(46,168,74,0.45)',   accent: '#2EA84A' },
-  low:  { bg: 'rgba(125,230,155,0.10)', border: 'rgba(125,230,155,0.25)', accent: '#7DE69B' },
+  low:  { bg: 'rgba(125,230,155,0.10)', border: 'rgba(125,230,155,0.25)', accent: 'var(--accent-mint)' },
 };
 
 // ─── Individual heatmap cell ──────────────────────────────────────────────────
@@ -53,7 +53,7 @@ function ThemeCell({ theme, colorMap, maxPct, onEnter, onLeave, delay }) {
       }}
     >
       <span style={{
-        color: '#e0e0e0',
+        color: 'var(--text-medium)',
         fontSize: 11.5,
         fontWeight: 600,
         fontFamily: 'DM Sans, sans-serif',
@@ -69,7 +69,7 @@ function ThemeCell({ theme, colorMap, maxPct, onEnter, onLeave, delay }) {
         letterSpacing: '-0.01em',
       }}>
         {theme.pct}%
-        <span style={{ fontSize: 10, fontWeight: 500, color: '#797D80', marginLeft: 5 }}>
+        <span style={{ fontSize: 10, fontWeight: 500, color: 'var(--text-support)', marginLeft: 5 }}>
           ({theme.count})
         </span>
       </span>
@@ -101,7 +101,7 @@ function HoverTooltip({ tooltip }) {
         top,
         left,
         width: 340,
-        background: '#1a1d1e',
+        background: 'var(--tooltip-bg)',
         border: `1px solid ${c.border}`,
         borderRadius: 12,
         padding: '14px 16px',
@@ -148,7 +148,7 @@ function HoverTooltip({ tooltip }) {
 function IntensityLegend({ colorMap }) {
   return (
     <div style={{ display: 'flex', gap: 12, marginTop: 12, alignItems: 'center' }}>
-      <span style={{ color: '#797D80', fontSize: 12, fontFamily: 'DM Sans, sans-serif' }}>
+      <span style={{ color: 'var(--text-support)', fontSize: 12, fontFamily: 'DM Sans, sans-serif' }}>
         Intensity:
       </span>
       {['low', 'mid', 'high'].map((level) => {
@@ -160,7 +160,7 @@ function IntensityLegend({ colorMap }) {
               background: c.bg, border: `1px solid ${c.border}`,
               display: 'inline-block',
             }} />
-            <span style={{ color: '#797D80', fontSize: 12, fontFamily: 'DM Sans, sans-serif', textTransform: 'capitalize' }}>
+            <span style={{ color: 'var(--text-support)', fontSize: 12, fontFamily: 'DM Sans, sans-serif', textTransform: 'capitalize' }}>
               {level}
             </span>
           </div>
@@ -205,20 +205,20 @@ export default function StruggleMap({ transforms }) {
       {/* Section header */}
       <div style={{ marginBottom: 16, textAlign: 'center' }}>
         <p style={{
-          color: '#7DE69B', fontSize: 12, fontWeight: 700,
+          color: 'var(--accent-mint)', fontSize: 12, fontWeight: 700,
           letterSpacing: '0.12em', textTransform: 'uppercase',
           margin: '0 0 8px', fontFamily: FONT,
         }}>
           Struggle Map
         </p>
         <h3 style={{
-          color: '#e0e0e0', fontSize: 'clamp(18px, 2.5vw, 24px)',
+          color: 'var(--text-medium)', fontSize: 'clamp(18px, 2.5vw, 24px)',
           fontWeight: 800, margin: 0, fontFamily: FONT, lineHeight: 1.2,
         }}>
           What&rsquo;s in the Way — and What They&rsquo;re Reaching For
         </h3>
         <p style={{
-          color: '#797D80', fontSize: 15, margin: '8px 0 0',
+          color: 'var(--text-support)', fontSize: 15, margin: '8px 0 0',
           fontFamily: FONT, lineHeight: 1.6,
         }}>
           Open-text responses thematically coded &middot; Hover any cell to read verbatim quotes
@@ -230,8 +230,8 @@ export default function StruggleMap({ transforms }) {
         display: 'grid',
         gridTemplateColumns: '1fr 1fr',
         gap: 0,
-        background: 'rgba(29,77,82,0.35)',
-        border: '1px solid rgba(125,230,155,0.15)',
+        background: 'var(--surface-green)',
+        border: '1px solid var(--border)',
         borderRadius: 16,
         overflow: 'hidden',
       }}>
@@ -245,7 +245,7 @@ export default function StruggleMap({ transforms }) {
               borderRadius: 2, display: 'inline-block', flexShrink: 0,
             }} />
             <p style={{
-              color: '#e0e0e0', fontWeight: 700, fontSize: 15,
+              color: 'var(--text-medium)', fontWeight: 700, fontSize: 15,
               margin: 0, fontFamily: 'DM Sans, sans-serif', letterSpacing: '0.01em',
             }}>
               What&rsquo;s in the Way
@@ -285,18 +285,18 @@ export default function StruggleMap({ transforms }) {
           {/* Panel header */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
             <span style={{
-              width: 3, height: 18, background: '#59BEC9',
+              width: 3, height: 18, background: 'var(--accent-turq)',
               borderRadius: 2, display: 'inline-block', flexShrink: 0,
             }} />
             <p style={{
-              color: '#e0e0e0', fontWeight: 700, fontSize: 15,
+              color: 'var(--text-medium)', fontWeight: 700, fontSize: 15,
               margin: 0, fontFamily: 'DM Sans, sans-serif', letterSpacing: '0.01em',
             }}>
               What They&rsquo;re Reaching For
             </p>
             <span style={{
               background: 'rgba(89,190,201,0.14)',
-              color: '#59BEC9',
+              color: 'var(--accent-turq)',
               fontSize: 10, fontWeight: 700,
               padding: '2px 8px', borderRadius: 20,
               fontFamily: 'DM Sans, sans-serif',
@@ -338,7 +338,7 @@ export default function StruggleMap({ transforms }) {
           color: 'rgba(224,224,224,0.80)', fontSize: 11, fontStyle: 'italic',
           margin: 0, lineHeight: 1.55, fontFamily: 'DM Sans, sans-serif',
         }}>
-          <span style={{ color: '#7DE69B', fontWeight: 700, fontStyle: 'normal', marginRight: 4 }}>
+          <span style={{ color: 'var(--accent-mint)', fontWeight: 700, fontStyle: 'normal', marginRight: 4 }}>
             What this tells us:
           </span>
           The left panel names the friction. The right names the energy already available to overcome it.

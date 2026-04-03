@@ -161,7 +161,7 @@ export default function ConvictionMoment({ transforms }) {
           style={{
             fontSize: 'clamp(18px, 3vw, 24px)',
             fontWeight: 600,
-            color: 'rgba(255,255,255,0.9)',
+            color: 'var(--text-primary)',
             fontFamily: 'DM Sans, sans-serif',
             letterSpacing: '0.01em',
             lineHeight: 1.45,
@@ -219,7 +219,7 @@ export default function ConvictionMoment({ transforms }) {
                   fontSize: 15,
                   fontStyle: 'italic',
                   lineHeight: 1.75,
-                  color: 'rgba(255,255,255,0.6)',
+                  color: 'var(--text-dim)',
                   fontFamily: 'DM Sans, sans-serif',
                 }}
               >

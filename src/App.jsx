@@ -55,7 +55,7 @@ export default function App() {
     <div
       style={{
         minHeight: '100vh',
-        background: '#1a1d1e',
+        background: 'var(--bg)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -73,7 +73,7 @@ export default function App() {
           boxShadow: '0 0 20px rgba(125,230,155,0.7)',
         }}
       />
-      <p style={{ color: '#797D80', fontSize: 13 }}>Loading survey data…</p>
+      <p style={{ color: 'var(--text-support)', fontSize: 13 }}>Loading survey data…</p>
     </div>
   );
 
@@ -81,7 +81,7 @@ export default function App() {
     <div
       style={{
         minHeight: '100vh',
-        background: '#1a1d1e',
+        background: 'var(--bg)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -93,7 +93,7 @@ export default function App() {
   );
 
   return (
-    <div style={{ background: '#1a1d1e', minHeight: '100vh' }}>
+    <div style={{ background: 'var(--bg)', minHeight: '100vh' }}>
       <Nav
         onOpenChat={() => setChatOpen(true)}
         onPresent={() => setPresentMode(true)}
@@ -138,7 +138,7 @@ export default function App() {
                       fontFamily: 'DM Sans, sans-serif',
                       fontSize: 11,
                       fontWeight: 700,
-                      color: '#797D80',
+                      color: 'var(--text-support)',
                       cursor: 'pointer',
                       letterSpacing: '0.08em',
                       textTransform: 'uppercase',
@@ -158,7 +158,7 @@ export default function App() {
                         fontFamily: 'DM Sans, sans-serif',
                         fontSize: 11,
                         fontWeight: 700,
-                        color: '#7DE69B',
+                        color: 'var(--accent-mint)',
                         letterSpacing: '0.08em',
                         textTransform: 'uppercase',
                         display: 'flex',
@@ -174,7 +174,7 @@ export default function App() {
                         style={{
                           background: 'transparent',
                           border: 'none',
-                          color: '#797D80',
+                          color: 'var(--text-support)',
                           fontSize: 10,
                           cursor: 'pointer',
                           fontFamily: 'DM Sans, sans-serif',
@@ -210,7 +210,7 @@ export default function App() {
                       exit={{ scale: 0.92, opacity: 0 }}
                       transition={{ duration: 0.2 }}
                       style={{
-                        background: '#1a1d1e',
+                        background: 'var(--surface-green)',
                         border: '1px solid rgba(125,230,155,0.25)',
                         borderRadius: 16,
                         padding: '36px 40px',
@@ -222,9 +222,9 @@ export default function App() {
                       }}
                     >
                       <div>
-                        <p style={{ margin: '0 0 4px', fontSize: 10, fontWeight: 800, color: '#7DE69B', textTransform: 'uppercase', letterSpacing: '0.1em' }}>◈ Leadership Vault</p>
-                        <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: '#f0f4f8' }}>Enter access code</h3>
-                        <p style={{ margin: '8px 0 0', fontSize: 13, color: '#797D80', lineHeight: 1.5 }}>
+                        <p style={{ margin: '0 0 4px', fontSize: 10, fontWeight: 800, color: 'var(--accent-mint)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>◈ Leadership Vault</p>
+                        <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: 'var(--text-primary)' }}>Enter access code</h3>
+                        <p style={{ margin: '8px 0 0', fontSize: 13, color: 'var(--text-support)', lineHeight: 1.5 }}>
                           This section contains role and function-level data. For leadership conversations only.
                         </p>
                       </div>
@@ -236,13 +236,13 @@ export default function App() {
                         onKeyDown={e => e.key === 'Enter' && tryUnlockVault()}
                         placeholder="Access code"
                         style={{
-                          background: 'rgba(255,255,255,0.05)',
+                          background: 'var(--card-bg-dark)',
                           border: `1px solid ${vaultError ? '#E5554F' : 'rgba(125,230,155,0.2)'}`,
                           borderRadius: 8,
                           padding: '11px 14px',
                           fontFamily: 'DM Sans, sans-serif',
                           fontSize: 14,
-                          color: '#f0f4f8',
+                          color: 'var(--text-primary)',
                           outline: 'none',
                           letterSpacing: '0.1em',
                         }}
@@ -262,7 +262,7 @@ export default function App() {
                             fontFamily: 'DM Sans, sans-serif',
                             fontSize: 13,
                             fontWeight: 700,
-                            color: '#7DE69B',
+                            color: 'var(--accent-mint)',
                             cursor: 'pointer',
                           }}
                         >
@@ -277,7 +277,7 @@ export default function App() {
                             padding: '10px 18px',
                             fontFamily: 'DM Sans, sans-serif',
                             fontSize: 13,
-                            color: '#797D80',
+                            color: 'var(--text-support)',
                             cursor: 'pointer',
                           }}
                         >

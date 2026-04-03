@@ -5,10 +5,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-
-// ─── Shared chart utilities ───────────────────────────────────────────────────
-const axisStyle = { fill: '#797D80', fontSize: 11, fontFamily: 'DM Sans, sans-serif' };
-const gridStyle = { stroke: 'rgba(125,230,155,0.07)', strokeDasharray: '3 3' };
+import { useTheme } from '../hooks/useTheme';
 
 const PERIOD_LABEL = {
   'Jan–Feb 2025': { survey: 'Survey 1', date: 'Jan–Feb 2025' },
@@ -20,11 +17,11 @@ function CustomXTick({ x, y, payload }) {
   const info = PERIOD_LABEL[payload.value] || { survey: payload.value, date: '' };
   return (
     <g transform={`translate(${x},${y})`}>
-      <text x={0} y={0} dy={14} textAnchor="middle" fill="#e0e0e0" fontSize={11} fontWeight={700} fontFamily="DM Sans, sans-serif">
+      <text x={0} y={0} dy={14} textAnchor="middle" fill="var(--chart-label)" fontSize={11} fontWeight={700} fontFamily="DM Sans, sans-serif">
         {info.survey}
       </text>
       {info.date && (
-        <text x={0} y={0} dy={26} textAnchor="middle" fill="#797D80" fontSize={9.5} fontFamily="DM Sans, sans-serif">
+        <text x={0} y={0} dy={26} textAnchor="middle" fill="var(--chart-subtext)" fontSize={9.5} fontFamily="DM Sans, sans-serif">
           ({info.date})
         </text>
       )}
@@ -38,16 +35,16 @@ function ChartTooltip({ active, payload, label, suffix = '%' }) {
   const header = info ? `${info.survey} (${info.date})` : label;
   return (
     <div style={{
-      background: '#1a1d1e',
+      background: 'var(--tooltip-bg)',
       border: '1px solid rgba(125,230,155,0.35)',
       borderRadius: 10,
       padding: '10px 14px',
       fontFamily: 'DM Sans, sans-serif',
       fontSize: 12,
-      color: '#e0e0e0',
-      boxShadow: '0 4px 24px rgba(0,0,0,0.5)',
+      color: 'var(--text-medium)',
+      boxShadow: '0 4px 24px rgba(0,0,0,0.25)',
     }}>
-      <p style={{ color: '#7DE69B', fontWeight: 700, margin: '0 0 6px' }}>{header}</p>
+      <p style={{ color: 'var(--accent-mint)', fontWeight: 700, margin: '0 0 6px' }}>{header}</p>
       {payload.map(entry => (
         <p key={entry.name} style={{ color: entry.color, margin: '2px 0' }}>
           {entry.name}: <strong>{entry.value}{suffix}</strong>
@@ -139,7 +136,7 @@ function ScorecardTile({ label, tag, value, unit, delta, deltaLabel, sparkValues
       transition={{ duration: 0.5, delay, ease: 'easeOut' }}
     >
       <div style={{
-        background: 'rgba(29,77,82,0.35)',
+        background: 'var(--surface-green)',
         border: '1px solid rgba(125,230,155,0.12)',
         borderRadius: 18,
         overflow: 'hidden',
@@ -252,7 +249,7 @@ function ScorecardTile({ label, tag, value, unit, delta, deltaLabel, sparkValues
             fontFamily: 'DM Sans, sans-serif',
             fontSize: 13,
             fontWeight: 600,
-            color: '#7DE69B',
+            color: 'var(--accent-mint)',
             letterSpacing: '0.03em',
             transition: 'background 0.2s',
             textAlign: 'left',
@@ -297,6 +294,11 @@ function ScorecardTile({ label, tag, value, unit, delta, deltaLabel, sparkValues
 
 // ─── Main export ───────────────────────────────────────────────────────────────
 export default function AdoptionScorecard({ transforms }) {
+  const theme = useTheme();
+  const isLight = theme === 'light';
+  const axisStyle = { fill: isLight ? '#555a60' : '#797D80', fontSize: 11, fontFamily: 'DM Sans, sans-serif' };
+  const gridStyle = { stroke: isLight ? 'rgba(46,168,74,0.09)' : 'rgba(125,230,155,0.07)', strokeDasharray: '3 3' };
+
   const { sentimentTrend, familiarityTrend, importanceTrend, confidenceTrend } = transforms;
 
   // ── Sentiment ────────────────────────────────────────────────────────────────
@@ -484,7 +486,7 @@ export default function AdoptionScorecard({ transforms }) {
         style={{ marginBottom: 24 }}
       >
         <p style={{
-          color: '#7DE69B', fontSize: 11, fontWeight: 700,
+          color: 'var(--accent-mint)', fontSize: 11, fontWeight: 700,
           letterSpacing: '0.13em', textTransform: 'uppercase',
           margin: '0 0 8px', fontFamily: 'DM Sans, sans-serif',
         }}>

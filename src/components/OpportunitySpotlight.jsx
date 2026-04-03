@@ -3,11 +3,11 @@ import { motion } from 'framer-motion';
 
 // ─── Category config ──────────────────────────────────────────────────────────
 const CATEGORY_CONFIG = {
-  ENABLEMENT: { color: '#7DE69B', bg: 'rgba(125,230,155,0.12)', icon: '◈' },
-  ADOPTION:   { color: '#59BEC9', bg: 'rgba(89,190,201,0.12)',  icon: '◎' },
-  RISK:       { color: '#E5554F', bg: 'rgba(229,85,79,0.12)',   icon: '◉' },
-  MOMENTUM:   { color: '#2EA84A', bg: 'rgba(46,168,74,0.12)',   icon: '◆' },
-  READINESS:  { color: '#b388ff', bg: 'rgba(179,136,255,0.12)', icon: '◇' },
+  ENABLEMENT: { color: 'var(--accent-mint)', badgeBorder: 'rgba(125,230,155,0.25)', actionBg: 'rgba(125,230,155,0.06)', actionBorder: 'rgba(125,230,155,0.15)', bg: 'rgba(125,230,155,0.12)', icon: '◈' },
+  ADOPTION:   { color: 'var(--accent-turq)', badgeBorder: 'rgba(89,190,201,0.25)',  actionBg: 'rgba(89,190,201,0.06)',  actionBorder: 'rgba(89,190,201,0.15)',  bg: 'rgba(89,190,201,0.12)',  icon: '◎' },
+  RISK:       { color: '#E5554F', badgeBorder: 'rgba(229,85,79,0.25)',  actionBg: 'rgba(229,85,79,0.06)',  actionBorder: 'rgba(229,85,79,0.15)',  bg: 'rgba(229,85,79,0.12)',   icon: '◉' },
+  MOMENTUM:   { color: '#2EA84A', badgeBorder: 'rgba(46,168,74,0.25)',  actionBg: 'rgba(46,168,74,0.06)',  actionBorder: 'rgba(46,168,74,0.15)',  bg: 'rgba(46,168,74,0.12)',   icon: '◆' },
+  READINESS:  { color: '#b388ff', badgeBorder: 'rgba(179,136,255,0.25)',actionBg: 'rgba(179,136,255,0.06)',actionBorder: 'rgba(179,136,255,0.15)',bg: 'rgba(179,136,255,0.12)', icon: '◇' },
 };
 
 // ─── Skeleton card ────────────────────────────────────────────────────────────
@@ -29,18 +29,18 @@ function SkeletonCard({ delay = 0 }) {
     >
       {/* badge row */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        <div style={{ width: 90, height: 20, background: 'rgba(255,255,255,0.08)', borderRadius: 20 }} />
+        <div style={{ width: 90, height: 20, background: 'var(--skeleton-line)', borderRadius: 20 }} />
       </div>
       {/* headline */}
-      <div style={{ width: '80%', height: 22, background: 'rgba(255,255,255,0.07)', borderRadius: 6 }} />
+      <div style={{ width: '80%', height: 22, background: 'var(--skeleton-line)', borderRadius: 6 }} />
       {/* body lines */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <div style={{ width: '100%', height: 13, background: 'rgba(255,255,255,0.05)', borderRadius: 4 }} />
-        <div style={{ width: '92%',  height: 13, background: 'rgba(255,255,255,0.05)', borderRadius: 4 }} />
-        <div style={{ width: '70%',  height: 13, background: 'rgba(255,255,255,0.05)', borderRadius: 4 }} />
+        <div style={{ width: '100%', height: 13, background: 'var(--skeleton-line-2)', borderRadius: 4 }} />
+        <div style={{ width: '92%',  height: 13, background: 'var(--skeleton-line-2)', borderRadius: 4 }} />
+        <div style={{ width: '70%',  height: 13, background: 'var(--skeleton-line-2)', borderRadius: 4 }} />
       </div>
       {/* stat */}
-      <div style={{ marginTop: 'auto', width: '55%', height: 16, background: 'rgba(255,255,255,0.06)', borderRadius: 4 }} />
+      <div style={{ marginTop: 'auto', width: '55%', height: 16, background: 'var(--skeleton-line-3)', borderRadius: 4 }} />
     </motion.div>
   );
 }
@@ -55,8 +55,8 @@ function InsightCard({ card, index }) {
       viewport={{ once: true }}
       transition={{ duration: 0.55, delay: index * 0.12, ease: 'easeOut' }}
       style={{
-        background: 'rgba(29,77,82,0.35)',
-        border: `1px solid rgba(125,230,155,0.15)`,
+        background: 'var(--surface-green)',
+        border: `1px solid var(--border)`,
         borderRadius: 16,
         padding: '28px 28px 24px',
         display: 'flex',
@@ -71,7 +71,7 @@ function InsightCard({ card, index }) {
           alignItems: 'center',
           gap: 6,
           background: cfg.bg,
-          border: `1px solid ${cfg.color}40`,
+          border: `1px solid ${cfg.badgeBorder}`,
           borderRadius: 20,
           padding: '3px 12px 3px 9px',
           fontSize: 10,
@@ -92,7 +92,7 @@ function InsightCard({ card, index }) {
         fontFamily: 'DM Sans, sans-serif',
         fontSize: 17,
         fontWeight: 800,
-        color: '#f0f2f4',
+        color: 'var(--text-primary)',
         letterSpacing: '0.01em',
         lineHeight: 1.35,
       }}>
@@ -105,7 +105,7 @@ function InsightCard({ card, index }) {
         fontFamily: 'DM Sans, sans-serif',
         fontSize: 15,
         fontWeight: 400,
-        color: '#b0b8c0',
+        color: 'var(--text-bridge)',
         lineHeight: 1.7,
         flex: 1,
       }}>
@@ -115,8 +115,8 @@ function InsightCard({ card, index }) {
       {/* recommendation */}
       {card.action && (
         <div style={{
-          background: `${cfg.color}0f`,
-          border: `1px solid ${cfg.color}25`,
+          background: cfg.actionBg,
+          border: `1px solid ${cfg.actionBorder}`,
           borderRadius: 10,
           padding: '10px 14px',
           display: 'flex',
@@ -129,7 +129,7 @@ function InsightCard({ card, index }) {
             fontFamily: 'DM Sans, sans-serif',
             fontSize: 14,
             fontWeight: 500,
-            color: '#d0d8e0',
+            color: 'var(--text-muted)',
             letterSpacing: '0.015em',
             lineHeight: 1.6,
           }}>
@@ -141,7 +141,7 @@ function InsightCard({ card, index }) {
       {/* supporting stat */}
       <div style={{
         paddingTop: 14,
-        borderTop: '1px solid rgba(255,255,255,0.07)',
+        borderTop: '1px solid var(--border)',
         fontFamily: 'DM Sans, sans-serif',
         fontSize: 14,
         fontWeight: 600,
@@ -166,14 +166,14 @@ function Spinner() {
           height: 32,
           borderRadius: '50%',
           border: '3px solid rgba(125,230,155,0.15)',
-          borderTopColor: '#7DE69B',
+          borderTopColor: 'var(--accent-mint)',
         }}
       />
       <p style={{
         margin: 0,
         fontFamily: 'DM Sans, sans-serif',
         fontSize: 13,
-        color: '#797D80',
+        color: 'var(--text-support)',
       }}>
         Claude is analyzing 14 months of survey data…
       </p>
@@ -442,7 +442,7 @@ Rules:
           fontSize: 11,
           fontWeight: 700,
           letterSpacing: '0.13em',
-          color: '#7DE69B',
+          color: 'var(--accent-mint)',
           textTransform: 'uppercase',
           marginBottom: 12,
         }}>
@@ -452,7 +452,7 @@ Rules:
           margin: '0 0 16px',
           fontSize: 'clamp(30px, 4vw, 44px)',
           fontWeight: 800,
-          color: '#f0f2f4',
+          color: 'var(--text-primary)',
           lineHeight: 1.1,
           letterSpacing: '-0.025em',
           fontFamily: "'Plus Jakarta Sans', sans-serif",
@@ -462,7 +462,7 @@ Rules:
         <p style={{
           margin: 0,
           fontSize: 16,
-          color: '#797D80',
+          color: 'var(--text-support)',
           maxWidth: 560,
           marginInline: 'auto',
           lineHeight: 1.65,
@@ -495,7 +495,7 @@ Rules:
           alignItems: 'center',
           gap: 16,
         }}>
-          <p style={{ margin: 0, color: '#797D80', fontSize: 14 }}>
+          <p style={{ margin: 0, color: 'var(--text-support)', fontSize: 14 }}>
             Insights couldn't load — the API may be busy or the key needs checking.
           </p>
           <button
@@ -505,7 +505,7 @@ Rules:
               border: '1px solid rgba(125,230,155,0.3)',
               borderRadius: 8,
               padding: '8px 20px',
-              color: '#7DE69B',
+              color: 'var(--accent-mint)',
               fontFamily: 'DM Sans, sans-serif',
               fontSize: 13,
               fontWeight: 600,

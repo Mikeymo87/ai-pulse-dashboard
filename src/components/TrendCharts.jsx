@@ -7,13 +7,12 @@ import {
 import StruggleMap from './StruggleMap';
 import AdoptionCurve from './AdoptionCurve';
 import AdoptionScorecard from './AdoptionScorecard';
+import { useTheme } from '../hooks/useTheme';
 
-// ─── Shared style constants ───────────────────────────────────────────────────
-const axisStyle = { fill: '#797D80', fontSize: 12, fontFamily: 'DM Sans, sans-serif' };
-const gridStyle = { stroke: 'rgba(125,230,155,0.07)', strokeDasharray: '3 3' };
+// axisStyle / gridStyle are computed per-render in TrendCharts using useTheme
 
 const questionStyle = {
-  color: 'rgba(121,125,128,0.85)',
+  color: 'var(--text-support)',
   fontSize: 13,
   fontStyle: 'italic',
   margin: '6px 0 0',
@@ -31,7 +30,7 @@ const insightContainerStyle = {
 };
 
 const insightTextStyle = {
-  color: '#b0b8c0',
+  color: 'var(--text-bridge)',
   fontSize: 15,
   fontStyle: 'italic',
   margin: 0,
@@ -40,7 +39,7 @@ const insightTextStyle = {
 };
 
 const insightLabelStyle = {
-  color: '#7DE69B',
+  color: 'var(--accent-mint)',
   fontWeight: 700,
   fontStyle: 'normal',
   marginRight: 6,
@@ -62,7 +61,7 @@ function CustomXTick({ x, y, payload }) {
       <text
         x={0} y={0} dy={14}
         textAnchor="middle"
-        fill="#e0e0e0"
+        fill="var(--chart-label)"
         fontSize={11}
         fontWeight={700}
         fontFamily="DM Sans, sans-serif"
@@ -73,7 +72,7 @@ function CustomXTick({ x, y, payload }) {
         <text
           x={0} y={0} dy={26}
           textAnchor="middle"
-          fill="#797D80"
+          fill="var(--chart-subtext)"
           fontSize={9.5}
           fontFamily="DM Sans, sans-serif"
         >
@@ -101,17 +100,17 @@ function ChartTooltip({ active, payload, label, suffix = '%' }) {
   return (
     <div
       style={{
-        background: '#1a1d1e',
+        background: 'var(--tooltip-bg)',
         border: '1px solid rgba(125,230,155,0.35)',
         borderRadius: 10,
         padding: '10px 14px',
         fontFamily: 'DM Sans, sans-serif',
         fontSize: 12,
-        color: '#e0e0e0',
-        boxShadow: '0 4px 24px rgba(0,0,0,0.5)',
+        color: 'var(--text-medium)',
+        boxShadow: '0 4px 24px rgba(0,0,0,0.25)',
       }}
     >
-      <p style={{ color: '#7DE69B', fontWeight: 700, margin: '0 0 6px', letterSpacing: '0.02em' }}>{header}</p>
+      <p style={{ color: 'var(--accent-mint)', fontWeight: 700, margin: '0 0 6px', letterSpacing: '0.02em' }}>{header}</p>
       {payload.map((entry) => (
         <p key={entry.name} style={{ color: entry.color, margin: '2px 0' }}>
           {entry.name}: <strong>{entry.value}{suffix}</strong>
@@ -130,8 +129,8 @@ function ChartCard({ title, subtitle, question, tag, tagColor, insight, children
       viewport={{ once: true }}
       transition={{ duration: 0.55, delay, ease: 'easeOut' }}
       style={{
-        background: 'rgba(29,77,82,0.35)',
-        border: '1px solid rgba(125,230,155,0.15)',
+        background: 'var(--surface-green)',
+        border: '1px solid var(--border)',
         borderRadius: 16,
         padding: '28px 32px 24px',
         display: 'flex',
@@ -141,11 +140,11 @@ function ChartCard({ title, subtitle, question, tag, tagColor, insight, children
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 14 }}>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={{ color: '#f0f2f4', fontWeight: 700, fontSize: 16, margin: 0, fontFamily: 'DM Sans, sans-serif', letterSpacing: '0.01em' }}>
+          <p style={{ color: 'var(--text-primary)', fontWeight: 700, fontSize: 16, margin: 0, fontFamily: 'DM Sans, sans-serif', letterSpacing: '0.01em' }}>
             {title}
           </p>
           {subtitle && (
-            <p style={{ color: '#797D80', fontSize: 15, margin: '6px 0 0', fontWeight: 400, fontFamily: 'DM Sans, sans-serif', lineHeight: 1.6 }}>
+            <p style={{ color: 'var(--text-support)', fontSize: 15, margin: '6px 0 0', fontWeight: 400, fontFamily: 'DM Sans, sans-serif', lineHeight: 1.6 }}>
               {subtitle}
             </p>
           )}
@@ -154,7 +153,7 @@ function ChartCard({ title, subtitle, question, tag, tagColor, insight, children
         <span
           style={{
             background: tagColor || 'rgba(125,230,155,0.12)',
-            color: tagColor ? '#1a1d1e' : '#7DE69B',
+            color: tagColor ? '#1a1d1e' : 'var(--accent-mint)',
             fontSize: 10,
             fontWeight: 700,
             letterSpacing: '0.06em',
@@ -188,6 +187,11 @@ function ChartCard({ title, subtitle, question, tag, tagColor, insight, children
 
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function TrendCharts({ transforms }) {
+  const theme = useTheme();
+  const isLight = theme === 'light';
+  const axisStyle = { fill: isLight ? '#555a60' : '#797D80', fontSize: 12, fontFamily: 'DM Sans, sans-serif' };
+  const gridStyle = { stroke: isLight ? 'rgba(46,168,74,0.09)' : 'rgba(125,230,155,0.07)', strokeDasharray: '3 3' };
+
   const { frequencyTrend, familiarityTrend } = transforms;
 
   // ── Frequency (Daily vs Never) — the "too dramatic to hide" chart ──────────
@@ -213,21 +217,21 @@ export default function TrendCharts({ transforms }) {
         style={{ marginBottom: 56, textAlign: 'center' }}
       >
         <p style={{
-          color: '#7DE69B', fontSize: 11, fontWeight: 700,
+          color: 'var(--accent-mint)', fontSize: 11, fontWeight: 700,
           letterSpacing: '0.13em', textTransform: 'uppercase',
           marginBottom: 12, fontFamily: 'DM Sans, sans-serif',
         }}>
           14-Month Trend
         </p>
         <h2 style={{
-          color: '#f0f2f4', fontSize: 'clamp(30px, 4vw, 44px)',
+          color: 'var(--text-primary)', fontSize: 'clamp(30px, 4vw, 44px)',
           fontWeight: 800, margin: '0 0 16px', fontFamily: "'Plus Jakarta Sans', sans-serif",
           lineHeight: 1.1, letterSpacing: '-0.025em',
         }}>
           The Numbers Tell the Story
         </h2>
         <p style={{
-          margin: 0, fontSize: 16, color: '#797D80',
+          margin: 0, fontSize: 16, color: 'var(--text-support)',
           lineHeight: 1.65, fontFamily: 'DM Sans, sans-serif',
           maxWidth: 540, marginInline: 'auto',
         }}>
@@ -248,7 +252,7 @@ export default function TrendCharts({ transforms }) {
       >
         <div style={{ flex: 1, height: 1, background: 'rgba(125,230,155,0.15)' }} />
         <span style={{
-          color: '#7DE69B', fontSize: 10, fontWeight: 700,
+          color: 'var(--accent-mint)', fontSize: 10, fontWeight: 700,
           letterSpacing: '0.14em', textTransform: 'uppercase',
           fontFamily: 'DM Sans, sans-serif', whiteSpace: 'nowrap',
         }}>
@@ -264,9 +268,9 @@ export default function TrendCharts({ transforms }) {
         viewport={{ once: true }}
         transition={{ duration: 0.55, ease: 'easeOut' }}
         style={{
-          background: 'rgba(29,77,82,0.35)',
+          background: 'var(--surface-green)',
           border: '1px solid rgba(125,230,155,0.15)',
-          borderTop: '4px solid #7DE69B',
+          borderTop: '4px solid var(--accent-mint)',
           borderRadius: 18,
           padding: '36px 44px 32px',
         }}
@@ -276,7 +280,7 @@ export default function TrendCharts({ transforms }) {
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 24 }}>
             <div>
               <p style={{
-                color: '#7DE69B',
+                color: 'var(--accent-mint)',
                 fontSize: 'clamp(28px, 3.5vw, 40px)',
                 fontWeight: 800,
                 fontFamily: "'Plus Jakarta Sans', sans-serif",
@@ -318,7 +322,7 @@ export default function TrendCharts({ transforms }) {
               minWidth: 130,
             }}>
               <p style={{
-                color: '#7DE69B', fontSize: 32, fontWeight: 800,
+                color: 'var(--accent-mint)', fontSize: 32, fontWeight: 800,
                 fontFamily: "'Plus Jakarta Sans', sans-serif", margin: '0 0 4px', lineHeight: 1,
               }}>
                 +{s3Daily - s1Daily}
@@ -356,7 +360,7 @@ export default function TrendCharts({ transforms }) {
             color: 'rgba(224,224,224,0.85)', fontSize: 15, fontStyle: 'italic',
             margin: 0, lineHeight: 1.7, fontFamily: 'DM Sans, sans-serif',
           }}>
-            <span style={{ color: '#7DE69B', fontWeight: 700, fontStyle: 'normal', marginRight: 6, letterSpacing: '0.02em' }}>What this tells us:</span>
+            <span style={{ color: 'var(--accent-mint)', fontWeight: 700, fontStyle: 'normal', marginRight: 6, letterSpacing: '0.02em' }}>What this tells us:</span>
             {`Daily use climbed from ${s1Daily}% in Survey 1 to ${s3Daily}% today — a ${s3Daily - s1Daily}-point leap in 14 months. Respondents who never use AI dropped from ${s1Never}% to ${s3Never}%. This is organic adoption, not mandated compliance. The team moved itself.`}
           </p>
         </div>
@@ -369,7 +373,7 @@ export default function TrendCharts({ transforms }) {
         viewport={{ once: true }}
         transition={{ duration: 0.55, delay: 0.1, ease: 'easeOut' }}
         style={{
-          background: 'rgba(29,77,82,0.35)',
+          background: 'var(--surface-green)',
           border: '1px solid rgba(125,230,155,0.15)',
           borderRadius: 16,
           padding: '28px 32px 24px',
