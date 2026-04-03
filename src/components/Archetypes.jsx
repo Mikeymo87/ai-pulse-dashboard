@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../hooks/useTheme';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 // ─── Card dimensions ──────────────────────────────────────────────────────────
 const CARD_W = 260;
@@ -29,55 +30,57 @@ const ORACLE_LINES = {
     `${n} teammates — ${pct}% of your team — are already building with AI, not just using it. They pay out of pocket, work at the frontier, and pull the rest of the department forward. Protect their time and amplify their reach.`,
 };
 
-// ─── Archetype static definitions — rainbow spectrum I→V (cool → warm) ────────
+// ─── Archetype static definitions — AI Competency Rubric order I→V ───────────
+// Order: Skeptic (Red) → Bystander (Orange) → Experimenter (Yellow) →
+//        Blocked Believer (Green) → Multiplier (Blue)
 const ARCHETYPE_DEFS = [
   {
-    key: 'confident-bystander',
+    key: 'thoughtful-skeptic',
     _adoptionScore: 1,
     roman: 'I',
-    image: '/Images/archetypes/archetype-4-confident-bystander.png',
-    name: 'The Confident Bystander',
-    tagline: 'Nothing stopping them. Nothing moving them.',
-    description:
-      'High self-reported confidence, no listed barriers, but monthly or less frequency and no own-pocket investment. The behavior doesn\'t match the self-assessment — not because they\'re misleading, but because they haven\'t yet done the work that would make it true.',
-    accentColor: '#A78BFA',
-    tension: 'Untapped potential',
-  },
-  {
-    key: 'thoughtful-skeptic',
-    _adoptionScore: 2,
-    roman: 'II',
     image: '/Images/archetypes/archetype-5-thoughtful-skeptic.png',
     name: 'The Thoughtful Skeptic',
     tagline: 'Not resistant because they don\'t understand — because they do.',
     description:
       'Mixed or cautious sentiment paired with real use. They have earned concerns: accuracy, human oversight, workflow disruption. Their open-text responses are the most detailed in the dataset. They are not against AI. They have good questions worth taking seriously.',
-    accentColor: '#60A5FA',
+    accentColor: '#E5554F',
     tension: 'Earned skepticism — not fear',
   },
   {
-    key: 'blocked-believer',
-    _adoptionScore: 3,
-    roman: 'III',
-    image: '/Images/archetypes/archetype-2-blocked-believer.png',
-    name: 'The Blocked Believer',
-    tagline: 'Enthusiastic people slowed by organizational friction.',
+    key: 'confident-bystander',
+    _adoptionScore: 2,
+    roman: 'II',
+    image: '/Images/archetypes/archetype-4-confident-bystander.png',
+    name: 'The Confident Bystander',
+    tagline: 'Nothing stopping them. Nothing moving them.',
     description:
-      'Positive sentiment, high importance ratings, active weekly use — but something in the system is in the way. IT access, unclear guidelines, or tool costs are the friction. This is not a motivation problem. It is an infrastructure problem.',
-    accentColor: '#59BEC9',
-    tension: 'Enthusiastic people failed by the system',
+      'High self-reported confidence, no listed barriers, but monthly or less frequency and no own-pocket investment. The behavior doesn\'t match the self-assessment — not because they\'re misleading, but because they haven\'t yet done the work that would make it true.',
+    accentColor: '#F97316',
+    tension: 'Untapped potential',
   },
   {
     key: 'experimenter',
-    _adoptionScore: 4,
-    roman: 'IV',
+    _adoptionScore: 3,
+    roman: 'III',
     image: '/Images/archetypes/archetype-3-experimenter.png',
     name: 'The Experimenter',
     tagline: 'Curious, multi-tool, moveable — highest training ROI.',
     description:
       'Still in the Experimentation stage, trying 2–3 tools, learning what works. The barrier is the learning curve, not the will. The right training or tool access could convert them into the most advanced users faster than anyone else in the department.',
-    accentColor: '#7DE69B',
+    accentColor: '#FFCD00',
     tension: 'Motion without traction — for now',
+  },
+  {
+    key: 'blocked-believer',
+    _adoptionScore: 4,
+    roman: 'IV',
+    image: '/Images/archetypes/archetype-2-blocked-believer.png',
+    name: 'The Blocked Believer',
+    tagline: 'Enthusiastic people slowed by organizational friction.',
+    description:
+      'Positive sentiment, high importance ratings, active weekly use — but something in the system is in the way. IT access, unclear guidelines, or tool costs are the friction. This is not a motivation problem. It is an infrastructure problem.',
+    accentColor: '#2EA84A',
+    tension: 'Enthusiastic people failed by the system',
   },
   {
     key: 'multiplier',
@@ -88,7 +91,7 @@ const ARCHETYPE_DEFS = [
     tagline: 'Pulling the department forward — with or without a mandate.',
     description:
       'Daily users building with AI, not just using it. They design workflows, build agents, create custom tools, and think about AI as infrastructure. They pay out of pocket, rate importance at 5/5, and operate at Integration or Transformation stage. These are your internal champions.',
-    accentColor: '#FFCD00',
+    accentColor: '#59BEC9',
     tension: 'Voluntary commitment, not compliance',
   },
 ];
@@ -121,9 +124,7 @@ function Pill({ label, type }) {
 
 // ─── Card Back — ornate tarot back with accent-colored mandala ────────────────
 function CardBack({ accentColor }) {
-  const theme = useTheme();
-  const isLight = theme === 'light';
-  const ac = isLight ? '#2EA84A' : accentColor;
+  const ac = accentColor;
   const radials = [0, 30, 60, 90, 120, 150].map(deg => {
     const rad = (Math.PI * deg) / 180;
     return {
@@ -211,24 +212,40 @@ function CardBack({ accentColor }) {
       }} />
 
       {/* Central mandala SVG */}
-      <svg width="190" height="190" viewBox="0 0 120 120" style={{ opacity: 0.25 }}>
+      <svg width="190" height="190" viewBox="0 0 120 120" style={{ opacity: 0.28 }}>
         <circle cx="60" cy="60" r="55" stroke={ac} strokeWidth="0.8" fill="none" />
         <circle cx="60" cy="60" r="44" stroke={ac} strokeWidth="0.6" fill="none" />
         <circle cx="60" cy="60" r="32" stroke={ac} strokeWidth="0.8" fill="none" />
-        <circle cx="60" cy="60" r="20" stroke={ac} strokeWidth="0.6" fill="none" />
-        <circle cx="60" cy="60" r="8"  stroke={ac} strokeWidth="1"   fill="none" />
         {radials.map((l, i) => (
           <line key={i} x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2}
             stroke={ac} strokeWidth="0.4" />
         ))}
-        <polygon
-          points="60,8 64,22 78,22 67,31 71,45 60,36 49,45 53,31 42,22 56,22"
-          stroke={ac} strokeWidth="0.7" fill="none"
-        />
-        <polygon
-          points="60,40 62,47 70,47 64,52 66,59 60,55 54,59 56,52 50,47 58,47"
-          stroke={ac} strokeWidth="0.7" fill="none"
-        />
+        {/* BH pineapple wireframe — paths inlined so fill matches accent color */}
+        <svg x="36" y="36" width="48" height="48" viewBox="0 0 24 24">
+          <path fill={ac} d="M12,7.93c-.83-1.78-2.63-3.01-4.71-3.01-.74,0-1.44.15-2.08.43.12,0,.25-.01.37-.01,1.83,0,3.41,1.05,4.18,2.59h2.24s0,0,0,0h0Z"/>
+          <path fill={ac} d="M18.42,5.34c.13,0,.25,0,.37.01-.64-.28-1.34-.43-2.08-.43-2.09,0-3.89,1.23-4.71,3.01h0s2.24,0,2.24,0c0,0,0,0,0,0,.76-1.53,2.35-2.59,4.18-2.59h0Z"/>
+          <path fill={ac} d="M15.74,3.73c-.16-.05-.32-.08-.49-.11-.08-.01-.16-.02-.24-.03-.1,0-.2-.01-.3-.01-.14,0-.27,0-.41.02-.91.1-1.71.53-2.3,1.16h0c-.59-.64-1.39-1.07-2.3-1.16-.13-.01-.27-.02-.41-.02-.1,0-.2,0-.3.01-.08,0-.16.02-.24.03-.17.02-.33.06-.49.11-.16.05-.31.1-.46.17.06,0,.12.01.18.02,1.8.23,3.27,1.35,4.01,2.87h0c.74-1.52,2.21-2.64,4.01-2.87.06,0,.12-.01.18-.02-.15-.07-.3-.12-.46-.17h0Z"/>
+          <path fill={ac} d="M12,3.91h0c.58-.63,1.37-1.06,2.26-1.16.13-.01.26-.02.4-.02.06,0,.12,0,.18,0-.25-.11-.52-.18-.79-.22-.14-.02-.28-.03-.42-.03-.1,0-.21,0-.31.02-.08,0-.17.02-.25.04-.17.03-.34.08-.5.14-.42.15-.81.4-1.16.71.21.15.41.33.59.52h0Z"/>
+          <polygon fill={ac} points="12.7 16.32 11.03 14.97 12.38 13.3 14.05 14.65 12.7 16.32 12.7 16.32"/>
+          <polygon fill={ac} points="11.49 19.22 12.84 17.55 14.5 18.9 13.16 20.57 11.49 19.22 11.49 19.22"/>
+          <polygon fill={ac} points="13.59 10.4 12.25 12.06 10.58 10.72 11.92 9.05 13.59 10.4 13.59 10.4"/>
+          <polygon fill={ac} points="16.4 16.54 15.06 18.21 13.39 16.87 14.73 15.2 16.4 16.54 16.4 16.54"/>
+          <path fill={ac} d="M7.99,12.52l-.99-.79c.26-.71.62-1.36,1.04-1.91l1.29,1.04-1.34,1.67h0Z"/>
+          <polygon fill={ac} points="11.69 12.75 10.35 14.42 8.68 13.07 10.02 11.41 11.69 12.75 11.69 12.75"/>
+          <polygon fill={ac} points="6.78 15.43 8.13 13.76 9.8 15.1 8.45 16.77 6.78 15.43 6.78 15.43"/>
+          <path fill={ac} d="M10.94,19.91l1.64,1.32c-.18.01-.35.02-.54.02-.73,0-1.38-.09-1.96-.28l.86-1.06h0Z"/>
+          <path fill={ac} d="M6.73,12.63l.71.57-.95,1.18c.02-.61.11-1.2.24-1.76h0Z"/>
+          <polygon fill={ac} points="12.15 17 10.8 18.67 9.14 17.33 10.48 15.66 12.15 17 12.15 17"/>
+          <path fill={ac} d="M15.74,18.77l1.34-1.67.21.17c-.2.77-.51,1.44-.92,2.01l-.64-.52h0Z"/>
+          <path fill={ac} d="M17.52,13.56c.05.39.08.78.08,1.19,0,.11,0,.21,0,.32l-.64.79-1.67-1.34,1.34-1.67.89.72h0Z"/>
+          <path fill={ac} d="M15.19,19.45l.61.49c-.5.47-1.12.82-1.85,1.04l1.24-1.53h0Z"/>
+          <path fill={ac} d="M7.63,19.19l.95-1.18,1.67,1.34-1.02,1.27c-.65-.35-1.18-.83-1.6-1.43h0Z"/>
+          <path fill={ac} d="M16.5,11.61l-1.67-1.34.77-.96c.49.53.91,1.16,1.24,1.87l-.35.43h0Z"/>
+          <path fill={ac} d="M7.9,17.46l-.73.91c-.27-.58-.45-1.24-.56-1.96l1.3,1.05h0Z"/>
+          <polygon fill={ac} points="14.6 13.96 12.93 12.62 14.28 10.95 15.94 12.29 14.6 13.96 14.6 13.96"/>
+          <path fill={ac} d="M8.63,9.15c.18-.18.36-.34.56-.49h1.92l-1.21,1.51-1.26-1.02h0Z"/>
+          <path fill={ac} d="M14.95,8.71l-.81,1-1.3-1.05h2.05s.04.03.06.05h0Z"/>
+        </svg>
       </svg>
 
       {/* Bottom label */}
@@ -595,10 +612,10 @@ function buildDynamicPills(key, data) {
 }
 
 // ─── Single archetype card — arc position + 3D tilt + flip ───────────────────
-function ArchetypeCard({ def, data, index, revealed, onReveal, onFocus }) {
+function ArchetypeCard({ def, data, index, revealed, onReveal, onFocus, isMobile }) {
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const cardRef = useRef(null);
-  const arc = ARC_CONFIG[index] ?? { rotate: 0, dip: 0 };
+  const arc = isMobile ? { rotate: 0, dip: 0 } : (ARC_CONFIG[index] ?? { rotate: 0, dip: 0 });
 
   if (!data) return null;
 
@@ -679,6 +696,7 @@ export default function Archetypes({ transforms }) {
   const [revealedCards, setRevealedCards] = useState(new Set());
   const [revealing, setRevealing]         = useState(false);
   const [focusedKey, setFocusedKey]       = useState(null);
+  const isMobile = useIsMobile();
 
   if (!archetypes) return null;
 
@@ -708,10 +726,10 @@ export default function Archetypes({ transforms }) {
   const focusedData = focusedKey ? archetypes[focusedKey] : null;
 
   return (
-    <section style={{ padding: '80px 0 100px', width: '100%', boxSizing: 'border-box' }}>
+    <section style={{ padding: isMobile ? '48px 0 60px' : '80px 0 100px', width: '100%', boxSizing: 'border-box' }}>
 
       {/* ── Section header — constrained to match DeepDive alignment ── */}
-      <div style={{ maxWidth: 1360, margin: '0 auto', padding: '0 32px', marginBottom: 48 }}>
+      <div style={{ maxWidth: 1360, margin: '0 auto', padding: isMobile ? '0 16px' : '0 32px', marginBottom: 48 }}>
         <div style={{
           display: 'inline-block',
           padding: '4px 12px',
@@ -770,13 +788,22 @@ export default function Archetypes({ transforms }) {
         )}
       </div>
 
-      {/* ── Arc spread — full-width, no scroll ── */}
-      <div style={{ overflowX: 'hidden', overflowY: 'visible', padding: '0 0 110px', width: '100%' }}>
+      {/* ── Arc spread — scrollable on mobile, full-width fan on desktop ── */}
+      <div style={{
+        overflowX: isMobile ? 'auto' : 'hidden',
+        overflowY: 'visible',
+        padding: isMobile ? '0 0 40px' : '0 0 110px',
+        width: '100%',
+        WebkitOverflowScrolling: 'touch',
+      }}>
         <motion.div style={{
-          display: 'flex', gap: 8,
-          justifyContent: 'center', alignItems: 'flex-end',
-          width: '100%',
-          paddingBottom: 24, paddingLeft: 16, paddingRight: 16,
+          display: 'flex', gap: isMobile ? 12 : 8,
+          justifyContent: isMobile ? 'flex-start' : 'center',
+          alignItems: isMobile ? 'center' : 'flex-end',
+          width: isMobile ? 'max-content' : '100%',
+          paddingBottom: 24,
+          paddingLeft: isMobile ? 16 : 16,
+          paddingRight: isMobile ? 16 : 16,
           boxSizing: 'border-box',
         }}>
           {ARCHETYPE_DEFS.map((def, i) => (
@@ -793,6 +820,7 @@ export default function Archetypes({ transforms }) {
                 revealed={revealedCards.has(def.key)}
                 onReveal={handleReveal}
                 onFocus={setFocusedKey}
+                isMobile={isMobile}
               />
             </motion.div>
           ))}

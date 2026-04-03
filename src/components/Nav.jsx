@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 const TABS = [
   { id: 'story',      label: 'The Story' },
   { id: 'numbers',    label: 'The Numbers' },
   { id: 'team',       label: 'The Team' },
   { id: 'whats-next', label: "What's Next" },
+  { id: 'playbook',   label: 'The Playbook' },
 ];
 
 // ── Theme toggle helpers ──────────────────────────────────────────────────────
@@ -56,6 +58,7 @@ function MoonIcon() {
 
 export default function Nav({ onOpenChat, onPresent, activeTab, onTabChange }) {
   const [theme, setTheme] = useState(getInitialTheme);
+  const isMobile = useIsMobile();
 
   // Apply theme on mount and whenever it changes
   useEffect(() => {
@@ -66,7 +69,131 @@ export default function Nav({ onOpenChat, onPresent, activeTab, onTabChange }) {
     setTheme(t => t === 'dark' ? 'light' : 'dark');
   }
 
+  function handleTabChange(id) {
+    onTabChange(id);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
   const isLight = theme === 'light';
+
+  if (isMobile) {
+    return (
+      <div style={{
+        position: 'sticky',
+        top: 0,
+        zIndex: 100,
+        background: 'var(--nav-bg)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        borderBottom: '1px solid var(--nav-border)',
+        boxSizing: 'border-box',
+      }}>
+        {/* Row 1: Brand + actions */}
+        <div style={{
+          height: 48,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0 16px',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <motion.img
+              src="/bh-pineapple.svg"
+              alt="Baptist Health"
+              animate={{ scale: [1, 1.07, 1], filter: ['drop-shadow(0 0 3px rgba(46,168,74,0.5))', 'drop-shadow(0 0 7px rgba(46,168,74,0.85))', 'drop-shadow(0 0 3px rgba(46,168,74,0.5))'] }}
+              transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+              style={{ width: 22, height: 22, flexShrink: 0, display: 'block' }}
+            />
+            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'DM Sans, sans-serif' }}>
+              Baptist Health
+            </span>
+            <span style={{ fontSize: 16, color: 'var(--border)', margin: '0 4px', fontWeight: 300 }}>|</span>
+            <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--accent-mint)', fontFamily: 'DM Sans, sans-serif' }}>
+              AI Pulse
+            </span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <motion.button
+              onClick={toggleTheme}
+              whileTap={{ scale: 0.9 }}
+              title={isLight ? 'Switch to dark mode' : 'Switch to light mode'}
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                width: 30, height: 30, borderRadius: '50%',
+                background: isLight ? 'rgba(46,168,74,0.1)' : 'rgba(125,230,155,0.08)',
+                border: isLight ? '1px solid rgba(46,168,74,0.25)' : '1px solid rgba(125,230,155,0.2)',
+                cursor: 'pointer', color: isLight ? '#2EA84A' : '#7DE69B', padding: 0,
+              }}
+            >
+              {isLight ? <SunIcon /> : <MoonIcon />}
+            </motion.button>
+            <motion.button
+              onClick={onOpenChat}
+              whileTap={{ scale: 0.96 }}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 5,
+                padding: '5px 11px',
+                background: 'rgba(46,168,74,0.15)',
+                border: '1px solid rgba(125,230,155,0.35)',
+                borderRadius: 20, cursor: 'pointer',
+                fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 600,
+                color: 'var(--accent-mint)',
+              }}
+            >
+              <motion.span
+                animate={{ opacity: [0.6, 1, 0.6] }}
+                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                style={{ fontSize: 9 }}
+              >●</motion.span>
+              Ask AI
+            </motion.button>
+          </div>
+        </div>
+
+        {/* Row 2: Scrollable tabs */}
+        <div style={{
+          display: 'flex',
+          overflowX: 'auto',
+          padding: '0 12px 0',
+          gap: 0,
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+          borderTop: '1px solid var(--nav-border)',
+        }}>
+          {TABS.map(tab => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => handleTabChange(tab.id)}
+                style={{
+                  position: 'relative',
+                  padding: '9px 14px',
+                  background: 'none', border: 'none', cursor: 'pointer',
+                  fontFamily: 'DM Sans, sans-serif', fontSize: 12,
+                  fontWeight: isActive ? 600 : 400,
+                  color: isActive ? 'var(--accent-mint)' : 'var(--text-support)',
+                  whiteSpace: 'nowrap', outline: 'none', flexShrink: 0,
+                }}
+              >
+                {tab.label}
+                {isActive && (
+                  <motion.div
+                    layoutId="tab-indicator-mobile"
+                    style={{
+                      position: 'absolute', bottom: 0, left: 6, right: 6,
+                      height: 2, background: 'var(--accent-mint)', borderRadius: 1,
+                    }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 35 }}
+                  />
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{
@@ -85,17 +212,12 @@ export default function Nav({ onOpenChat, onPresent, activeTab, onTabChange }) {
     }}>
       {/* Left — brand */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 0, flexShrink: 0 }}>
-        <motion.div
-          animate={{ opacity: [0.7, 1, 0.7] }}
+        <motion.img
+          src="/bh-pineapple.svg"
+          alt="Baptist Health"
+          animate={{ scale: [1, 1.07, 1], filter: ['drop-shadow(0 0 3px rgba(46,168,74,0.5))', 'drop-shadow(0 0 8px rgba(46,168,74,0.9))', 'drop-shadow(0 0 3px rgba(46,168,74,0.5))'] }}
           transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-          style={{
-            width: 8,
-            height: 8,
-            borderRadius: '50%',
-            background: '#2EA84A',
-            boxShadow: '0 0 10px rgba(46,168,74,0.8)',
-            flexShrink: 0,
-          }}
+          style={{ width: 24, height: 24, flexShrink: 0, display: 'block' }}
         />
         <span style={{
           fontSize: 14,
@@ -103,7 +225,7 @@ export default function Nav({ onOpenChat, onPresent, activeTab, onTabChange }) {
           color: 'var(--text-primary)',
           letterSpacing: '0.01em',
           fontFamily: 'DM Sans, sans-serif',
-          marginLeft: 10,
+          marginLeft: 8,
         }}>
           Baptist Health
         </span>
@@ -141,7 +263,7 @@ export default function Nav({ onOpenChat, onPresent, activeTab, onTabChange }) {
           return (
             <button
               key={tab.id}
-              onClick={() => onTabChange(tab.id)}
+              onClick={() => handleTabChange(tab.id)}
               style={{
                 position: 'relative',
                 padding: '6px 16px',

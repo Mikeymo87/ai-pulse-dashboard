@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { Smile, Star, ShieldCheck, Briefcase } from 'lucide-react';
 import {
   LineChart, Line, AreaChart, Area,
   XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer,
 } from 'recharts';
 import { useTheme } from '../hooks/useTheme';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 const PERIOD_LABEL = {
   'Jan–Feb 2025': { survey: 'Survey 1', date: 'Jan–Feb 2025' },
@@ -125,7 +127,7 @@ function Sparkline({ values, color }) {
 }
 
 // ─── Single scorecard tile ─────────────────────────────────────────────────────
-function ScorecardTile({ label, tag, value, unit, delta, deltaLabel, sparkValues, color, delay, expandedChart }) {
+function ScorecardTile({ label, tag, value, unit, delta, deltaLabel, sparkValues, color, delay, expandedChart, icon: Icon }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -144,13 +146,16 @@ function ScorecardTile({ label, tag, value, unit, delta, deltaLabel, sparkValues
         borderTop: `4px solid ${color}`,
       }}>
         {/* ── Tile body — two column layout ── */}
-        <div style={{ padding: '26px 32px 22px', display: 'flex', alignItems: 'stretch', gap: 0 }}>
+        <div style={{ padding: 'clamp(18px, 4vw, 26px) clamp(16px, 4vw, 32px) clamp(16px, 3vw, 22px)', display: 'flex', alignItems: 'stretch', gap: 0 }}>
 
           {/* LEFT: metric identity */}
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
 
             {/* Metric label */}
             <span style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
               color: '#797D80',
               fontSize: 12,
               fontWeight: 700,
@@ -159,6 +164,13 @@ function ScorecardTile({ label, tag, value, unit, delta, deltaLabel, sparkValues
               fontFamily: 'DM Sans, sans-serif',
               marginBottom: 12,
             }}>
+              {Icon && (
+                <Icon
+                  size={13}
+                  strokeWidth={1.75}
+                  style={{ color, opacity: 0.65, flexShrink: 0 }}
+                />
+              )}
               {label}
             </span>
 
@@ -279,7 +291,7 @@ function ScorecardTile({ label, tag, value, unit, delta, deltaLabel, sparkValues
               style={{ overflow: 'hidden' }}
             >
               <div style={{
-                padding: '24px 36px 32px',
+                padding: 'clamp(16px, 4vw, 24px) clamp(16px, 5vw, 36px) clamp(20px, 4vw, 32px)',
                 borderTop: '1px solid rgba(125,230,155,0.06)',
               }}>
                 {expandedChart}
@@ -296,6 +308,7 @@ function ScorecardTile({ label, tag, value, unit, delta, deltaLabel, sparkValues
 export default function AdoptionScorecard({ transforms }) {
   const theme = useTheme();
   const isLight = theme === 'light';
+  const isMobile = useIsMobile();
   const axisStyle = { fill: isLight ? '#555a60' : '#797D80', fontSize: 11, fontFamily: 'DM Sans, sans-serif' };
   const gridStyle = { stroke: isLight ? 'rgba(46,168,74,0.09)' : 'rgba(125,230,155,0.07)', strokeDasharray: '3 3' };
 
@@ -327,9 +340,14 @@ export default function AdoptionScorecard({ transforms }) {
   const impDomain = autoDomain(importanceData.map(d => d['Avg Score']), 0.25, 1, 5);
 
   // ── Confidence ───────────────────────────────────────────────────────────────
+  // "Confident or higher" = exclude "Somewhat confident" and "Not confident at all".
+  // Each survey uses a different score scale, so we filter by label text rather than
+  // a raw score threshold (score >= 3 incorrectly pulls in S1's "Somewhat confident").
   const confidenceData = confidenceTrend.map(s => ({
     period: s.period,
-    'Confident or Higher': s.distribution.filter(d => d.score >= 3).reduce((sum, d) => sum + d.pct, 0),
+    'Confident or Higher': s.distribution
+      .filter(d => d.label && !d.label.toLowerCase().includes('somewhat') && !d.label.toLowerCase().startsWith('not confident'))
+      .reduce((sum, d) => sum + d.pct, 0),
   }));
   const [s1Conf, s2Conf, s3Conf] = confidenceData.map(d => d['Confident or Higher']);
   const confDomain = autoDomain(confidenceData.map(d => d['Confident or Higher']), 5, 0, 100);
@@ -337,6 +355,7 @@ export default function AdoptionScorecard({ transforms }) {
   const tiles = [
     {
       label: 'Positive Sentiment',
+      icon: Smile,
       tag: 'Sentiment',
       value: `${s3Pos}%`,
       unit: 'of the team',
@@ -350,8 +369,8 @@ export default function AdoptionScorecard({ transforms }) {
           <p style={{ color: '#e0e0e0', fontWeight: 700, fontSize: 15, margin: '0 0 18px', fontFamily: 'DM Sans, sans-serif' }}>
             Sentiment Shift — Survey 1 → 2 → 3
           </p>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={sentimentData} margin={{ top: 4, right: 8, bottom: 20, left: -10 }}>
+          <div className="chart-scroll"><ResponsiveContainer width="100%" height={300}>
+            <LineChart data={sentimentData} margin={{ top: 4, right: 50, bottom: 20, left: -10 }}>
               <CartesianGrid {...gridStyle} vertical={false} />
               <XAxis dataKey="period" tick={<CustomXTick />} tickLine={false} axisLine={false} height={42} interval={0} />
               <YAxis tick={axisStyle} tickLine={false} axisLine={false} tickFormatter={v => `${v}%`} />
@@ -367,12 +386,13 @@ export default function AdoptionScorecard({ transforms }) {
                   strokeDasharray="4 4" dot={{ r: 3, fill: '#59BEC9', strokeWidth: 0 }} activeDot={{ r: 5 }} />
               )}
             </LineChart>
-          </ResponsiveContainer>
+          </ResponsiveContainer></div>
         </>
       ),
     },
     {
       label: 'AI Familiarity',
+      icon: Star,
       tag: 'Familiarity',
       value: (s3Fam ?? 0).toFixed(1),
       unit: '/ 5.0 avg score',
@@ -386,8 +406,8 @@ export default function AdoptionScorecard({ transforms }) {
           <p style={{ color: '#e0e0e0', fontWeight: 700, fontSize: 15, margin: '0 0 18px', fontFamily: 'DM Sans, sans-serif' }}>
             AI Familiarity — Survey 1 → 2 → 3
           </p>
-          <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={familiarityData} margin={{ top: 4, right: 8, bottom: 20, left: -10 }}>
+          <div className="chart-scroll"><ResponsiveContainer width="100%" height={300}>
+            <AreaChart data={familiarityData} margin={{ top: 4, right: 50, bottom: 20, left: -10 }}>
               <defs>
                 <linearGradient id="sc-famGrad" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#59BEC9" stopOpacity={0.35} />
@@ -401,12 +421,13 @@ export default function AdoptionScorecard({ transforms }) {
               <Area type="monotone" dataKey="Avg Score" stroke="#59BEC9" strokeWidth={2.5}
                 fill="url(#sc-famGrad)" dot={{ r: 4, fill: '#59BEC9', strokeWidth: 0 }} activeDot={{ r: 6 }} />
             </AreaChart>
-          </ResponsiveContainer>
+          </ResponsiveContainer></div>
         </>
       ),
     },
     {
       label: 'Confidence',
+      icon: ShieldCheck,
       tag: 'Confidence',
       value: `${Math.round(s3Conf ?? 0)}%`,
       unit: 'feel confident',
@@ -420,8 +441,8 @@ export default function AdoptionScorecard({ transforms }) {
           <p style={{ color: '#e0e0e0', fontWeight: 700, fontSize: 15, margin: '0 0 18px', fontFamily: 'DM Sans, sans-serif' }}>
             Confidence Over Time — Survey 1 → 2 → 3
           </p>
-          <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={confidenceData} margin={{ top: 4, right: 8, bottom: 20, left: -10 }}>
+          <div className="chart-scroll"><ResponsiveContainer width="100%" height={300}>
+            <AreaChart data={confidenceData} margin={{ top: 4, right: 50, bottom: 20, left: -10 }}>
               <defs>
                 <linearGradient id="sc-confGrad" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#FFCD00" stopOpacity={0.3} />
@@ -435,12 +456,13 @@ export default function AdoptionScorecard({ transforms }) {
               <Area type="monotone" dataKey="Confident or Higher" stroke="#FFCD00" strokeWidth={2.5}
                 fill="url(#sc-confGrad)" dot={{ r: 4, fill: '#FFCD00', strokeWidth: 0 }} activeDot={{ r: 6 }} />
             </AreaChart>
-          </ResponsiveContainer>
+          </ResponsiveContainer></div>
         </>
       ),
     },
     {
       label: 'Importance to Role',
+      icon: Briefcase,
       tag: 'Importance',
       value: (s3Imp ?? 0).toFixed(1),
       unit: '/ 5.0 avg score',
@@ -454,8 +476,8 @@ export default function AdoptionScorecard({ transforms }) {
           <p style={{ color: '#e0e0e0', fontWeight: 700, fontSize: 15, margin: '0 0 18px', fontFamily: 'DM Sans, sans-serif' }}>
             Importance to Role — Survey 1 → 2 → 3
           </p>
-          <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={importanceData} margin={{ top: 4, right: 8, bottom: 20, left: -10 }}>
+          <div className="chart-scroll"><ResponsiveContainer width="100%" height={300}>
+            <AreaChart data={importanceData} margin={{ top: 4, right: 50, bottom: 20, left: -10 }}>
               <defs>
                 <linearGradient id="sc-impGrad" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#2EA84A" stopOpacity={0.35} />
@@ -469,7 +491,7 @@ export default function AdoptionScorecard({ transforms }) {
               <Area type="monotone" dataKey="Avg Score" stroke="#2EA84A" strokeWidth={2.5}
                 fill="url(#sc-impGrad)" dot={{ r: 4, fill: '#2EA84A', strokeWidth: 0 }} activeDot={{ r: 6 }} />
             </AreaChart>
-          </ResponsiveContainer>
+          </ResponsiveContainer></div>
         </>
       ),
     },
@@ -500,8 +522,8 @@ export default function AdoptionScorecard({ transforms }) {
       {/* 2×2 tile grid */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(2, 1fr)',
-        gap: 24,
+        gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)',
+        gap: isMobile ? 16 : 24,
       }}>
         {tiles.map(tile => (
           <ScorecardTile key={tile.label} {...tile} />

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { useTheme } from '../hooks/useTheme';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function easeOutExpo(progress) {
@@ -52,7 +53,7 @@ const ORBS = [
 const STAT_CONFIGS = [
   { label: 'Surveys',   colorDark: '#59BEC9', colorLight: '#1a7585' },
   { label: 'Responses', colorDark: '#7DE69B', colorLight: '#1d8040' },
-  { label: 'Months',    colorDark: '#FFCD00', colorLight: '#8a6500' },
+  { label: 'Months',    colorDark: '#FFCD00', colorLight: '#1a7585' },
 ];
 
 // ── Then vs. Now quote diptych ────────────────────────────────────────────────
@@ -84,7 +85,7 @@ const QUOTE_PAIRS = [
   },
 ];
 
-function ThenNowDiptych({ s1Quotes, s3Quotes }) {
+function ThenNowDiptych({ s1Quotes, s3Quotes, isMobile }) {
   const [idx, setIdx]         = useState(0);
   const [visible, setVisible] = useState(true);
   const timerRef              = useRef(null);
@@ -111,7 +112,7 @@ function ThenNowDiptych({ s1Quotes, s3Quotes }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.6 }}
-      style={{ maxWidth: 1000, width: '100%', margin: '0 auto', padding: '0 32px', boxSizing: 'border-box' }}
+      style={{ maxWidth: 1000, width: '100%', margin: '0 auto', padding: isMobile ? '0 16px' : '0 32px', boxSizing: 'border-box' }}
     >
       {/* Section label */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginBottom: 18 }}>
@@ -129,12 +130,12 @@ function ThenNowDiptych({ s1Quotes, s3Quotes }) {
       {/* Diptych frame */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: '1fr auto 1fr',
+        gridTemplateColumns: isMobile ? '1fr' : '1fr auto 1fr',
         background: 'var(--card-bg)',
         border: '1px solid var(--border)',
         borderRadius: 16,
         overflow: 'hidden',
-        minHeight: 200,
+        minHeight: isMobile ? 'unset' : 200,
       }}>
         {/* LEFT — Then (S1) */}
         <div style={{ padding: '28px 28px 24px', background: 'var(--card-bg-dark)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
@@ -152,8 +153,8 @@ function ThenNowDiptych({ s1Quotes, s3Quotes }) {
           <div style={{ marginTop: 16, fontSize: 13, color: 'var(--accent-yellow)', fontFamily: 'DM Sans, sans-serif', fontWeight: 500 }}>Survey 1 respondent</div>
         </div>
 
-        {/* CENTER divider */}
-        <div style={{ width: 48, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, background: 'rgba(125,230,155,0.04)', borderLeft: '1px solid rgba(125,230,155,0.1)', borderRight: '1px solid rgba(125,230,155,0.1)', padding: '0 4px' }}>
+        {/* CENTER divider — hidden on mobile via CSS class */}
+        <div className="diptych-divider" style={{ width: 48, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, background: 'rgba(125,230,155,0.04)', borderLeft: '1px solid rgba(125,230,155,0.1)', borderRight: '1px solid rgba(125,230,155,0.1)', padding: '0 4px' }}>
           <AnimatePresence mode="wait">
             {visible && (
               <motion.div key={`theme-${idx}`} initial={{ opacity: 0, scale: 0.85 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.85 }} transition={{ duration: 0.3 }}
@@ -205,6 +206,7 @@ function ThenNowDiptych({ s1Quotes, s3Quotes }) {
 export default function Hero({ transforms }) {
   const theme          = useTheme();
   const isLight        = theme === 'light';
+  const isMobile       = useIsMobile();
   const totalResponses = transforms.responseCounts.reduce((sum, s) => sum + s.n, 0);
   const statValues     = [3, totalResponses, 14];
 
@@ -233,7 +235,7 @@ export default function Hero({ transforms }) {
         position: 'relative',
         overflow: 'hidden',
         background: isLight ? 'var(--bg)' : '#0a0c0e',
-        padding: '72px 48px 60px',
+        padding: isMobile ? '80px 20px 48px' : '72px 48px 60px',
         boxSizing: 'border-box',
       }}>
 
@@ -377,17 +379,32 @@ export default function Hero({ transforms }) {
                       fontFamily: "'Plus Jakarta Sans', sans-serif",
                     }}>
                       <CountUp value={statValues[i]} color={color} />
+                      {cfg.suffix && <span style={{ fontSize: 'clamp(24px, 3.5vw, 40px)', marginLeft: 2 }}>{cfg.suffix}</span>}
                     </div>
                     <div style={{
-                      fontSize: 11,
+                      fontSize: 'var(--text-xs)',
                       color: 'var(--text-support)',
                       textTransform: 'uppercase',
                       letterSpacing: '0.11em',
                       fontFamily: 'DM Sans, sans-serif',
                       marginTop: 7,
+                      maxWidth: 160,
                     }}>
                       {cfg.label}
                     </div>
+                    {cfg.sublabel && (
+                      <div style={{
+                        fontSize: 'var(--text-xs)',
+                        color: 'var(--text-support)',
+                        fontFamily: 'DM Sans, sans-serif',
+                        marginTop: 4,
+                        opacity: 0.65,
+                        maxWidth: 160,
+                        lineHeight: 1.4,
+                      }}>
+                        {cfg.sublabel}
+                      </div>
+                    )}
                   </div>
                 </div>
               );
@@ -461,11 +478,12 @@ export default function Hero({ transforms }) {
       {/* ── BELOW FOLD — first scroll destination: their own words ─────────── */}
       <div style={{
         background: isLight ? 'var(--bg)' : '#0a0c0e',
-        padding: '72px 0 80px',
+        padding: isMobile ? '40px 0 48px' : '72px 0 80px',
       }}>
         <ThenNowDiptych
           s1Quotes={transforms.openEndedText?.s1 ?? []}
           s3Quotes={transforms.openEndedText?.s3Excitement ?? []}
+          isMobile={isMobile}
         />
       </div>
 

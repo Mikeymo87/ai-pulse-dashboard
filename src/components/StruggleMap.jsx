@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import * as LucideIcons from 'lucide-react';
 
 // ─── Intensity helpers ────────────────────────────────────────────────────────
 function getIntensity(pct, maxPct) {
@@ -29,6 +30,7 @@ const EXCITEMENT_COLORS = {
 function ThemeCell({ theme, colorMap, maxPct, onEnter, onLeave, delay }) {
   const intensity = getIntensity(theme.pct, maxPct);
   const c = colorMap[intensity];
+  const IconComponent = theme.icon ? LucideIcons[theme.icon] : null;
 
   return (
     <motion.div
@@ -53,23 +55,33 @@ function ThemeCell({ theme, colorMap, maxPct, onEnter, onLeave, delay }) {
       }}
     >
       <span style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 5,
         color: 'var(--text-medium)',
-        fontSize: 11.5,
+        fontSize: 'var(--text-sm)',
         fontWeight: 600,
         fontFamily: 'DM Sans, sans-serif',
         lineHeight: 1.35,
       }}>
+        {IconComponent && (
+          <IconComponent
+            size={13}
+            strokeWidth={1.75}
+            style={{ color: c.accent, opacity: 0.75, flexShrink: 0 }}
+          />
+        )}
         {theme.label}
       </span>
       <span style={{
         color: c.accent,
-        fontSize: 14,
+        fontSize: 'var(--text-base)',
         fontWeight: 800,
         fontFamily: 'DM Sans, sans-serif',
         letterSpacing: '-0.01em',
       }}>
         {theme.pct}%
-        <span style={{ fontSize: 10, fontWeight: 500, color: 'var(--text-support)', marginLeft: 5 }}>
+        <span style={{ fontSize: 'var(--text-xs)', fontWeight: 500, color: 'var(--text-support)', marginLeft: 5 }}>
           ({theme.count})
         </span>
       </span>
@@ -111,15 +123,15 @@ function HoverTooltip({ tooltip }) {
         fontFamily: 'DM Sans, sans-serif',
       }}
     >
-      <p style={{ color: '#e0e0e0', fontWeight: 700, fontSize: 13.5, margin: '0 0 4px', lineHeight: 1.3 }}>
+      <p style={{ color: 'var(--text-primary)', fontWeight: 700, fontSize: 'var(--text-base)', margin: '0 0 4px', lineHeight: 1.3 }}>
         {theme.label}
       </p>
-      <p style={{ color: c.accent, fontWeight: 800, fontSize: 15, margin: '0 0 10px' }}>
+      <p style={{ color: c.accent, fontWeight: 800, fontSize: 'var(--text-md)', margin: '0 0 10px' }}>
         {theme.count} respondents &middot; {theme.pct}% of team
       </p>
       {theme.quotes?.length > 0 && (
         <div style={{
-          borderTop: '1px solid rgba(255,255,255,0.08)',
+          borderTop: '1px solid var(--border)',
           paddingTop: 10,
           display: 'flex',
           flexDirection: 'column',
@@ -127,11 +139,11 @@ function HoverTooltip({ tooltip }) {
         }}>
           {theme.quotes.slice(0, 3).map((q, i) => (
             <p key={i} style={{
-              color: 'rgba(224,224,224,0.78)',
-              fontSize: 11,
+              color: 'var(--text-muted)',
+              fontSize: 'var(--text-sm)',
               fontStyle: 'italic',
               margin: 0,
-              lineHeight: 1.5,
+              lineHeight: 1.55,
               paddingLeft: 9,
               borderLeft: `2px solid ${c.border}`,
             }}>
@@ -148,7 +160,7 @@ function HoverTooltip({ tooltip }) {
 function IntensityLegend({ colorMap }) {
   return (
     <div style={{ display: 'flex', gap: 12, marginTop: 12, alignItems: 'center' }}>
-      <span style={{ color: 'var(--text-support)', fontSize: 12, fontFamily: 'DM Sans, sans-serif' }}>
+      <span style={{ color: 'var(--text-support)', fontSize: 'var(--text-sm)', fontFamily: 'DM Sans, sans-serif' }}>
         Intensity:
       </span>
       {['low', 'mid', 'high'].map((level) => {
@@ -160,7 +172,7 @@ function IntensityLegend({ colorMap }) {
               background: c.bg, border: `1px solid ${c.border}`,
               display: 'inline-block',
             }} />
-            <span style={{ color: 'var(--text-support)', fontSize: 12, fontFamily: 'DM Sans, sans-serif', textTransform: 'capitalize' }}>
+            <span style={{ color: 'var(--text-support)', fontSize: 'var(--text-sm)', fontFamily: 'DM Sans, sans-serif', textTransform: 'capitalize' }}>
               {level}
             </span>
           </div>
@@ -202,68 +214,76 @@ export default function StruggleMap({ transforms }) {
       transition={{ duration: 0.55, ease: 'easeOut' }}
       style={{ marginTop: 20 }}
     >
-      {/* Section header */}
-      <div style={{ marginBottom: 16, textAlign: 'center' }}>
-        <p style={{
-          color: 'var(--accent-mint)', fontSize: 12, fontWeight: 700,
-          letterSpacing: '0.12em', textTransform: 'uppercase',
-          margin: '0 0 8px', fontFamily: FONT,
-        }}>
-          Struggle Map
-        </p>
-        <h3 style={{
-          color: 'var(--text-medium)', fontSize: 'clamp(18px, 2.5vw, 24px)',
-          fontWeight: 800, margin: 0, fontFamily: FONT, lineHeight: 1.2,
-        }}>
-          What&rsquo;s in the Way — and What They&rsquo;re Reaching For
-        </h3>
-        <p style={{
-          color: 'var(--text-support)', fontSize: 15, margin: '8px 0 0',
-          fontFamily: FONT, lineHeight: 1.6,
-        }}>
-          Open-text responses thematically coded &middot; Hover any cell to read verbatim quotes
-        </p>
-      </div>
-
-      {/* Two-panel heatmap card */}
+      {/* ── Panel 1: What's Still in the Way ─────────────────────────────── */}
       <div style={{
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: 0,
         background: 'var(--surface-green)',
         border: '1px solid var(--border)',
         borderRadius: 16,
         overflow: 'hidden',
+        marginBottom: 20,
       }}>
-
-        {/* ── Left: Struggles ──────────────────────────────────────────────── */}
-        <div style={{ padding: '20px 20px 20px 20px', borderRight: '1px solid rgba(125,230,155,0.10)' }}>
-          {/* Panel header */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
+        {/* Panel header */}
+        <div style={{
+          padding: '20px 24px 16px',
+          borderBottom: '1px solid rgba(229,85,79,0.12)',
+          background: 'rgba(229,85,79,0.04)',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
             <span style={{
-              width: 3, height: 18, background: '#E5554F',
+              width: 4, height: 20, background: '#E5554F',
               borderRadius: 2, display: 'inline-block', flexShrink: 0,
             }} />
-            <p style={{
-              color: 'var(--text-medium)', fontWeight: 700, fontSize: 15,
-              margin: 0, fontFamily: 'DM Sans, sans-serif', letterSpacing: '0.01em',
-            }}>
-              What&rsquo;s in the Way
-            </p>
             <span style={{
               background: 'rgba(229,85,79,0.14)',
               color: '#E5554F',
-              fontSize: 10, fontWeight: 700,
-              padding: '2px 8px', borderRadius: 20,
+              fontSize: 'var(--text-xs)', fontWeight: 700,
+              padding: '3px 10px', borderRadius: 20,
               fontFamily: 'DM Sans, sans-serif',
-              letterSpacing: '0.06em',
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
             }}>
-              STRUGGLES
+              Barriers &amp; Friction
             </span>
           </div>
+          <h3 style={{
+            color: 'var(--text-primary)', fontWeight: 800,
+            fontSize: 'var(--text-xl)',
+            margin: 0, fontFamily: "'Plus Jakarta Sans', sans-serif",
+            lineHeight: 1.2, letterSpacing: '-0.01em',
+          }}>
+            What&rsquo;s Still in the Way
+          </h3>
+          <p style={{
+            color: 'var(--text-support)', fontSize: 'var(--text-base)',
+            margin: '6px 0 0', fontFamily: FONT, lineHeight: 1.6,
+          }}>
+            Open-text responses thematically coded &middot; Hover any cell to read verbatim quotes
+          </p>
+          {/* Editorial anecdote */}
+          <p style={{
+            color: 'var(--text-bridge)',
+            fontSize: 'var(--text-base)',
+            fontStyle: 'italic',
+            lineHeight: 1.75,
+            margin: '12px 0 0',
+            fontFamily: FONT,
+            borderLeft: '3px solid rgba(229,85,79,0.40)',
+            paddingLeft: 12,
+          }}>
+            Time is the constraint that effort alone can't fix. Nearly half the team says they want to go
+            deeper — the will is there, the skill is growing — but the day-to-day workload doesn't leave
+            room for real practice. The people who are most enthusiastic are often the most stretched.
+            Protecting space to learn isn't a perk. It's the next infrastructure decision.
+          </p>
+        </div>
 
-          {/* Struggle cells */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+        {/* Struggle cells grid */}
+        <div style={{ padding: '20px 24px 24px' }}>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+            gap: 10,
+          }}>
             {struggles.map((theme, i) => (
               <ThemeCell
                 key={theme.key}
@@ -276,38 +296,79 @@ export default function StruggleMap({ transforms }) {
               />
             ))}
           </div>
-
           <IntensityLegend colorMap={STRUGGLE_COLORS} />
         </div>
+      </div>
 
-        {/* ── Right: Excitement ────────────────────────────────────────────── */}
-        <div style={{ padding: '20px 20px 20px 20px' }}>
-          {/* Panel header */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
+      {/* ── Panel 2: What's Working ───────────────────────────────────────── */}
+      <div style={{
+        background: 'var(--surface-green)',
+        border: '1px solid var(--border)',
+        borderRadius: 16,
+        overflow: 'hidden',
+      }}>
+        {/* Panel header */}
+        <div style={{
+          padding: '20px 24px 16px',
+          borderBottom: '1px solid rgba(89,190,201,0.12)',
+          background: 'rgba(89,190,201,0.04)',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
             <span style={{
-              width: 3, height: 18, background: 'var(--accent-turq)',
+              width: 4, height: 20, background: 'var(--accent-turq)',
               borderRadius: 2, display: 'inline-block', flexShrink: 0,
             }} />
-            <p style={{
-              color: 'var(--text-medium)', fontWeight: 700, fontSize: 15,
-              margin: 0, fontFamily: 'DM Sans, sans-serif', letterSpacing: '0.01em',
-            }}>
-              What They&rsquo;re Reaching For
-            </p>
             <span style={{
               background: 'rgba(89,190,201,0.14)',
               color: 'var(--accent-turq)',
-              fontSize: 10, fontWeight: 700,
-              padding: '2px 8px', borderRadius: 20,
+              fontSize: 'var(--text-xs)', fontWeight: 700,
+              padding: '3px 10px', borderRadius: 20,
               fontFamily: 'DM Sans, sans-serif',
-              letterSpacing: '0.06em',
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
             }}>
-              EXCITEMENT
+              Benefits &amp; Excitement
             </span>
           </div>
+          <h3 style={{
+            color: 'var(--text-primary)', fontWeight: 800,
+            fontSize: 'var(--text-xl)',
+            margin: 0, fontFamily: "'Plus Jakarta Sans', sans-serif",
+            lineHeight: 1.2, letterSpacing: '-0.01em',
+          }}>
+            What&rsquo;s Working
+          </h3>
+          <p style={{
+            color: 'var(--text-support)', fontSize: 'var(--text-base)',
+            margin: '6px 0 0', fontFamily: FONT, lineHeight: 1.6,
+          }}>
+            What staff report gaining from AI &middot; Hover any cell to read verbatim quotes
+          </p>
+          {/* Editorial anecdote */}
+          <p style={{
+            color: 'var(--text-bridge)',
+            fontSize: 'var(--text-base)',
+            fontStyle: 'italic',
+            lineHeight: 1.75,
+            margin: '12px 0 0',
+            fontFamily: FONT,
+            borderLeft: '3px solid rgba(89,190,201,0.45)',
+            paddingLeft: 12,
+          }}>
+            Efficiency and quality top the list — but what the open-text responses reveal is something
+            more personal. Staff aren't just saving time. They're producing work they're proud of.
+            The most common thread isn't "AI made this faster." It's "AI helped me do something I
+            couldn't have done alone." That's a different kind of result, and it's the one that sticks.
+          </p>
+        </div>
 
-          {/* Excitement cells */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+        {/* Excitement cells grid */}
+        <div style={{ padding: '20px 24px 24px' }}>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+            gap: 10,
+          }}>
             {excitement.map((theme, i) => (
               <ThemeCell
                 key={theme.key}
@@ -320,28 +381,26 @@ export default function StruggleMap({ transforms }) {
               />
             ))}
           </div>
-
           <IntensityLegend colorMap={EXCITEMENT_COLORS} />
         </div>
-
       </div>
 
       {/* Insight callout */}
       <div style={{
-        marginTop: 12,
-        padding: '9px 12px',
+        marginTop: 16,
+        padding: '11px 16px',
         borderLeft: '3px solid rgba(125,230,155,0.55)',
         background: 'rgba(125,230,155,0.06)',
         borderRadius: '0 8px 8px 0',
       }}>
         <p style={{
-          color: 'rgba(224,224,224,0.80)', fontSize: 11, fontStyle: 'italic',
-          margin: 0, lineHeight: 1.55, fontFamily: 'DM Sans, sans-serif',
+          color: 'var(--text-dim)', fontSize: 'var(--text-sm)', fontStyle: 'italic',
+          margin: 0, lineHeight: 1.65, fontFamily: 'DM Sans, sans-serif',
         }}>
           <span style={{ color: 'var(--accent-mint)', fontWeight: 700, fontStyle: 'normal', marginRight: 4 }}>
             What this tells us:
           </span>
-          The left panel names the friction. The right names the energy already available to overcome it.
+          The top panel names the friction. The bottom names the energy already available to overcome it.
           Every struggle has a matching aspiration — the team isn&rsquo;t blocked by doubt,
           they&rsquo;re blocked by access, time, and structure. Those are solvable.
         </p>

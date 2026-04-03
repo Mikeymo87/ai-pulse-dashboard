@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../hooks/useTheme';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const TOTAL    = 117;
@@ -51,8 +52,9 @@ function Dot({ active, color, delay, inactiveColor }) {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function ParticipationStory({ transforms }) {
-  const theme   = useTheme();
-  const isLight = theme === 'light';
+  const theme    = useTheme();
+  const isLight  = theme === 'light';
+  const isMobile = useIsMobile();
 
   const WAVES = buildWaves(transforms?.responseCounts);
   const [wave, setWave]             = useState(0);
@@ -109,7 +111,7 @@ export default function ParticipationStory({ transforms }) {
   function deltaIsPositive(diff) { return diff !== null && diff > 0; }
 
   return (
-    <section style={{ padding: '72px 32px 64px', maxWidth: 1360, margin: '0 auto' }}>
+    <section style={{ padding: isMobile ? '48px 16px 40px' : '72px 32px 64px', maxWidth: 1360, margin: '0 auto' }}>
 
       {/* Header */}
       <motion.div

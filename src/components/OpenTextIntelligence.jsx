@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
+import { Target, Wrench, Megaphone, Lock } from 'lucide-react';
 
 // ─── Accent color per insight ID (fixed — not generated) ─────────────────────
 const ACCENT = {
@@ -7,6 +8,13 @@ const ACCENT = {
   'tool-mindset':      'var(--accent-turq)',
   'leadership-voices': 'var(--accent-mint)',
   'blocked-investors': '#E5554F',
+};
+
+const ICON = {
+  'aspiration-gap':    Target,
+  'tool-mindset':      Wrench,
+  'leadership-voices': Megaphone,
+  'blocked-investors': Lock,
 };
 
 // Background tint per insight ID (avoids hex-append opacity pattern)
@@ -116,9 +124,10 @@ function ToolStat({ data }) {
 
 // ─── Single insight card (AI copy + live data) ────────────────────────────────
 function InsightCard({ id, copy, data, index }) {
-  const accent   = ACCENT[id];
-  const bgAccent = BG_ACCENT[id];
-  const label    = LABEL[id];
+  const accent      = ACCENT[id];
+  const bgAccent    = BG_ACCENT[id];
+  const label       = LABEL[id];
+  const IconComp    = ICON[id];
   return (
     <motion.div
       initial={{ opacity: 0, y: 28 }}
@@ -141,6 +150,9 @@ function InsightCard({ id, copy, data, index }) {
       {/* Label badge */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <span style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 5,
           fontFamily: 'DM Sans, sans-serif',
           fontSize: 10,
           fontWeight: 800,
@@ -151,6 +163,7 @@ function InsightCard({ id, copy, data, index }) {
           letterSpacing: '0.1em',
           textTransform: 'uppercase',
         }}>
+          {IconComp && <IconComp size={11} strokeWidth={2} style={{ flexShrink: 0 }} />}
           {label}
         </span>
         <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 10.5, fontWeight: 700, color: 'var(--text-support)' }}>
@@ -360,7 +373,7 @@ Do not add markdown. Do not wrap in code fences. Return raw JSON only.`,
 
   return (
     <section style={{
-      padding: '96px 32px 80px',
+      padding: 'clamp(48px, 8vw, 96px) clamp(16px, 4vw, 32px) clamp(48px, 8vw, 80px)',
       maxWidth: 1360,
       margin: '0 auto',
       fontFamily: 'DM Sans, sans-serif',
@@ -410,7 +423,7 @@ Do not add markdown. Do not wrap in code fences. Return raw JSON only.`,
 
       {/* Loading state */}
       {loading && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(460px, 1fr))', gap: 24 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(460px, 1fr))', gap: 24 }} className="grid-responsive">
           {ORDER.map((id, i) => <SkeletonCard key={id} id={id} delay={i * 0.15} />)}
         </div>
       )}
@@ -432,7 +445,7 @@ Do not add markdown. Do not wrap in code fences. Return raw JSON only.`,
 
       {/* Card grid */}
       {!loading && !error && cards && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(460px, 1fr))', gap: 24 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(460px, 1fr))', gap: 24 }} className="grid-responsive">
           {ORDER.map((id, i) => {
             const copy = cards.find(c => c.id === id);
             if (!copy) return null;

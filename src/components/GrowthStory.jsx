@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { useTheme } from '../hooks/useTheme';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 // Wave accent colors ordered by story arc:
 //   Wave 1 (Baseline)   = turquoise — neutral starting point
@@ -79,7 +80,7 @@ function MiniSentimentBar({ sentimentTrend, surveyKey }) {
           pct > 0 ? (
             <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
               <div style={{ width: 6, height: 6, borderRadius: 2, background: color, flexShrink: 0 }} />
-              <span style={{ fontSize: 12, color: 'var(--text-support)', fontFamily: 'DM Sans, sans-serif' }}>
+              <span style={{ fontSize: 'var(--text-sm)', color: 'var(--text-support)', fontFamily: 'DM Sans, sans-serif' }}>
                 {label} {pct}%
               </span>
             </div>
@@ -125,7 +126,7 @@ function StatPill({ value, label, accentColor, delta }) {
             display: 'inline-flex',
             alignItems: 'center',
             gap: 3,
-            fontSize: 12,
+            fontSize: 'var(--text-sm)',
             fontWeight: 700,
             color: delta >= 0 ? '#2EA84A' : '#E5554F',
             background: delta >= 0 ? 'rgba(46,168,74,0.12)' : 'rgba(229,85,79,0.12)',
@@ -142,7 +143,7 @@ function StatPill({ value, label, accentColor, delta }) {
         )}
       </div>
       <div style={{
-        fontSize: 13,
+        fontSize: 'var(--text-sm)',
         color: 'var(--text-support)',
         textTransform: 'uppercase',
         letterSpacing: '0.07em',
@@ -162,43 +163,124 @@ const BRIDGE_COPY = [
   `By September 2025, the team's daily AI usage was more than ten times the national average of 8%. But the work wasn't finished — it was compounding. The six months that followed would reveal something the numbers alone couldn't capture: how personally invested people had become. Not just in their workflows. In the tools themselves.`,
 ];
 
+const BRIDGE_META = [
+  { span: 'Jan 2025 → Aug 2025', months: '7 months' },
+  { span: 'Aug 2025 → Mar 2026', months: '6 months' },
+];
+
 function ConnectorLine({ index }) {
   const copy = BRIDGE_COPY[index];
+  const meta = BRIDGE_META[index];
+  const fromAccent = WAVE_ACCENT[index];
+  const toAccent   = WAVE_ACCENT[index + 1];
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '12px 0 20px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      {/* Top stem */}
       <div style={{
-        width: 1,
+        width: 2,
         height: 32,
-        background: 'linear-gradient(to bottom, rgba(46,168,74,0.3), rgba(125,230,155,0.15))',
-        marginBottom: 28,
+        background: `linear-gradient(to bottom, ${fromAccent}60, transparent)`,
+        flexShrink: 0,
       }} />
-      {copy && (
-        <motion.p
-          initial={{ opacity: 0, y: 8 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, ease: 'easeOut' }}
-          style={{
-            color: 'var(--text-bridge)',
-            fontSize: 16,
-            fontWeight: 400,
-            fontStyle: 'italic',
-            lineHeight: 1.75,
-            textAlign: 'center',
-            maxWidth: 560,
-            margin: '0 auto',
-            fontFamily: 'DM Sans, sans-serif',
-            padding: '0 24px',
-          }}
-        >
+
+      {/* Editorial bridge card */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.55, ease: 'easeOut' }}
+        style={{
+          maxWidth: 720,
+          width: '100%',
+          background: 'var(--card-bg)',
+          border: '1px solid rgba(125,230,155,0.10)',
+          borderLeft: `3px solid ${fromAccent}`,
+          borderRadius: '0 14px 14px 0',
+          padding: '20px 20px',
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Subtle background tint */}
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          background: `linear-gradient(135deg, rgba(${hexToRgb(fromAccent)},0.04) 0%, transparent 60%)`,
+          pointerEvents: 'none',
+        }} />
+
+        {/* Wave transition header */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          marginBottom: 14,
+          position: 'relative',
+          zIndex: 1,
+        }}>
+          <div style={{
+            width: 7, height: 7, borderRadius: '50%',
+            background: fromAccent,
+            boxShadow: `0 0 8px ${fromAccent}90`,
+            flexShrink: 0,
+          }} />
+          <div style={{
+            width: 36, height: 1,
+            background: `linear-gradient(to right, ${fromAccent}80, ${toAccent}80)`,
+            flexShrink: 0,
+          }} />
+          <div style={{
+            width: 7, height: 7, borderRadius: '50%',
+            background: toAccent,
+            boxShadow: `0 0 8px ${toAccent}90`,
+            flexShrink: 0,
+          }} />
+          <span style={{
+            fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+            fontSize: 10,
+            color: 'var(--text-support)',
+            letterSpacing: '0.12em',
+            textTransform: 'uppercase',
+            marginLeft: 6,
+            opacity: 0.65,
+          }}>
+            {meta.span}
+          </span>
+          <span style={{
+            marginLeft: 'auto',
+            fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+            fontSize: 10,
+            color: toAccent,
+            letterSpacing: '0.08em',
+            opacity: 0.7,
+          }}>
+            {meta.months}
+          </span>
+        </div>
+
+        {/* Bridge copy */}
+        <p style={{
+          color: 'var(--text-bridge)',
+          fontSize: 'var(--text-md)',
+          fontWeight: 400,
+          fontStyle: 'italic',
+          lineHeight: 1.8,
+          fontFamily: 'DM Sans, sans-serif',
+          margin: 0,
+          position: 'relative',
+          zIndex: 1,
+        }}>
           {copy.replace(/\s+/g, ' ').trim()}
-        </motion.p>
-      )}
+        </p>
+      </motion.div>
+
+      {/* Bottom stem */}
       <div style={{
-        width: 1,
+        width: 2,
         height: 32,
-        background: 'linear-gradient(to bottom, rgba(125,230,155,0.15), rgba(46,168,74,0.3))',
-        marginTop: 28,
+        background: `linear-gradient(to bottom, transparent, ${toAccent}60)`,
+        flexShrink: 0,
       }} />
     </div>
   );
@@ -207,8 +289,9 @@ function ConnectorLine({ index }) {
 // ── Main component ────────────────────────────────────────────────────────────
 // presentationWave: when 0/1/2, show only that chapter (no section header)
 export default function GrowthStory({ transforms, presentationWave }) {
-  const theme   = useTheme();
-  const isLight = theme === 'light';
+  const theme    = useTheme();
+  const isLight  = theme === 'light';
+  const isMobile = useIsMobile();
   const positive       = transforms.sentimentTrend.find(e => e.sentiment === 'Positive');
   const confidence     = transforms.confidenceTrend;
   const frequency      = transforms.frequencyTrend;
@@ -271,7 +354,9 @@ export default function GrowthStory({ transforms, presentationWave }) {
 
   return (
     <section style={{
-      padding: presentationWave !== undefined && presentationWave !== null ? '48px 48px' : '80px 48px',
+      padding: presentationWave !== undefined && presentationWave !== null
+        ? '48px 48px'
+        : isMobile ? '40px 16px' : '80px 48px',
       maxWidth: 1360,
       margin: '0 auto',
       boxSizing: 'border-box',
@@ -282,7 +367,7 @@ export default function GrowthStory({ transforms, presentationWave }) {
         <div style={{ textAlign: 'center', marginBottom: 72 }}>
           <div style={{
             fontFamily: 'DM Sans, sans-serif',
-            fontSize: 11,
+            fontSize: 'var(--text-xs)',
             fontWeight: 700,
             color: 'var(--accent-mint)',
             letterSpacing: '0.13em',
@@ -304,7 +389,7 @@ export default function GrowthStory({ transforms, presentationWave }) {
           </h2>
           <p style={{
             color: 'var(--text-support)',
-            fontSize: 16,
+            fontSize: 'var(--text-md)',
             lineHeight: 1.65,
             margin: 0,
             fontFamily: 'DM Sans, sans-serif',
@@ -330,24 +415,40 @@ export default function GrowthStory({ transforms, presentationWave }) {
               style={{
                 background: 'var(--card-bg)',
                 borderLeft: `3px solid ${accent}`,
+                borderTop: `1px solid rgba(${hexToRgb(accent)},0.18)`,
                 borderTopLeftRadius: 4,
                 borderBottomLeftRadius: 4,
                 borderTopRightRadius: 20,
                 borderBottomRightRadius: 20,
-                padding: 48,
+                padding: isMobile ? '28px 20px' : 48,
                 position: 'relative',
                 overflow: 'hidden',
                 display: 'flex',
-                gap: 80,
+                flexDirection: isMobile ? 'column' : 'row',
+                gap: isMobile ? 24 : 80,
                 alignItems: 'flex-start',
-                boxShadow: isLight ? '0 2px 16px rgba(0,0,0,0.08)' : '0 2px 40px rgba(0,0,0,0.35)',
+                boxShadow: isLight
+                  ? `0 2px 16px rgba(0,0,0,0.08), 0 0 0 1px rgba(${hexToRgb(accent)},0.06)`
+                  : `0 2px 40px rgba(0,0,0,0.35), 0 0 0 1px rgba(${hexToRgb(accent)},0.08)`,
               }}
             >
+              {/* Subtle background glow behind right column */}
+              <div style={{
+                position: 'absolute',
+                top: -40,
+                right: -40,
+                width: 320,
+                height: 320,
+                borderRadius: '50%',
+                background: `radial-gradient(circle, rgba(${hexToRgb(accent)},0.07) 0%, transparent 70%)`,
+                pointerEvents: 'none',
+              }} />
+
               {/* Watermark number */}
               <div style={{
                 fontSize: 160,
                 fontWeight: 800,
-                color: 'rgba(125,230,155,0.05)',
+                color: `rgba(${hexToRgb(accent)},0.06)`,
                 position: 'absolute',
                 right: -10,
                 top: -20,
@@ -362,21 +463,26 @@ export default function GrowthStory({ transforms, presentationWave }) {
               {/* Left column */}
               <div style={{ flex: 1, position: 'relative', zIndex: 1, minWidth: 0 }}>
                 {/* Wave label + date badge */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
                   <div style={{
+                    background: `rgba(${hexToRgb(accent)},0.12)`,
+                    border: `1px solid rgba(${hexToRgb(accent)},0.28)`,
+                    borderRadius: 6,
+                    padding: '4px 10px',
                     fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
                     fontSize: 10,
                     color: accent,
-                    letterSpacing: '0.2em',
+                    letterSpacing: '0.18em',
                     textTransform: 'uppercase',
+                    fontWeight: 600,
                   }}>
                     {chapter.waveLabel}
                   </div>
                   <div style={{
-                    fontSize: 12,
+                    fontSize: 'var(--text-sm)',
                     color: 'var(--text-support)',
-                    background: 'rgba(125,230,155,0.07)',
-                    border: '1px solid rgba(125,230,155,0.12)',
+                    background: 'rgba(125,230,155,0.06)',
+                    border: '1px solid rgba(125,230,155,0.10)',
                     borderRadius: 6,
                     padding: '4px 10px',
                     fontFamily: 'DM Sans, sans-serif',
@@ -401,7 +507,7 @@ export default function GrowthStory({ transforms, presentationWave }) {
 
                 {/* Narrative — full paragraph */}
                 <p style={{
-                  fontSize: 16,
+                  fontSize: 'var(--text-md)',
                   color: 'var(--text-support)',
                   fontWeight: 400,
                   lineHeight: 1.75,
@@ -421,11 +527,12 @@ export default function GrowthStory({ transforms, presentationWave }) {
                 display: 'grid',
                 gridTemplateColumns: 'repeat(2, 1fr)',
                 gap: 12,
-                minWidth: i === 2 ? 480 : 440,
+                minWidth: isMobile ? 'unset' : (i === 2 ? 480 : 440),
+                width: isMobile ? '100%' : 'auto',
                 flexShrink: 0,
                 position: 'relative',
                 zIndex: 1,
-                alignSelf: 'flex-start',
+                alignSelf: isMobile ? 'stretch' : 'center',
               }}>
                 {stats.map(stat => (
                   <StatPill
@@ -445,36 +552,179 @@ export default function GrowthStory({ transforms, presentationWave }) {
         );
       })}
 
-      {/* Closing bridge — transitions into ConvictionMoment */}
+      {/* Closing bridge — transitions into ConvictionMoment + StruggleMap */}
       {(presentationWave === undefined || presentationWave === null) && (
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.55, ease: 'easeOut' }}
-          style={{ textAlign: 'center', padding: '48px 24px 16px', maxWidth: 600, margin: '0 auto' }}
-        >
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          {/* Stem from last wave card */}
           <div style={{
-            width: 1,
-            height: 40,
-            background: 'linear-gradient(to bottom, rgba(125,230,155,0.2), rgba(229,85,79,0.3))',
-            margin: '0 auto 32px',
+            width: 2,
+            height: 32,
+            background: 'linear-gradient(to bottom, rgba(125,230,155,0.5), transparent)',
+            flexShrink: 0,
           }} />
-          <p style={{
-            color: 'var(--text-bridge)',
-            fontSize: 17,
-            fontWeight: 400,
-            fontStyle: 'italic',
-            lineHeight: 1.75,
-            fontFamily: 'DM Sans, sans-serif',
-            margin: 0,
-          }}>
-            The national average for daily AI use at work is 8%. This team reached 92%.
-            That gap — more than ten times the national benchmark — is the direct result
-            of leadership that modeled the change, built the infrastructure, and trusted
-            a team of 117 to run with it. What comes next is the number that proves it wasn't top-down.
-          </p>
-        </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.55, ease: 'easeOut' }}
+            style={{
+              maxWidth: 720,
+              width: '100%',
+              background: 'var(--card-bg)',
+              border: '1px solid rgba(125,230,155,0.10)',
+              borderLeft: '3px solid #7DE69B',
+              borderRadius: '0 14px 14px 0',
+              padding: '28px 36px',
+              position: 'relative',
+              overflow: 'hidden',
+            }}
+          >
+            {/* Mint background tint */}
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(135deg, rgba(125,230,155,0.04) 0%, transparent 55%)',
+              pointerEvents: 'none',
+            }} />
+
+            {/* Header badge */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              marginBottom: 16,
+              position: 'relative',
+              zIndex: 1,
+            }}>
+              <div style={{
+                width: 7, height: 7, borderRadius: '50%',
+                background: '#7DE69B',
+                boxShadow: '0 0 8px rgba(125,230,155,0.7)',
+                flexShrink: 0,
+              }} />
+              <span style={{
+                fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+                fontSize: 10,
+                color: 'var(--text-support)',
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                opacity: 0.65,
+              }}>
+                March 2026 — Where things stand
+              </span>
+            </div>
+
+            {/* Main copy */}
+            <p style={{
+              color: 'var(--text-bridge)',
+              fontSize: 'var(--text-md)',
+              fontWeight: 400,
+              fontStyle: 'italic',
+              lineHeight: 1.8,
+              fontFamily: 'DM Sans, sans-serif',
+              margin: '0 0 24px',
+              position: 'relative',
+              zIndex: 1,
+            }}>
+              The national average for daily AI use at work is 8%. This team reached 92% — more than
+              ten times the benchmark. That gap is the direct result of leadership that modeled the change,
+              built the infrastructure, and trusted a team of 117 to run with it. Since Survey 3, that
+              investment hasn't stopped. New staff are onboarding into a department where AI fluency is
+              already the norm. The question has changed: it's no longer whether the team will use AI.
+              It's whether they'll have enough protected time to go as deep as they want to.
+            </p>
+
+            {/* Preview chips — barriers + excitement */}
+            <div style={{
+              display: 'flex',
+              gap: 10,
+              flexWrap: 'wrap',
+              position: 'relative',
+              zIndex: 1,
+              borderTop: '1px solid rgba(125,230,155,0.08)',
+              paddingTop: 18,
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                background: 'rgba(229,85,79,0.07)',
+                border: '1px solid rgba(229,85,79,0.18)',
+                borderRadius: 8,
+                padding: '8px 14px',
+                flex: 1,
+                minWidth: 200,
+              }}>
+                <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#E5554F', flexShrink: 0 }} />
+                <div>
+                  <div style={{
+                    fontFamily: 'DM Sans, sans-serif',
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: '#E5554F',
+                    letterSpacing: '0.07em',
+                    textTransform: 'uppercase',
+                    marginBottom: 2,
+                  }}>
+                    Barriers &amp; Friction
+                  </div>
+                  <div style={{
+                    fontFamily: 'DM Sans, sans-serif',
+                    fontSize: 'var(--text-sm)',
+                    color: 'var(--text-support)',
+                    lineHeight: 1.4,
+                  }}>
+                    Time, access, and structure — what's still in the way
+                  </div>
+                </div>
+              </div>
+
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                background: 'rgba(89,190,201,0.07)',
+                border: '1px solid rgba(89,190,201,0.18)',
+                borderRadius: 8,
+                padding: '8px 14px',
+                flex: 1,
+                minWidth: 200,
+              }}>
+                <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#59BEC9', flexShrink: 0 }} />
+                <div>
+                  <div style={{
+                    fontFamily: 'DM Sans, sans-serif',
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: '#59BEC9',
+                    letterSpacing: '0.07em',
+                    textTransform: 'uppercase',
+                    marginBottom: 2,
+                  }}>
+                    Benefits &amp; Excitement
+                  </div>
+                  <div style={{
+                    fontFamily: 'DM Sans, sans-serif',
+                    fontSize: 'var(--text-sm)',
+                    color: 'var(--text-support)',
+                    lineHeight: 1.4,
+                  }}>
+                    Efficiency, quality, and pride — what's already working
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Stem into ConvictionMoment / StruggleMap */}
+          <div style={{
+            width: 2,
+            height: 32,
+            background: 'linear-gradient(to bottom, transparent, rgba(125,230,155,0.3))',
+            flexShrink: 0,
+          }} />
+        </div>
       )}
     </section>
   );

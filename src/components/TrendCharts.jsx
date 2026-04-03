@@ -8,6 +8,7 @@ import StruggleMap from './StruggleMap';
 import AdoptionCurve from './AdoptionCurve';
 import AdoptionScorecard from './AdoptionScorecard';
 import { useTheme } from '../hooks/useTheme';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 // axisStyle / gridStyle are computed per-render in TrendCharts using useTheme
 
@@ -189,6 +190,7 @@ function ChartCard({ title, subtitle, question, tag, tagColor, insight, children
 export default function TrendCharts({ transforms }) {
   const theme = useTheme();
   const isLight = theme === 'light';
+  const isMobile = useIsMobile();
   const axisStyle = { fill: isLight ? '#555a60' : '#797D80', fontSize: 12, fontFamily: 'DM Sans, sans-serif' };
   const gridStyle = { stroke: isLight ? 'rgba(46,168,74,0.09)' : 'rgba(125,230,155,0.07)', strokeDasharray: '3 3' };
 
@@ -206,7 +208,7 @@ export default function TrendCharts({ transforms }) {
   const s3Never = frequencyData[2]?.['Never'] ?? 0;
 
   return (
-    <section id="trends" style={{ maxWidth: 1360, margin: '0 auto', padding: '80px 32px' }}>
+    <section id="trends" style={{ maxWidth: 1360, margin: '0 auto', padding: isMobile ? '48px 16px' : '80px 32px' }}>
 
       {/* Section header */}
       <motion.div
@@ -272,7 +274,7 @@ export default function TrendCharts({ transforms }) {
           border: '1px solid rgba(125,230,155,0.15)',
           borderTop: '4px solid var(--accent-mint)',
           borderRadius: 18,
-          padding: '36px 44px 32px',
+          padding: isMobile ? '24px 16px 20px' : '36px 44px 32px',
         }}
       >
         {/* Card header */}
@@ -335,8 +337,9 @@ export default function TrendCharts({ transforms }) {
         </div>
 
         {/* Chart */}
+        <div className="chart-scroll">
         <ResponsiveContainer width="100%" height={320}>
-          <LineChart data={frequencyData} margin={{ top: 4, right: 8, bottom: 20, left: -10 }}>
+          <LineChart data={frequencyData} margin={{ top: 4, right: 50, bottom: 20, left: -10 }}>
             <CartesianGrid {...gridStyle} vertical={false} />
             <XAxis dataKey="period" tick={<CustomXTick />} tickLine={false} axisLine={false} height={42} interval={0} />
             <YAxis tick={axisStyle} tickLine={false} axisLine={false} tickFormatter={v => `${v}%`} />
@@ -347,6 +350,7 @@ export default function TrendCharts({ transforms }) {
               strokeDasharray="5 4" dot={{ r: 4, fill: '#E5554F', strokeWidth: 0 }} activeDot={{ r: 6 }} />
           </LineChart>
         </ResponsiveContainer>
+        </div>
 
         {/* Insight callout */}
         <div style={{
@@ -376,7 +380,7 @@ export default function TrendCharts({ transforms }) {
           background: 'var(--surface-green)',
           border: '1px solid rgba(125,230,155,0.15)',
           borderRadius: 16,
-          padding: '28px 32px 24px',
+          padding: isMobile ? '20px 16px 16px' : '28px 32px 24px',
           marginTop: 20,
         }}
       >

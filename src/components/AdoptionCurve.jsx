@@ -186,7 +186,7 @@ export default function AdoptionCurve({ familiarityTrend, compact = false }) {
   function deltaColor(n, invert) { return (invert ? n < 0 : n > 0) ? (isLight ? '#1d8040' : '#7DE69B') : '#E5554F'; }
   function segmentTextFill(brightColor) {
     if (!isLight) return brightColor;
-    const map = { '#7DE69B': '#1d8040', '#59BEC9': '#1a7585', '#FFCD00': '#8a6500' };
+    const map = { '#7DE69B': '#1d8040', '#59BEC9': '#1a7585', '#FFCD00': '#c4a000' };
     return map[brightColor] || brightColor;
   }
   function deltaBadge(n, invert) { return `${deltaArrow(n, invert)}${Math.abs(n)}%`; }

@@ -148,13 +148,47 @@ React + Vite · Tailwind CSS · Recharts · Framer Motion · Papa Parse · Claud
 
 ---
 
-## Tomorrow's Work (April 3, 2026)
+## Mobile Responsiveness Status (as of April 3, 2026 EOD)
 
-1. **Replit env var** — Set `VITE_VAULT_PASSWORD` in Replit Secrets so the vault password isn't exposed in the public GitHub repo
-2. **Presentation slide polish** — Test bell curve + struggle map slides in all 3 lenses live; fix any internal padding/overflow issues from embedding the full interactive components inside the presentation container
-3. **SlideTeam cleanup** — Ghost slide still in `SLIDES_ALL` (filtered out of all lenses); either repurpose or remove
-4. **OpportunitySpotlight QA** — Verify Claude API output quality now that archetypes + open text context is injected into the prompt
-5. **Mobile** — Dashboard is desktop-only; assess whether any responsive work is needed before the actual presentation date
+### ✅ Completed — Mobile-ready
+| Component | What was done |
+|---|---|
+| `Nav.jsx` | Full 2-row mobile layout (brand+actions Row 1, scrollable tabs Row 2); BH pineapple logo pulses; scroll-to-top on tab change |
+| `Hero.jsx` | Mobile padding; `ThenNowDiptych` stacks to 1 column via `isMobile`; center divider hidden via `.diptych-divider` CSS class |
+| `GrowthStory.jsx` | `isMobile` for flex direction, gap, padding, card layout; pill grid goes full-width; ConnectorLine and closing bridge adjust padding |
+| `ConvictionMoment.jsx` | Uses `clamp()` for responsive padding — no hook needed |
+| `HowWeDidIt.jsx` | `.grid-responsive` + `.pad-section` classes added |
+| `StoryNarrative.jsx` | `isMobile` for grid (3→1 col), borders, stagger delay, card padding |
+| `ParticipationStory.jsx` | `isMobile` section padding |
+| `TrendCharts.jsx` | `isMobile` section + card padding |
+| `AdoptionScorecard.jsx` | `isMobile` for tile grid (2→1 col); `clamp()` on inner padding |
+| `AdoptionCurve.jsx` | SVG uses `viewBox + width="100%"` — scales proportionally, no fix needed |
+| `StruggleMap.jsx` | `minmax(180px, 1fr)` auto-fill grid — wraps naturally to 2 cols on mobile |
+| `OpenTextIntelligence.jsx` | `.grid-responsive` class; `clamp()` section padding |
+| `OpportunitySpotlight.jsx` | `.grid-responsive` class; `clamp()` section padding |
+| `Archetypes.jsx` | `isMobile`: arc fan → horizontal scroll; no rotate/dip; card backs now use each archetype's accent color (not forced green in light mode) |
+| `App.jsx` | StruggleMap `.pad-section`; footer added |
+| `src/index.css` | Mobile utility classes: `.grid-responsive`, `.pad-section`, `.chart-scroll`, `.diptych-divider`, `.flex-stack`, `.mobile-full` |
+| `src/hooks/useIsMobile.js` | New hook — 768px breakpoint, resize listener |
+
+### ⏸ Deferred — Not started yet
+| Item | Notes |
+|---|---|
+| **Mobile Presentation Mode** | Explicitly deferred by user — "leave mobile presentation for later" |
+| **Replit env var** | Set `VITE_VAULT_PASSWORD` in Replit Secrets (vault password `TGSD26` should not be in public GitHub) |
+| **Presentation slide polish** | Test bell curve + struggle map slides in all 3 lenses live; check padding/overflow inside presentation container |
+| **SlideTeam cleanup** | Ghost slide still in `SLIDES_ALL` (filtered from all lenses); either repurpose or remove |
+| **OpportunitySpotlight QA** | Verify Claude API card quality with archetypes + open text injected |
+
+## Next Session — Monday Startup
+
+Say **"continue the build"** — CLAUDE.md auto-loads.
+
+**First thing to do Monday:**
+1. `npm run dev` → open http://localhost:5000
+2. View on mobile (Chrome DevTools → toggle device toolbar, 390px width)
+3. QA the mobile layout top to bottom across all 4 tabs
+4. Then tackle the Deferred list above in order
 
 ---
 

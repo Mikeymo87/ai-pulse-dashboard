@@ -5,6 +5,8 @@ import { useSurveyData } from './hooks/useSurveyData';
 import Nav from './components/Nav';
 import Hero from './components/Hero';
 import GrowthStory from './components/GrowthStory';
+import StoryNarrative from './components/StoryNarrative';
+import StruggleMap from './components/StruggleMap';
 import TrendCharts from './components/TrendCharts';
 import OpportunitySpotlight from './components/OpportunitySpotlight';
 import ChatPanel from './components/ChatPanel';
@@ -14,12 +16,16 @@ import ConvictionMoment from './components/ConvictionMoment';
 import PresentationMode from './components/PresentationMode';
 import OpenTextIntelligence from './components/OpenTextIntelligence';
 import ParticipationStory from './components/ParticipationStory';
+import NumbersSubNav from './components/NumbersSubNav';
+import SurveySnapshot from './components/SurveySnapshot';
+import HowWeDidIt from './components/HowWeDidIt';
 
 export default function App() {
   const { surveys, transforms, loading, error } = useSurveyData();
   const [chatOpen, setChatOpen]         = useState(false);
   const [presentMode, setPresentMode]   = useState(false);
-  const [activeTab, setActiveTab]       = useState('story');
+  const [activeTab, setActiveTab]         = useState('story');
+  const [numbersSubTab, setNumbersSubTab] = useState('overview');
   const [vaultUnlocked, setVaultUnlocked] = useState(false);
   const [vaultPrompt, setVaultPrompt]   = useState(false);
   const [vaultInput, setVaultInput]     = useState('');
@@ -113,12 +119,24 @@ export default function App() {
           {activeTab === 'story' && (
             <>
               <Hero transforms={transforms} />
+              <StoryNarrative />
               <GrowthStory transforms={transforms} />
               <ConvictionMoment transforms={transforms} />
+              <div className="pad-section" style={{ padding: '0 32px', maxWidth: 1360, margin: '0 auto' }}>
+                <StruggleMap transforms={transforms} />
+              </div>
             </>
           )}
           {activeTab === 'numbers' && (
-            <TrendCharts transforms={transforms} />
+            <>
+              <div style={{ paddingTop: 24 }}>
+                <NumbersSubNav active={numbersSubTab} onChange={setNumbersSubTab} />
+              </div>
+              {numbersSubTab === 'overview' && <TrendCharts transforms={transforms} />}
+              {numbersSubTab === 's1' && <SurveySnapshot wave="s1" transforms={transforms} />}
+              {numbersSubTab === 's2' && <SurveySnapshot wave="s2" transforms={transforms} />}
+              {numbersSubTab === 's3' && <SurveySnapshot wave="s3" transforms={transforms} />}
+            </>
           )}
           {activeTab === 'team' && (
             <>
@@ -296,8 +314,31 @@ export default function App() {
               <OpportunitySpotlight transforms={transforms} />
             </>
           )}
+          {activeTab === 'playbook' && (
+            <HowWeDidIt transforms={transforms} />
+          )}
         </motion.div>
       </AnimatePresence>
+
+      {/* Footer */}
+      <div style={{
+        borderTop: '1px solid var(--border)',
+        marginTop: 64,
+        padding: '32px 40px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}>
+        <p style={{
+          margin: 0,
+          fontFamily: 'DM Sans, sans-serif',
+          fontSize: 12,
+          color: 'var(--text-support)',
+          letterSpacing: '0.02em',
+        }}>
+          &copy; {new Date().getFullYear()} Baptist Health Marketing &amp; Communications
+        </p>
+      </div>
 
       {/* Always-mounted overlays — available from any tab */}
       <ChatPanel transforms={transforms} open={chatOpen} setOpen={setChatOpen} vaultUnlocked={vaultUnlocked} />

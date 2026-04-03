@@ -117,6 +117,17 @@
   --accent-turq-bg:   rgba(89,190,201,0.12);
 }
 
+/* ── Type scale ────────────────────────────────────────────────────────────── */
+:root {
+  --text-xs:   11px;   /* eyebrow labels, metadata, micro-copy — use sparingly */
+  --text-sm:   13px;   /* minimum label size — chart axis, badges, captions */
+  --text-base: 15px;   /* minimum body size — card copy, descriptions */
+  --text-md:   17px;   /* slightly elevated body — section intros */
+  --text-lg:   20px;   /* sub-headings, stat labels */
+  --text-xl:   24px;   /* section headings */
+  --text-2xl:  32px;   /* display headings */
+}
+
 *, *::before, *::after { box-sizing: border-box; }
 
 body {
@@ -126,9 +137,53 @@ body {
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-size: var(--text-base);
+  line-height: 1.6;
 }
 
 #root {
   width: 100%;
   min-height: 100vh;
+}
+
+/* ── Mobile responsive utilities ───────────────────────────────────────────── */
+@media (max-width: 767px) {
+  /* Single-column grid on mobile */
+  .grid-responsive {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Tighter section padding on mobile */
+  .pad-section {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  /* Horizontally scrollable chart wrappers */
+  .chart-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 8px;
+  }
+  .chart-scroll > * {
+    min-width: 560px;
+  }
+
+  /* Hide diptych center divider on mobile */
+  .diptych-divider {
+    display: none !important;
+  }
+
+  /* Stack flex rows on mobile */
+  .flex-stack {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  /* Full width on mobile */
+  .mobile-full {
+    width: 100% !important;
+    min-width: unset !important;
+    max-width: 100% !important;
+  }
 }

@@ -6,21 +6,34 @@ function easeOutExpo(p) {
   return 1 - Math.pow(2, -10 * p);
 }
 
-// Fallback quotes for when live own-pocket respondents don't have enough struggle text
-const FALLBACK_QUOTES = [
-  "I pay for my own ChatGPT subscription because the free version just isn't enough for what I'm doing.",
-  "I've been covering the cost myself — it's worth it for the quality of work it helps me produce.",
-  "There's no budget for the tools I actually need, so I use my own money. I can't work without it now.",
-  "I subscribe to multiple AI tools on my own dime. It's become as essential as my laptop.",
-  "The tools I need aren't provided, so I fund them myself. The ROI on my own work is obvious.",
+// Time-barrier keywords — filter live struggle text for relevant quotes
+const TIME_KEYWORDS = [
+  'time', 'busy', 'priorities', 'capacity', 'bandwidth', 'schedule',
+  'learning curve', 'overwhelm', 'juggling', 'deadline', 'competing',
+  'carve out', 'make time', 'find time', 'opportunity to',
 ];
 
-// ── Conviction Moment Panel ───────────────────────────────────────────────────
+// Fallback quotes for when live data doesn't surface enough time-specific text
+const FALLBACK_QUOTES = [
+  "I know it would help my workflow — I just can't carve out time to actually learn it properly.",
+  "The hardest part isn't finding the tools. It's finding uninterrupted time to get good at them.",
+  "Every time I start building a new AI workflow, something urgent pulls me away.",
+  "I want to go deeper, but the day-to-day workload doesn't leave room for real learning.",
+  "It's not that I'm resistant — it's that learning takes time I don't have between deadlines.",
+];
+
+// ── Time as Barrier Panel ─────────────────────────────────────────────────────
 export default function ConvictionMoment({ transforms }) {
-  const pct    = transforms.ownPocketS3?.yesPct ?? 43;
-  const quotes = transforms.openEndedText?.s3OwnPocketQuotes?.length >= 3
-    ? transforms.openEndedText.s3OwnPocketQuotes
-    : FALLBACK_QUOTES;
+  // Pull time-barrier % from structured data
+  const pct = transforms.barriersTrend
+    ?.find(b => b.barrier === 'Lack of time')?.s3?.pct ?? 44;
+
+  // Pull time-related quotes from open-text struggle responses
+  const liveQuotes = (transforms.openEndedText?.s3Struggle ?? [])
+    .filter(q => q && q.trim().length > 20)
+    .filter(q => TIME_KEYWORDS.some(kw => q.toLowerCase().includes(kw)));
+
+  const quotes = liveQuotes.length >= 3 ? liveQuotes : FALLBACK_QUOTES;
 
   // Count-up
   const [display, setDisplay]   = useState(0);
@@ -74,21 +87,21 @@ export default function ConvictionMoment({ transforms }) {
       style={{
         position: 'relative',
         overflow: 'hidden',
-        padding: '96px 48px',
+        padding: 'clamp(48px, 10vw, 96px) clamp(20px, 5vw, 48px)',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         textAlign: 'center',
       }}
     >
-      {/* Coral radial glow — mirrors Hero ambient pattern but coral */}
+      {/* Mint radial glow */}
       <motion.div
-        animate={{ scale: [1, 1.1, 1], opacity: [0.4, 0.7, 0.4] }}
+        animate={{ scale: [1, 1.1, 1], opacity: [0.35, 0.6, 0.35] }}
         transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
         style={{
           position: 'absolute',
           inset: 0,
-          background: 'radial-gradient(ellipse at 50% 50%, rgba(229,85,79,0.12) 0%, transparent 65%)',
+          background: 'radial-gradient(ellipse at 50% 50%, rgba(46,168,74,0.13) 0%, transparent 65%)',
           pointerEvents: 'none',
         }}
       />
@@ -100,7 +113,7 @@ export default function ConvictionMoment({ transforms }) {
         left: '10%',
         right: '10%',
         height: 1,
-        background: 'linear-gradient(90deg, transparent, rgba(229,85,79,0.25), transparent)',
+        background: 'linear-gradient(90deg, transparent, rgba(46,168,74,0.35), transparent)',
       }} />
 
       {/* Bottom separator line */}
@@ -110,7 +123,7 @@ export default function ConvictionMoment({ transforms }) {
         left: '10%',
         right: '10%',
         height: 1,
-        background: 'linear-gradient(90deg, transparent, rgba(229,85,79,0.2), transparent)',
+        background: 'linear-gradient(90deg, transparent, rgba(46,168,74,0.22), transparent)',
       }} />
 
       <div style={{ position: 'relative', zIndex: 1, maxWidth: 900, width: '100%' }}>
@@ -123,14 +136,14 @@ export default function ConvictionMoment({ transforms }) {
           transition={{ duration: 0.5 }}
           style={{
             fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
-            fontSize: 10,
-            color: 'rgba(229,85,79,0.7)',
+            fontSize: 'var(--text-xs)',
+            color: 'rgba(46,168,74,0.80)',
             letterSpacing: '0.2em',
             textTransform: 'uppercase',
             marginBottom: 28,
           }}
         >
-          The Conviction Signal
+          The Barrier Signal
         </motion.div>
 
         {/* The big number */}
@@ -142,11 +155,11 @@ export default function ConvictionMoment({ transforms }) {
           style={{
             fontSize: 'clamp(96px, 18vw, 160px)',
             fontWeight: 800,
-            color: '#E5554F',
+            color: '#2EA84A',
             lineHeight: 1,
             letterSpacing: '-0.04em',
             fontFamily: "'Plus Jakarta Sans', sans-serif",
-            textShadow: '0 0 60px rgba(229,85,79,0.35)',
+            textShadow: '0 0 60px rgba(46,168,74,0.32)',
           }}
         >
           {display}%
@@ -168,8 +181,8 @@ export default function ConvictionMoment({ transforms }) {
             margin: '20px 0 12px',
           }}
         >
-          of your team is paying for AI tools{' '}
-          <span style={{ color: '#E5554F' }}>out of their own money.</span>
+          of your team names time as their{' '}
+          <span style={{ color: '#2EA84A' }}>most-cited barrier to going deeper.</span>
         </motion.p>
 
         {/* Secondary context */}
@@ -179,7 +192,7 @@ export default function ConvictionMoment({ transforms }) {
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.4 }}
           style={{
-            fontSize: 15,
+            fontSize: 'var(--text-base)',
             color: 'var(--text-support)',
             fontFamily: 'DM Sans, sans-serif',
             lineHeight: 1.7,
@@ -189,16 +202,16 @@ export default function ConvictionMoment({ transforms }) {
             marginRight: 'auto',
           }}
         >
-          Not because they were asked to. Because they believe in what it does for their work.
-          That is organizational conviction — and a direct signal that demand has outpaced
-          the tools officially provided.
+          Not time to use AI — time to learn it well. The team believes in it.
+          What they need is protected space to go deeper without competing priorities
+          pulling them back to the surface.
         </motion.p>
 
         {/* Divider */}
         <div style={{
           width: 48,
           height: 2,
-          background: 'rgba(229,85,79,0.35)',
+          background: 'rgba(46,168,74,0.40)',
           borderRadius: 1,
           margin: '0 auto 36px',
         }} />
@@ -216,7 +229,7 @@ export default function ConvictionMoment({ transforms }) {
                 style={{
                   margin: 0,
                   padding: 0,
-                  fontSize: 15,
+                  fontSize: 'var(--text-base)',
                   fontStyle: 'italic',
                   lineHeight: 1.75,
                   color: 'var(--text-dim)',
@@ -229,8 +242,8 @@ export default function ConvictionMoment({ transforms }) {
           </AnimatePresence>
           <div style={{
             marginTop: 12,
-            fontSize: 11,
-            color: 'rgba(229,85,79,0.5)',
+            fontSize: 'var(--text-xs)',
+            color: 'rgba(46,168,74,0.55)',
             fontFamily: 'DM Sans, sans-serif',
             fontWeight: 500,
             letterSpacing: '0.06em',

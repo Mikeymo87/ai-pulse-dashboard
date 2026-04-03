@@ -1,13 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
+import { Unlock, TrendingUp, AlertTriangle, Rocket, ClipboardCheck } from 'lucide-react';
 
 // ─── Category config ──────────────────────────────────────────────────────────
 const CATEGORY_CONFIG = {
-  ENABLEMENT: { color: 'var(--accent-mint)', badgeBorder: 'rgba(125,230,155,0.25)', actionBg: 'rgba(125,230,155,0.06)', actionBorder: 'rgba(125,230,155,0.15)', bg: 'rgba(125,230,155,0.12)', icon: '◈' },
-  ADOPTION:   { color: 'var(--accent-turq)', badgeBorder: 'rgba(89,190,201,0.25)',  actionBg: 'rgba(89,190,201,0.06)',  actionBorder: 'rgba(89,190,201,0.15)',  bg: 'rgba(89,190,201,0.12)',  icon: '◎' },
-  RISK:       { color: '#E5554F', badgeBorder: 'rgba(229,85,79,0.25)',  actionBg: 'rgba(229,85,79,0.06)',  actionBorder: 'rgba(229,85,79,0.15)',  bg: 'rgba(229,85,79,0.12)',   icon: '◉' },
-  MOMENTUM:   { color: '#2EA84A', badgeBorder: 'rgba(46,168,74,0.25)',  actionBg: 'rgba(46,168,74,0.06)',  actionBorder: 'rgba(46,168,74,0.15)',  bg: 'rgba(46,168,74,0.12)',   icon: '◆' },
-  READINESS:  { color: '#b388ff', badgeBorder: 'rgba(179,136,255,0.25)',actionBg: 'rgba(179,136,255,0.06)',actionBorder: 'rgba(179,136,255,0.15)',bg: 'rgba(179,136,255,0.12)', icon: '◇' },
+  ENABLEMENT: { color: 'var(--accent-mint)', badgeBorder: 'rgba(125,230,155,0.25)', actionBg: 'rgba(125,230,155,0.06)', actionBorder: 'rgba(125,230,155,0.15)', bg: 'rgba(125,230,155,0.12)', Icon: Unlock },
+  ADOPTION:   { color: 'var(--accent-turq)', badgeBorder: 'rgba(89,190,201,0.25)',  actionBg: 'rgba(89,190,201,0.06)',  actionBorder: 'rgba(89,190,201,0.15)',  bg: 'rgba(89,190,201,0.12)',  Icon: TrendingUp },
+  RISK:       { color: '#E5554F', badgeBorder: 'rgba(229,85,79,0.25)',  actionBg: 'rgba(229,85,79,0.06)',  actionBorder: 'rgba(229,85,79,0.15)',  bg: 'rgba(229,85,79,0.12)',   Icon: AlertTriangle },
+  MOMENTUM:   { color: '#2EA84A', badgeBorder: 'rgba(46,168,74,0.25)',  actionBg: 'rgba(46,168,74,0.06)',  actionBorder: 'rgba(46,168,74,0.15)',  bg: 'rgba(46,168,74,0.12)',   Icon: Rocket },
+  READINESS:  { color: '#b388ff', badgeBorder: 'rgba(179,136,255,0.25)',actionBg: 'rgba(179,136,255,0.06)',actionBorder: 'rgba(179,136,255,0.15)',bg: 'rgba(179,136,255,0.12)', Icon: ClipboardCheck },
 };
 
 // ─── Skeleton card ────────────────────────────────────────────────────────────
@@ -81,7 +82,7 @@ function InsightCard({ card, index }) {
           fontFamily: 'DM Sans, sans-serif',
           textTransform: 'uppercase',
         }}>
-          <span style={{ fontSize: 8 }}>{cfg.icon}</span>
+          {cfg.Icon && <cfg.Icon size={11} strokeWidth={2} style={{ flexShrink: 0 }} />}
           {card.category}
         </span>
       </div>
@@ -423,7 +424,7 @@ Rules:
     <section
       id="spotlight"
       style={{
-        padding: '96px 32px 80px',
+        padding: 'clamp(48px, 8vw, 96px) clamp(16px, 4vw, 32px) clamp(48px, 8vw, 80px)',
         maxWidth: 1360,
         margin: '0 auto',
         fontFamily: 'DM Sans, sans-serif',
@@ -475,7 +476,7 @@ Rules:
       {loading && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           <Spinner />
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(460px, 1fr))', gap: 24 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(460px, 1fr))', gap: 24 }} className="grid-responsive">
             {[0, 1, 2, 3].map(i => <SkeletonCard key={i} delay={i * 0.2} />)}
           </div>
           <SkeletonCard delay={0.8} />
@@ -520,7 +521,7 @@ Rules:
       {cards && !error && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           {/* First 4 cards — 2×2 grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(460px, 1fr))', gap: 24 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(460px, 1fr))', gap: 24 }} className="grid-responsive">
             {cards.slice(0, 4).map((card, i) => (
               <InsightCard key={card.category} card={card} index={i} />
             ))}
