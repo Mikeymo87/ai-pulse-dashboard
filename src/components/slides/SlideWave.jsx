@@ -70,9 +70,9 @@ function SentimentBar({ sentimentTrend, surveyKey }) {
         {[['#2EA84A','Positive',pos],['#FFCD00','Mixed',mixed],['#E5554F','Negative',neg],['#797D80','Unsure',unsure]]
           .filter(([,,p]) => p > 0)
           .map(([color, label, pct]) => (
-            <span key={label} style={{ fontSize: 11, color: '#9ca8b4', fontFamily: 'DM Sans, sans-serif' }}>
+            <span key={label} style={{ fontSize: 11, color: 'var(--text-bridge)', fontFamily: 'DM Sans, sans-serif' }}>
               <span style={{ display: 'inline-block', width: 7, height: 7, borderRadius: 2, background: color, marginRight: 5, verticalAlign: 'middle' }} />
-              {label} <strong style={{ color: '#e0e4e8' }}>{pct}%</strong>
+              {label} <strong style={{ color: 'var(--text-medium)' }}>{pct}%</strong>
             </span>
           ))}
       </div>
@@ -188,7 +188,7 @@ export default function SlideWave({ transforms, wave }) {
         </div>
         <div style={{ width: 1, height: 16, background: `rgba(${rgb},0.25)`, flexShrink: 0 }} />
         <div style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: '#797D80' }}>{chapter.dateRange}</div>
-        <div style={{ width: 1, height: 16, background: 'rgba(255,255,255,0.06)', flexShrink: 0 }} />
+        <div style={{ width: 1, height: 16, background: 'rgba(128,128,128,0.2)', flexShrink: 0 }} />
         <div style={{ fontFamily: MONO, fontSize: 10, color: `rgba(${rgb},0.7)`, letterSpacing: '0.16em', textTransform: 'uppercase' }}>
           {chapter.eyebrow}
         </div>
@@ -209,7 +209,7 @@ export default function SlideWave({ transforms, wave }) {
           style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 16 }}
         >
           <div style={{ width: 4, height: 68, background: `linear-gradient(to bottom, ${accent}, transparent)`, borderRadius: 2, flexShrink: 0 }} />
-          <h2 style={{ fontFamily: SANS, fontSize: 'clamp(48px, 6vw, 72px)', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.035em', lineHeight: 0.95, margin: 0 }}>
+          <h2 style={{ fontFamily: SANS, fontSize: 'clamp(48px, 6vw, 72px)', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.035em', lineHeight: 0.95, margin: 0 }}>
             {chapter.title}
           </h2>
         </motion.div>
@@ -247,7 +247,7 @@ export default function SlideWave({ transforms, wave }) {
           <p style={{
             fontFamily: 'DM Sans, sans-serif',
             fontSize: 'clamp(13px, 1.4vw, 15px)',
-            color: '#b0bcc8', lineHeight: 1.8, margin: 0,
+            color: 'var(--text-bridge)', lineHeight: 1.8, margin: 0,
             flex: 1,
             overflow: 'hidden',
             display: '-webkit-box',
@@ -292,7 +292,7 @@ export default function SlideWave({ transforms, wave }) {
         <p style={{
           fontFamily: 'DM Sans, sans-serif',
           fontSize: 13,
-          color: 'rgba(255,255,255,0.58)',
+          color: 'var(--text-dim)',
           fontStyle: 'italic',
           lineHeight: 1.6,
           margin: 0,

@@ -43,7 +43,7 @@ function TransformCard({ before, after, label, delta, color, context, delay = 0 
 
       {before ? (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 6 }}>
-          <span style={{ fontFamily: SANS, fontSize: 'clamp(22px, 2.3vw, 30px)', fontWeight: 900, color: 'rgba(255,255,255,0.22)', lineHeight: 1, letterSpacing: '-0.03em' }}>{before}</span>
+          <span style={{ fontFamily: SANS, fontSize: 'clamp(22px, 2.3vw, 30px)', fontWeight: 900, color: 'var(--text-support)', lineHeight: 1, letterSpacing: '-0.03em' }}>{before}</span>
           <span style={{ color: `rgba(${rgb},0.5)`, fontSize: 16, fontWeight: 300 }}>→</span>
           <span style={{ fontFamily: SANS, fontSize: 'clamp(32px, 3.5vw, 46px)', fontWeight: 900, color: color, lineHeight: 1, letterSpacing: '-0.03em' }}>{after}</span>
         </div>
@@ -61,7 +61,7 @@ function TransformCard({ before, after, label, delta, color, context, delay = 0 
         {context}
       </p>
 
-      <div style={{ height: 4, borderRadius: 4, background: 'rgba(255,255,255,0.07)', overflow: 'hidden', flexShrink: 0 }}>
+      <div style={{ height: 4, borderRadius: 4, background: 'rgba(128,128,128,0.15)', overflow: 'hidden', flexShrink: 0 }}>
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${Math.min(afterNum, 100)}%` }}
@@ -97,7 +97,7 @@ function ParticipationPod({ survey, n, accent, delay = 0 }) {
         <span style={{ fontFamily: SANS, fontSize: 32, fontWeight: 900, color: accent, lineHeight: 1, letterSpacing: '-0.03em' }}>{pct}%</span>
         <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: '#797D80' }}>{n} of {TOTAL}</span>
       </div>
-      <div style={{ height: 4, borderRadius: 4, background: 'rgba(255,255,255,0.07)', overflow: 'hidden' }}>
+      <div style={{ height: 4, borderRadius: 4, background: 'rgba(128,128,128,0.15)', overflow: 'hidden' }}>
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${pct}%` }}
@@ -172,7 +172,7 @@ export default function SlideOverview({ transforms }) {
         <div style={{ borderLeft: '3px solid rgba(125,230,155,0.3)', paddingLeft: 14, marginTop: 12 }}>
           <p style={{
             fontFamily: 'DM Sans, sans-serif', fontSize: 13,
-            color: 'rgba(255,255,255,0.55)', fontStyle: 'italic',
+            color: 'var(--text-dim)', fontStyle: 'italic',
             lineHeight: 1.6, margin: 0,
           }}>
             Most organizations can't get half their team to answer one survey. This team did it three times — over 14 months — with response rates above 76% every round. The data below only exists because of the people above.
@@ -192,7 +192,7 @@ export default function SlideOverview({ transforms }) {
       >
         <h1 style={{
           fontFamily: SANS, fontSize: 'clamp(28px, 3.8vw, 46px)',
-          fontWeight: 900, color: '#ffffff',
+          fontWeight: 900, color: 'var(--text-primary)',
           letterSpacing: '-0.03em', lineHeight: 1.0, margin: 0,
         }}>
           14 months changed{' '}

@@ -102,7 +102,7 @@ function LensSelect({ onSelect }) {
       style={{
         position: 'fixed',
         inset: 0,
-        background: '#1a1d1e',
+        background: 'var(--bg)',
         zIndex: 200,
         display: 'flex',
         flexDirection: 'column',
@@ -152,7 +152,7 @@ function LensSelect({ onSelect }) {
           style={{
             fontSize: 'clamp(28px, 5vw, 42px)',
             fontWeight: 900,
-            color: '#fff',
+            color: 'var(--text-primary)',
             letterSpacing: '-0.025em',
             margin: '0 0 10px',
             lineHeight: 1.1,
@@ -193,7 +193,7 @@ function LensSelect({ onSelect }) {
               style={{
                 background: hovered === lens.key
                   ? `rgba(${lens.key === 'council' ? '89,190,201' : lens.key === 'exec' ? '125,230,155' : '255,205,0'}, 0.09)`
-                  : 'rgba(29,77,82,0.2)',
+                  : 'var(--card-bg)',
                 border: `1px solid ${hovered === lens.key ? lens.accent + '55' : 'rgba(125,230,155,0.1)'}`,
                 borderTop: `2px solid ${hovered === lens.key ? lens.accent : lens.accent + '44'}`,
                 borderRadius: 14,
@@ -215,7 +215,7 @@ function LensSelect({ onSelect }) {
                   <div style={{
                     fontSize: 16,
                     fontWeight: 800,
-                    color: '#fff',
+                    color: 'var(--text-primary)',
                     letterSpacing: '-0.01em',
                   }}>
                     {lens.title}
@@ -235,7 +235,7 @@ function LensSelect({ onSelect }) {
               {/* Description */}
               <p style={{
                 fontSize: 13,
-                color: 'rgba(255,255,255,0.55)',
+                color: 'var(--text-support)',
                 lineHeight: 1.6,
                 margin: 0,
                 fontWeight: 400,
@@ -372,7 +372,7 @@ export default function PresentationMode({ transforms, surveys, onClose }) {
       style={{
         position: 'fixed',
         inset: 0,
-        background: '#1a1d1e',
+        background: 'var(--bg)',
         zIndex: 200,
         display: 'flex',
         flexDirection: 'column',
@@ -398,9 +398,9 @@ export default function PresentationMode({ transforms, surveys, onClose }) {
             transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
             style={{ width: 7, height: 7, borderRadius: '50%', background: '#2EA84A', boxShadow: '0 0 8px rgba(46,168,74,0.8)', flexShrink: 0 }}
           />
-          <span style={{ fontSize: 13, fontWeight: 700, color: '#fff', marginLeft: 9 }}>Baptist Health</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginLeft: 9 }}>Baptist Health</span>
           <span style={{ color: 'rgba(125,230,155,0.2)', fontSize: 18, margin: '0 10px', fontWeight: 300 }}>|</span>
-          <span style={{ fontSize: 12, fontWeight: 500, color: '#7DE69B' }}>AI Pulse</span>
+          <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--accent-mint)' }}>AI Pulse</span>
         </div>
 
         <div style={{ width: 1, height: 20, background: 'rgba(125,230,155,0.1)' }} />

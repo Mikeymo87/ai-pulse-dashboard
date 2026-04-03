@@ -15,7 +15,7 @@ function SkeletonCard({ delay = 0 }) {
       animate={{ opacity: [0.35, 0.6, 0.35] }}
       transition={{ repeat: Infinity, duration: 1.6, delay }}
       style={{
-        background: 'rgba(29,77,82,0.3)',
+        background: 'var(--card-bg)',
         border: '1px solid rgba(125,230,155,0.12)',
         borderRadius: 14,
         padding: '20px 22px',
@@ -25,8 +25,8 @@ function SkeletonCard({ delay = 0 }) {
         overflow: 'hidden',
       }}
     >
-      <div style={{ width: 80, height: 18, background: 'rgba(255,255,255,0.08)', borderRadius: 20 }} />
-      <div style={{ width: '75%', height: 18, background: 'rgba(255,255,255,0.06)', borderRadius: 5 }} />
+      <div style={{ width: 80, height: 18, background: 'rgba(128,128,128,0.12)', borderRadius: 20 }} />
+      <div style={{ width: '75%', height: 18, background: 'rgba(128,128,128,0.09)', borderRadius: 5 }} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
         <div style={{ width: '100%', height: 11, background: 'rgba(255,255,255,0.04)', borderRadius: 3 }} />
         <div style={{ width: '88%',  height: 11, background: 'rgba(255,255,255,0.04)', borderRadius: 3 }} />
@@ -45,7 +45,7 @@ function InsightCard({ card, index }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45, delay: index * 0.1 }}
       style={{
-        background: 'rgba(29,77,82,0.28)',
+        background: 'var(--card-bg)',
         border: `1px solid rgba(125,230,155,0.12)`,
         borderTop: `2px solid ${cfg.color}60`,
         borderRadius: 14,
@@ -84,7 +84,7 @@ function InsightCard({ card, index }) {
         fontFamily: 'DM Sans, sans-serif',
         fontSize: 15,
         fontWeight: 800,
-        color: '#f0f2f4',
+        color: 'var(--text-medium)',
         lineHeight: 1.3,
         overflow: 'hidden',
         display: '-webkit-box',
@@ -100,7 +100,7 @@ function InsightCard({ card, index }) {
         fontFamily: 'DM Sans, sans-serif',
         fontSize: 12,
         fontWeight: 400,
-        color: '#9aa4b0',
+        color: 'var(--text-bridge)',
         lineHeight: 1.6,
         flex: 1,
         overflow: 'hidden',
@@ -129,7 +129,7 @@ function InsightCard({ card, index }) {
             fontFamily: 'DM Sans, sans-serif',
             fontSize: 11,
             fontWeight: 500,
-            color: '#c8d4e0',
+            color: 'var(--text-bridge)',
             lineHeight: 1.5,
             overflow: 'hidden',
             display: '-webkit-box',
@@ -144,7 +144,7 @@ function InsightCard({ card, index }) {
       {/* Stat */}
       <div style={{
         paddingTop: 10,
-        borderTop: '1px solid rgba(255,255,255,0.06)',
+        borderTop: '1px solid rgba(128,128,128,0.15)',
         fontFamily: 'DM Sans, sans-serif',
         fontSize: 11,
         fontWeight: 600,
@@ -302,7 +302,7 @@ stat: one key data point as a short string`,
           fontFamily: 'DM Sans, sans-serif',
           fontSize: 24,
           fontWeight: 800,
-          color: '#ffffff',
+          color: 'var(--text-primary)',
           letterSpacing: '-0.02em',
           margin: 0,
         }}>

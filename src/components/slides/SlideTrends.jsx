@@ -21,7 +21,7 @@ function CustomXTick({ x, y, payload }) {
   const info = PERIOD_LABEL[payload.value] || { survey: payload.value, date: '' };
   return (
     <g transform={`translate(${x},${y})`}>
-      <text x={0} y={0} dy={13} textAnchor="middle" fill="#e0e0e0" fontSize={10} fontWeight={700} fontFamily="DM Sans, sans-serif">
+      <text x={0} y={0} dy={13} textAnchor="middle" fill="var(--chart-label)" fontSize={10} fontWeight={700} fontFamily="DM Sans, sans-serif">
         {info.survey}
       </text>
       {info.date && (
@@ -45,13 +45,13 @@ function ChartTooltip({ active, payload, label, suffix = '%' }) {
   const header = info ? `${info.survey} (${info.date})` : label;
   return (
     <div style={{
-      background: '#1a1d1e',
+      background: 'var(--tooltip-bg)',
       border: '1px solid rgba(125,230,155,0.35)',
       borderRadius: 8,
       padding: '8px 12px',
       fontFamily: 'DM Sans, sans-serif',
       fontSize: 12,
-      color: '#e0e0e0',
+      color: 'var(--text-medium)',
     }}>
       <p style={{ color: '#7DE69B', fontWeight: 700, margin: '0 0 5px' }}>{header}</p>
       {payload.map((entry) => (
@@ -266,7 +266,7 @@ function ChartBlock({ id, chartData, chartH }) {
       flex: 1,
       display: 'flex',
       flexDirection: 'column',
-      background: 'rgba(29,77,82,0.22)',
+      background: 'var(--card-bg)',
       border: '1px solid rgba(125,230,155,0.1)',
       borderRadius: 14,
       padding: '18px 20px 14px',
@@ -275,7 +275,7 @@ function ChartBlock({ id, chartData, chartH }) {
     }}>
       {/* Title row */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, flexShrink: 0 }}>
-        <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 700, color: '#e0e0e0' }}>
+        <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 700, color: 'var(--text-medium)' }}>
           {cfg.title}
         </p>
         <span style={{
@@ -309,7 +309,7 @@ function ChartBlock({ id, chartData, chartH }) {
         borderRadius: '0 6px 6px 0',
         flexShrink: 0,
       }}>
-        <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: 'rgba(224,224,224,0.75)', lineHeight: 1.5, fontStyle: 'italic' }}>
+        <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: 'var(--text-dim)', lineHeight: 1.5, fontStyle: 'italic' }}>
           <span style={{ color: '#7DE69B', fontWeight: 700, fontStyle: 'normal', marginRight: 4 }}>Key takeaway:</span>
           {cfg.insight}
         </p>
