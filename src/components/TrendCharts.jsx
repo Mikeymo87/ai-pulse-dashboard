@@ -361,7 +361,7 @@ export default function TrendCharts({ transforms }) {
           borderRadius: '0 10px 10px 0',
         }}>
           <p style={{
-            color: 'rgba(224,224,224,0.85)', fontSize: 15, fontStyle: 'italic',
+            color: 'var(--text-bridge)', fontSize: 15, fontStyle: 'italic',
             margin: 0, lineHeight: 1.7, fontFamily: 'DM Sans, sans-serif',
           }}>
             <span style={{ color: 'var(--accent-mint)', fontWeight: 700, fontStyle: 'normal', marginRight: 6, letterSpacing: '0.02em' }}>What this tells us:</span>
