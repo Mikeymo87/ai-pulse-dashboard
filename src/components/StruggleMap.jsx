@@ -394,7 +394,7 @@ export default function StruggleMap({ transforms }) {
         borderRadius: '0 8px 8px 0',
       }}>
         <p style={{
-          color: 'var(--text-dim)', fontSize: 'var(--text-sm)', fontStyle: 'italic',
+          color: 'var(--text-bridge)', fontSize: 13, fontStyle: 'italic',
           margin: 0, lineHeight: 1.65, fontFamily: 'DM Sans, sans-serif',
         }}>
           <span style={{ color: 'var(--accent-mint)', fontWeight: 700, fontStyle: 'normal', marginRight: 4 }}>

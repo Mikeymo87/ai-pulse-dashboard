@@ -542,7 +542,7 @@ export default function AdoptionCurve({ familiarityTrend, compact = false }) {
           borderRadius: '0 8px 8px 0',
         }}>
           <p style={{
-            color: 'var(--text-bridge)', fontSize: 11, fontStyle: 'italic',
+            color: 'var(--text-bridge)', fontSize: 13, fontStyle: 'italic',
             margin: 0, lineHeight: 1.55, fontFamily: FONT,
           }}>
             <span style={{ color: 'var(--accent-mint)', fontWeight: 700, fontStyle: 'normal', marginRight: 4 }}>
