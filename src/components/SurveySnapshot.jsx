@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ChevronDown, ChevronUp, FileText } from 'lucide-react';
+import { ChevronDown, ChevronUp, FileText } from './Icons';
 import {
   PieChart, Pie, Cell, Tooltip as ReTooltip,
   AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer,

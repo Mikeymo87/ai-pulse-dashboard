@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import * as LucideIcons from 'lucide-react';
+import { ICON_MAP as LucideIcons } from './Icons';
 
 // ─── Intensity helpers ────────────────────────────────────────────────────────
 function getIntensity(pct, maxPct) {

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Unlock, TrendingUp, AlertTriangle, Rocket, ClipboardCheck } from 'lucide-react';
+import { Unlock, TrendingUp, AlertTriangle, Rocket, ClipboardCheck } from './Icons';
 
 // ─── Category config ──────────────────────────────────────────────────────────
 const CATEGORY_CONFIG = {

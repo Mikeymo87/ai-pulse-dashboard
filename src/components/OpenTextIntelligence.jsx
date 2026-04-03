@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Target, Wrench, Megaphone, Lock } from 'lucide-react';
+import { Target, Wrench, Megaphone, Lock } from './Icons';
 
 // ─── Accent color per insight ID (fixed — not generated) ─────────────────────
 const ACCENT = {

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Smile, Star, ShieldCheck, Briefcase } from 'lucide-react';
+import { Smile, Star, ShieldCheck, Briefcase } from './Icons';
 import {
   LineChart, Line, AreaChart, Area,
   XAxis, YAxis, CartesianGrid, Tooltip,
