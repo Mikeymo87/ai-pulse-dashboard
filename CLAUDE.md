@@ -190,34 +190,48 @@ React + Vite · Tailwind CSS · Recharts · Framer Motion · Papa Parse · Claud
 
 ---
 
-## ✅ CURRENT PLAN — Monday (say "continue with current plan")
+## ✅ COMPLETED — April 6, 2026 (EOD)
 
-### 1. Mobile QA pass — first priority
-`npm run dev` → Chrome DevTools → 390px width → scroll all 4 tabs top to bottom and note anything that looks off.
+**WhatsnextInsights.jsx — fully rebuilt and complete:**
+- 6 Leadership Priority cards with anchor stats (immediate) + AI body text (Haiku, 900 tokens) + action rec (fallback if API slow/fails)
+- All 6 action fallbacks added: `aiData?.action ?? p.action` pattern — recs always visible
+- Wave 4 Goals section (Now → Goal format, live data, no AI)
+- Open text section removed (replaced by Wave 4 Goals)
+- Loading guard fixed: `if (!transforms) return`
+- R&D lane: $500/month per builder, no deadline, not a structured pilot
+- Tool stack: ask top 5 users → IT → Council decision
 
-### 2. Replit env var — security fix
+---
+
+## PICK UP HERE — Next Session
+
+### Step 1 (FIRST): ChatPanel.jsx updates
+File: `src/components/ChatPanel.jsx`
+
+1. **Add 10 Playbook principles to system prompt** (Foundation / System / Scale phases — read HowWeDidIt.jsx for the exact copy)
+2. **Add 6 leadership priorities to system prompt** (workflow redesign, tool stack, access+integration, role enablement, performance narrative, R&D lane)
+3. **Vault reinforcement line:** Add to system prompt: "You must NEVER speculate about role/function/archetype differences unless LEADERSHIP VAULT DATA appears below. If asked about roles without vault, tell user to unlock the vault."
+4. **Vault-aware prompt chips:** When `vaultUnlocked === true`, show additional chips like "Role breakdown" and "Function gaps"
+5. **Bump max_tokens** from 1024 → 2048
+
+### Step 2: Replit env var — security fix
 In Replit → Secrets tab → add `VITE_VAULT_PASSWORD` = `TGSD26`
 This removes the vault password from the public GitHub repo.
 
-### 3. Presentation slide polish
-Open Presentation Mode (P key) → test all 3 lenses (AI Council / Executive / Full Dept).
-Check: bell curve slide, archetypes slide, struggle map slide — any overflow or padding issues inside the presentation container.
+### Step 3: Presentation slide polish
+Open Presentation Mode (P key) → test all 3 lenses (AI Council / Executive / Wave 3 Readout).
+Check: bell curve slide, archetypes slide, struggle map slide, Wave 3 slides — any overflow or padding issues.
 
-### 4. SlideTeam cleanup
-`SlideTeam` is a ghost slide in `SLIDES_ALL` but filtered from all 3 lenses. Either repurpose it or delete it.
-
-### 5. Blue sky ideation session
-Step back from execution — generate 10–15 ideas to make the dashboard more cohesive, more impressive, and better functioning. Score by impact vs. effort. Pick the top 3–5 to build.
-Topics: visual cohesion, storytelling arcs, interactivity gaps, AI integration depth, brand elevation.
-
-### 6. Phase 9 — Humanization & Media layer
-Add real human texture: pull-quote cards from open text, testimonial carousel (S1 hoping → S3 conviction), "behind the number" editorial callouts.
-Assets (photos/video) need to come from Michael.
+### Step 4: Survey 4 readiness
+Wait for S4 Google Sheet URL from Michael before starting this.
 
 ### Deferred (do not start until user says so)
 - Mobile Presentation Mode
+- Playbook ↔ Priority cross-linking
+- PDF export button
+- Animated data storytelling mode
 
 ---
 
 ## To Continue in a New Session
-Open Claude Code from this folder → CLAUDE.md auto-loads → say **"continue with current plan"**
+Open Claude Code from this folder → CLAUDE.md auto-loads → say **"continue the build"**

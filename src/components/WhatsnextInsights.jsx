@@ -10,6 +10,7 @@ const PRIORITIES = [
     id: 'workflow-pilots', num: '01', category: 'WORKFLOW', color: '#2EA84A',
     title: 'Run workflow redesign pilots',
     fallback: 'Three quarters of the team are already integrating or transforming how they work with AI. The next move is making that change visible and repeatable at the team level, not just the individual level.',
+    action: 'Pick one recurring workflow per team — a brief, a report, a campaign kickoff — and redesign it end-to-end with AI in the loop. Measure before and after.',
     getAnchor: (t) => {
       const pct = ['Integration','Transformation'].reduce((s, st) => s + (t.stageTrend?.find(e => e.stage === st)?.s3?.pct ?? 0), 0);
       return { val: `${Math.round(pct)}%`, label: 'at integration or transformation — ready for team-level redesign' };
@@ -19,6 +20,7 @@ const PRIORITIES = [
     id: 'tool-stack', num: '02', category: 'TOOLS', color: '#FFCD00',
     title: 'Rationalize the tool stack',
     fallback: 'Staff aren\'t waiting for permission — they\'re paying out of pocket and building their own stack. That\'s not a discipline problem, it\'s a signal that demand has outrun what\'s been officially sanctioned. The Council needs a clear picture of what\'s actually winning in the wild before making any decisions.',
+    action: 'Ask your top five AI users what tools they\'re actually using and why, then take that list to IT — get clarity on what\'s winning before deciding what to standardize. This is a Council-level decision.',
     getAnchor: (t) => {
       const ownPocket = Math.round(t.ownPocketS3?.yesPct ?? 32);
       const tooMany   = Math.round(t.barriersTrend?.find(b => b.barrier?.toLowerCase().includes('too many'))?.s3?.pct ?? 16);
@@ -29,6 +31,7 @@ const PRIORITIES = [
     id: 'access-integration', num: '03', category: 'ACCESS', color: '#E5554F',
     title: 'Fix access and integration',
     fallback: 'People aren\'t frustrated with AI — they\'re frustrated with the walls around it. When someone can\'t connect AI to the files and systems they use every day, the friction lands as a personal blocker, not a technical one.',
+    action: 'Map the three most-requested integrations — shared files, project management, email — and take a specific request to IT. One unlocked connection is more motivating than a broad access policy.',
     getAnchor: (t) => {
       const access = Math.round(t.barriersTrend?.find(b => b.barrier?.toLowerCase().includes('access') || b.barrier?.toLowerCase().includes('limited'))?.s3?.pct ?? 11);
       return { val: `${access}%`, label: 'cite limited access as a barrier — open text shows this is far more widespread' };
@@ -38,17 +41,19 @@ const PRIORITIES = [
     id: 'role-enablement', num: '04', category: 'ENABLEMENT', color: '#59BEC9',
     title: 'Build role-based enablement',
     fallback: 'Nearly everyone feels confident — but that confidence has a ceiling. Generic training got us here; the gap that remains is about people not seeing how AI applies to their specific job, their specific workflows, their specific output.',
+    action: 'Run one function-specific lab per team — bring 3 real deliverables from that team\'s actual work and rebuild them with AI in the room. That\'s more useful than another hour of general AI literacy.',
     getAnchor: (t) => {
       const highConf = Math.round((t.confidenceTrend?.[2]?.distribution ?? []).filter(d => d.score >= 4).reduce((s,d) => s+d.pct, 0));
       const anyConf  = Math.round((t.confidenceTrend?.[2]?.distribution ?? []).filter(d => d.score >= 3).reduce((s,d) => s+d.pct, 0));
       const gap = anyConf - highConf;
-      return { val: `${gap > 0 ? gap : 66}pt`, label: 'gap between "confident" and "very/extremely confident" — the enablement opportunity' };
+      return { val: `${gap > 0 ? gap : 26}%`, label: 'feel confident but NOT very/extremely confident — the practical enablement gap' };
     },
   },
   {
     id: 'performance-narrative', num: '05', category: 'NARRATIVE', color: '#7DE69B',
     title: 'Reset the performance narrative',
     fallback: 'When 87% of people rate AI as important to their work, there\'s real risk that "using AI" becomes a performance rather than a practice. The goal isn\'t more AI activity — it\'s better work. That distinction needs to come from the top.',
+    action: 'At the next all-hands or team meeting, say it plainly: we don\'t measure AI by how often people use it. We measure it by whether the work got better. One sentence from a leader does more than a policy doc.',
     getAnchor: (t) => {
       const imp     = Math.round((t.importanceTrend?.[2]?.distribution ?? []).filter(d => d.score >= 4).reduce((s,d) => s+d.pct, 0) || 87);
       const partner = Math.round((t.benefitsS3 ?? []).find(b => (b.label ?? b.benefit)?.toLowerCase().includes('strategic'))?.pct ?? 42);
@@ -59,6 +64,7 @@ const PRIORITIES = [
     id: 'rd-lane', num: '06', category: 'INNOVATION', color: '#2EA84A',
     title: 'Create a small R&D lane',
     fallback: 'You already have builders — people at transformation stage who are experimenting on their own time with their own tools. They don\'t need a pilot program. They need a budget, permission, and someone to share what they find with the rest of the team.',
+    action: 'Identify your three most active AI experimenters and give each of them $500 a month to spend on tools, courses, or time to build something with no deadline and no defined outcome — just "show us what you learned." That\'s how you turn hobbyists into your innovation engine.',
     getAnchor: (t) => {
       const pct = Math.round(t.stageTrend?.find(e => e.stage === 'Transformation')?.s3?.pct ?? 25);
       return { val: `${pct}%`, label: 'already at transformation stage — internal builders ready for a dedicated lane' };
@@ -202,7 +208,21 @@ function PriorityCard({ p, anchor, aiData, loading, index }) {
         {/* AI body text — shimmer while loading, fallback if API fails */}
         <div style={{ flex: 1, minHeight: 52 }}>
           {loading
-            ? <TextShimmer lines={3} />
+            ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <motion.div
+                  animate={{ opacity: [0.5, 1, 0.5] }}
+                  transition={{ repeat: Infinity, duration: 1.8, ease: 'easeInOut' }}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+                >
+                  <div style={{ width: 5, height: 5, borderRadius: '50%', background: c, opacity: 0.7 }} />
+                  <span style={{ fontFamily: MONO, fontSize: 9, color: textColor, letterSpacing: '0.12em', textTransform: 'uppercase', opacity: 0.7 }}>
+                    AI analysis loading…
+                  </span>
+                </motion.div>
+                <TextShimmer lines={3} />
+              </div>
+            )
             : (
               <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}
                 style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: 'var(--text-bridge)', lineHeight: 1.65, margin: 0 }}>
@@ -213,12 +233,12 @@ function PriorityCard({ p, anchor, aiData, loading, index }) {
         </div>
 
         {/* AI action line */}
-        {!loading && (aiData?.action) && (
+        {!loading && (aiData?.action || p.action) && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}
             style={{ borderTop: `1px solid ${c}15`, paddingTop: 12, display: 'flex', gap: 8, alignItems: 'flex-start' }}>
             <span style={{ color: textColor, fontSize: 12, fontWeight: 700, flexShrink: 0, paddingTop: 1 }}>→</span>
             <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 600, color: 'var(--text-medium)', lineHeight: 1.5 }}>
-              {aiData.action}
+              {aiData?.action || p.action}
             </p>
           </motion.div>
         )}
@@ -437,7 +457,7 @@ SPECIAL INSTRUCTIONS:
           },
           body: JSON.stringify({
             model: 'claude-haiku-4-5-20251001',
-            max_tokens: 900,
+            max_tokens: 1800,
             messages: [{ role: 'user', content: prompt }],
           }),
         });
