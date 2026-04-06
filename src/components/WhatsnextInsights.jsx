@@ -19,6 +19,7 @@ const PRIORITIES = [
   {
     id: 2, num: '02', category: 'TOOLS', color: '#59BEC9',
     title: 'Rationalize the tool stack',
+    callout: 'Audit the current tool landscape, define a core stack with clear use cases for each tool, and publish a one-page decision guide so staff know what to use — and how to request exceptions.',
     getAnchor: (t) => {
       const ownPocket = Math.round(t.ownPocketS3?.yesPct ?? 32);
       const tooMany   = Math.round(t.barriersTrend?.find(b => b.barrier?.toLowerCase().includes('too many'))?.s3?.pct ?? 16);
@@ -28,11 +29,13 @@ const PRIORITIES = [
   {
     id: 3, num: '03', category: 'ACCESS', color: '#E5554F',
     title: 'Fix access and integration',
+    callout: 'Map the three most common integration blockers (shared files, email, project management) and escalate as a formal IT request — with business impact data from this survey attached.',
     getAnchor: () => ({ val: '77%', label: 'use tools beyond the official stack — workarounds signal unmet integration needs' }),
   },
   {
     id: 4, num: '04', category: 'ENABLEMENT', color: '#FFCD00',
     title: 'Build role-based enablement',
+    callout: 'Design one function-specific AI lab per team — 90 minutes, built around that team\'s actual work — with a follow-up office hours slot two weeks later to close the gap between session and practice.',
     getAnchor: (t) => {
       const pct = (t.confidenceTrend?.[2]?.distribution ?? []).filter(d => d.score >= 4).reduce((s,d) => s+d.pct, 0);
       return { val: `${Math.round(pct) || 67}%`, label: 'very or extremely confident — uneven across roles and functions' };
@@ -41,6 +44,7 @@ const PRIORITIES = [
   {
     id: 5, num: '05', category: 'NARRATIVE', color: '#7DE69B',
     title: 'Reset the performance narrative',
+    callout: 'Replace AI usage metrics with outcome metrics in team check-ins — ask "what did AI help you do better?" instead of "did you use AI?" and share strong examples publicly to model the right behavior.',
     getAnchor: (t) => {
       const pct = (t.importanceTrend?.[2]?.distribution ?? []).filter(d => d.score >= 4).reduce((s,d) => s+d.pct, 0);
       return { val: `${Math.round(pct) || 87}%`, label: 'rate AI highly important — making performative use a real risk' };
@@ -49,6 +53,7 @@ const PRIORITIES = [
   {
     id: 6, num: '06', category: 'R&D', color: '#59BEC9',
     title: 'Create a small R&D lane',
+    callout: 'Give three volunteer builders a small budget, a 30-day window, and a simple brief — build something that saves your team time. Share results at the next all-hands and fast-track anything worth scaling.',
     getAnchor: (t) => {
       const pct = t.stageTrend?.find(e => e.stage === 'Transformation')?.s3?.pct ?? 25;
       return { val: `${Math.round(pct)}%`, label: 'already at transformation stage — builders are ready for a dedicated lane' };
@@ -167,7 +172,7 @@ function Shimmer({ lines = 3 }) {
 }
 
 // ── Priority card ─────────────────────────────────────────────────────────────
-function PriorityCard({ p, anchor, aiData, loading, index }) {
+function PriorityCard({ p, anchor, index }) {
   const c = p.color;
   return (
     <motion.div
@@ -204,16 +209,7 @@ function PriorityCard({ p, anchor, aiData, loading, index }) {
         </span>
       </div>
 
-      <div style={{ flex: 1 }}>
-        {loading ? <Shimmer /> : (
-          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}
-            style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 14, color: 'var(--text-bridge)', lineHeight: 1.65, margin: 0 }}>
-            {aiData?.body ?? ''}
-          </motion.p>
-        )}
-      </div>
-
-      {/* Highlighted callout — shown when card has a specific prescribed action */}
+      {/* Highlighted callout */}
       {p.callout && (
         <div style={{
           background: `${c}12`,
@@ -232,13 +228,6 @@ function PriorityCard({ p, anchor, aiData, loading, index }) {
         </div>
       )}
 
-      {!loading && aiData?.action && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4, delay: 0.1 }}
-          style={{ borderTop: `1px solid ${c}25`, paddingTop: 12, display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-          <span style={{ color: c, fontSize: 13, fontWeight: 700, flexShrink: 0, paddingTop: 1 }}>→</span>
-          <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: 'var(--text-support)', lineHeight: 1.55 }}>{aiData.action}</p>
-        </motion.div>
-      )}
     </motion.div>
   );
 }
@@ -432,14 +421,6 @@ KEY STATS:
 
 Return ONLY valid JSON. No markdown, no explanation:
 {
-  "priorities": [
-    { "id": 1, "body": "2-3 sentences grounded in data", "action": "1 concrete next step, action verb first" },
-    { "id": 2, "body": "...", "action": "..." },
-    { "id": 3, "body": "...", "action": "..." },
-    { "id": 4, "body": "...", "action": "..." },
-    { "id": 5, "body": "...", "action": "..." },
-    { "id": 6, "body": "...", "action": "..." }
-  ],
   "openText": [
     { "id": "aspiration-gap", "body": "2 sentences on what this gap means for leadership", "action": "1 concrete action" },
     { "id": "tool-mindset", "body": "...", "action": "..." },
@@ -448,8 +429,7 @@ Return ONLY valid JSON. No markdown, no explanation:
   ]
 }
 
-Priorities: 1=workflow redesign, 2=tool stack, 3=access/integration, 4=role-based enablement, 5=performance narrative, 6=R&D lane.
-Open text: aspiration-gap=hoping vs doing, tool-mindset=Claude vs ChatGPT language, leadership-voices=informal champions, blocked-investors=paying+blocked.
+Open text patterns: aspiration-gap=hoping vs doing gap, tool-mindset=Claude vs ChatGPT mental model difference, leadership-voices=informal adoption champions in open text, blocked-investors=staff paying out of pocket AND facing org friction.
 Tone: direct, evidence-grounded, no hype. Audience: marketing leadership team.`;
 
         const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -462,7 +442,7 @@ Tone: direct, evidence-grounded, no hype. Audience: marketing leadership team.`;
           },
           body: JSON.stringify({
             model: 'claude-sonnet-4-6',
-            max_tokens: 2200,
+            max_tokens: 900,
             messages: [{ role: 'user', content: prompt }],
           }),
         });
@@ -472,13 +452,9 @@ Tone: direct, evidence-grounded, no hype. Audience: marketing leadership team.`;
         let raw = data.content?.[0]?.text ?? '';
         raw = raw.replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/```\s*$/i,'').trim();
         const parsed = JSON.parse(raw);
-
-        const priorityMap = {};
-        (parsed.priorities ?? []).forEach(p => { priorityMap[p.id] = p; });
         const otMap = {};
         (parsed.openText ?? []).forEach(o => { otMap[o.id] = o; });
-
-        setAiResults({ priorities: priorityMap, openText: otMap });
+        setAiResults({ openText: otMap });
       } catch (err) {
         console.error('WhatsnextInsights error:', err);
         setError(true);
@@ -509,31 +485,11 @@ Tone: direct, evidence-grounded, no hype. Audience: marketing leadership team.`;
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 64 }}>
         {PRIORITIES.map((p, i) => (
-          <PriorityCard key={p.id} p={p} anchor={anchors[i]} aiData={aiResults?.priorities?.[p.id] ?? null} loading={loading} index={i} />
+          <PriorityCard key={p.id} p={p} anchor={anchors[i]} index={i} />
         ))}
       </div>
 
-      {/* ── Section 2: Open Text Evidence ──────────────────────────────────── */}
-      <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }} style={{ marginBottom: 28 }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(89,190,201,0.08)', border: '1px solid rgba(89,190,201,0.2)', borderRadius: 20, padding: '4px 14px', marginBottom: 16 }}>
-          <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#59BEC9' }} />
-          <span style={{ fontFamily: MONO, fontSize: 10, color: '#59BEC9', letterSpacing: '0.15em', textTransform: 'uppercase', fontWeight: 700 }}>Open text intelligence</span>
-        </div>
-        <h2 style={{ fontFamily: SANS, fontSize: 'clamp(22px, 2.6vw, 32px)', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.025em', lineHeight: 1.1, margin: '0 0 8px' }}>
-          What they're actually saying
-        </h2>
-        <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 15, color: 'var(--text-support)', margin: 0, maxWidth: 560 }}>
-          Four patterns from the open-text responses — with real quotes from the survey.
-        </p>
-      </motion.div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16, marginBottom: 0 }}>
-        {OPEN_TEXT_CARDS.map((card, i) => (
-          <OpenTextCard key={card.id} card={card} stat={otStats[i]} quote={otQuotes[i]} aiData={aiResults?.openText?.[card.id] ?? null} loading={loading} index={i} />
-        ))}
-      </div>
-
-      {/* ── Section 3: Wave 4 Scorecard ────────────────────────────────────── */}
+      {/* ── Section 2: Wave 4 Scorecard ────────────────────────────────────── */}
       <Wave4Scorecard transforms={transforms} />
 
       {error && (
