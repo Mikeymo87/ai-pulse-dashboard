@@ -8,13 +8,12 @@ import GrowthStory from './components/GrowthStory';
 import StoryNarrative from './components/StoryNarrative';
 import StruggleMap from './components/StruggleMap';
 import TrendCharts from './components/TrendCharts';
-import OpportunitySpotlight from './components/OpportunitySpotlight';
+import WhatsnextInsights from './components/WhatsnextInsights';
 import ChatPanel from './components/ChatPanel';
 import DeepDive from './components/DeepDive';
 import Archetypes from './components/Archetypes';
 import ConvictionMoment from './components/ConvictionMoment';
 import PresentationMode from './components/PresentationMode';
-import OpenTextIntelligence from './components/OpenTextIntelligence';
 import ParticipationStory from './components/ParticipationStory';
 import NumbersSubNav from './components/NumbersSubNav';
 import SurveySnapshot from './components/SurveySnapshot';
@@ -309,10 +308,7 @@ export default function App() {
             </>
           )}
           {activeTab === 'whats-next' && (
-            <>
-              <OpenTextIntelligence transforms={transforms} />
-              <OpportunitySpotlight transforms={transforms} />
-            </>
+            <WhatsnextInsights transforms={transforms} vaultUnlocked={vaultUnlocked} />
           )}
           {activeTab === 'playbook' && (
             <HowWeDidIt transforms={transforms} />
