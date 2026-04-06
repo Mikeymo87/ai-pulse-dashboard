@@ -105,7 +105,7 @@ const OPEN_TEXT_CARDS = [
 const SCORECARD_ROWS = [
   {
     metric: 'Integration + Transformation',
-    targetLabel: 'Move above 80%',
+    targetLabel: 'Move above 80%', targetDisplay: '80%',
     direction: 'above', threshold: 80,
     getVal: (t) => {
       const pct = ['Integration','Transformation'].reduce((s, st) => s + (t.stageTrend?.find(e => e.stage === st)?.s3?.pct ?? 0), 0);
@@ -115,35 +115,35 @@ const SCORECARD_ROWS = [
   },
   {
     metric: 'Very / extremely confident',
-    targetLabel: 'Move above 75%',
+    targetLabel: 'Move above 75%', targetDisplay: '75%',
     direction: 'above', threshold: 75,
     getVal: (t) => Math.round((t.confidenceTrend?.[2]?.distribution ?? []).filter(d => d.score >= 4).reduce((s,d) => s+d.pct, 0)),
     unit: '%',
   },
   {
     metric: 'Time / priorities as a barrier',
-    targetLabel: 'Pull below 25%',
+    targetLabel: 'Pull below 25%', targetDisplay: '<25%',
     direction: 'below', threshold: 25,
     getVal: (t) => Math.round(t.barriersTrend?.find(b => b.barrier?.toLowerCase().includes('time'))?.s3?.pct ?? 34),
     unit: '%',
   },
   {
     metric: 'Too many tools as a barrier',
-    targetLabel: 'Pull below 10%',
+    targetLabel: 'Pull below 10%', targetDisplay: '<10%',
     direction: 'below', threshold: 10,
     getVal: (t) => Math.round(t.barriersTrend?.find(b => b.barrier?.toLowerCase().includes('too many'))?.s3?.pct ?? 16),
     unit: '%',
   },
   {
     metric: 'Strategic thought partner benefit',
-    targetLabel: 'Move above 50%',
+    targetLabel: 'Move above 50%', targetDisplay: '50%',
     direction: 'above', threshold: 50,
     getVal: (t) => Math.round((t.benefitsS3 ?? []).find(b => (b.label ?? b.benefit)?.toLowerCase().includes('strategic'))?.pct ?? 42),
     unit: '%',
   },
   {
     metric: 'Out-of-pocket tool spend',
-    targetLabel: 'Reduce via sanctioned support',
+    targetLabel: 'Reduce via sanctioned support', targetDisplay: '↓',
     direction: 'below', threshold: 20,
     getVal: (t) => Math.round(t.ownPocketS3?.yesPct ?? 32),
     unit: '%',
@@ -151,84 +151,14 @@ const SCORECARD_ROWS = [
 ];
 
 // ── Shared shimmer ────────────────────────────────────────────────────────────
-function Shimmer({ lines = 3 }) {
+function Shimmer({ lines = 2 }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       {Array.from({ length: lines }, (_, i) => (
-        <motion.div
-          key={i}
-          animate={{ opacity: [0.3, 0.6, 0.3] }}
-          transition={{ repeat: Infinity, duration: 1.5, delay: i * 0.15 }}
-          style={{
-            height: 13,
-            width: `${[100, 92, 74][i] ?? 80}%`,
-            borderRadius: 4,
-            background: 'var(--skeleton-line-2, rgba(125,230,155,0.1))',
-          }}
-        />
+        <motion.div key={i} animate={{ opacity: [0.3, 0.6, 0.3] }} transition={{ repeat: Infinity, duration: 1.5, delay: i * 0.15 }}
+          style={{ height: 13, width: `${[100, 78][i] ?? 80}%`, borderRadius: 4, background: 'var(--skeleton-line-2, rgba(125,230,155,0.1))' }} />
       ))}
     </div>
-  );
-}
-
-// ── Priority card ─────────────────────────────────────────────────────────────
-function PriorityCard({ p, anchor, index }) {
-  const c = p.color;
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.5, delay: index * 0.07, ease: [0.22,1,0.36,1] }}
-      style={{
-        background: 'var(--card-bg, rgba(35,40,41,0.9))',
-        border: `1px solid ${c}30`,
-        borderTop: `3px solid ${c}`,
-        borderRadius: 14,
-        padding: '20px 22px',
-        display: 'flex', flexDirection: 'column', gap: 14,
-      }}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ background: `${c}15`, border: `1px solid ${c}30`, borderRadius: 20, padding: '3px 10px', fontFamily: MONO, fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', color: c }}>
-          {p.category}
-        </span>
-        <span style={{ fontFamily: MONO, fontSize: 11, color: c, opacity: 0.45, fontWeight: 700, letterSpacing: '0.08em' }}>{p.num}</span>
-      </div>
-
-      <div style={{ fontFamily: SANS, fontSize: 17, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.01em', lineHeight: 1.25 }}>
-        {p.title}
-      </div>
-
-      <div style={{ background: `${c}12`, borderRadius: 10, padding: '12px 14px', display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
-        <span style={{ fontFamily: SANS, fontSize: 'clamp(26px, 2.8vw, 34px)', fontWeight: 900, color: c, lineHeight: 1, letterSpacing: '-0.03em', flexShrink: 0 }}>
-          {anchor.val}
-        </span>
-        <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: 'var(--text-support)', lineHeight: 1.4 }}>
-          {anchor.label}
-        </span>
-      </div>
-
-      {/* Highlighted callout */}
-      {p.callout && (
-        <div style={{
-          background: `${c}12`,
-          border: `1px solid ${c}35`,
-          borderLeft: `3px solid ${c}`,
-          borderRadius: 8,
-          padding: '10px 12px',
-          display: 'flex',
-          gap: 8,
-          alignItems: 'flex-start',
-        }}>
-          <span style={{ color: c, fontSize: 14, flexShrink: 0, lineHeight: 1.4 }}>★</span>
-          <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 600, color: 'var(--text-medium)', lineHeight: 1.55 }}>
-            {p.callout}
-          </p>
-        </div>
-      )}
-
-    </motion.div>
   );
 }
 
@@ -243,25 +173,23 @@ function OpenTextCard({ card, stat, quote, aiData, loading, index }) {
       transition={{ duration: 0.5, delay: index * 0.08, ease: [0.22,1,0.36,1] }}
       style={{
         background: 'var(--card-bg, rgba(35,40,41,0.9))',
-        border: `1px solid ${c}25`,
+        border: `1px solid ${c}22`,
         borderLeft: `3px solid ${c}`,
         borderRadius: 14,
         padding: '20px 22px',
         display: 'flex', flexDirection: 'column', gap: 12,
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{ background: `${c}15`, border: `1px solid ${c}30`, borderRadius: 20, padding: '3px 10px', fontFamily: MONO, fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', color: c }}>
-          {card.category}
-        </span>
-      </div>
+      <span style={{ background: `${c}18`, borderRadius: 20, padding: '3px 10px', fontFamily: MONO, fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', color: c, alignSelf: 'flex-start' }}>
+        {card.category}
+      </span>
 
       <div style={{ fontFamily: SANS, fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.01em', lineHeight: 1.25 }}>
         {card.title}
       </div>
 
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
-        <span style={{ fontFamily: SANS, fontSize: 'clamp(22px, 2.4vw, 30px)', fontWeight: 900, color: c, lineHeight: 1, letterSpacing: '-0.02em', flexShrink: 0 }}>
+        <span style={{ fontFamily: SANS, fontSize: 'clamp(20px, 2.2vw, 26px)', fontWeight: 900, color: c, lineHeight: 1, letterSpacing: '-0.02em', flexShrink: 0 }}>
           {stat.val}
         </span>
         <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: 'var(--text-support)', lineHeight: 1.4 }}>
@@ -271,16 +199,16 @@ function OpenTextCard({ card, stat, quote, aiData, loading, index }) {
 
       {quote && (
         <div style={{ background: `${c}08`, border: `1px solid ${c}18`, borderRadius: 8, padding: '10px 12px' }}>
-          <span style={{ color: c, fontSize: '1.2em', lineHeight: 0, verticalAlign: '-0.15em', marginRight: 4, fontFamily: 'Georgia, serif' }}>&ldquo;</span>
+          <span style={{ color: c, fontSize: '1.1em', lineHeight: 0, verticalAlign: '-0.1em', marginRight: 4, fontFamily: 'Georgia, serif' }}>&ldquo;</span>
           <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: 'var(--text-bridge)', fontStyle: 'italic', lineHeight: 1.55 }}>
             {typeof quote === 'string' ? quote : quote.text ?? ''}
           </span>
         </div>
       )}
 
-      <div style={{ flex: 1, marginTop: 2 }}>
-        {loading ? <Shimmer lines={2} /> : (
-          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}
+      <div style={{ flex: 1 }}>
+        {loading ? <Shimmer /> : (
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}
             style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: 'var(--text-bridge)', lineHeight: 1.6, margin: 0 }}>
             {aiData?.body ?? ''}
           </motion.p>
@@ -289,11 +217,64 @@ function OpenTextCard({ card, stat, quote, aiData, loading, index }) {
 
       {!loading && aiData?.action && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}
-          style={{ borderTop: `1px solid ${c}20`, paddingTop: 10, display: 'flex', gap: 7, alignItems: 'flex-start' }}>
-          <span style={{ color: c, fontSize: 12, fontWeight: 700, flexShrink: 0, paddingTop: 1 }}>→</span>
+          style={{ borderTop: `1px solid ${c}18`, paddingTop: 10, display: 'flex', gap: 7, alignItems: 'flex-start' }}>
+          <span style={{ color: c, fontSize: 12, fontWeight: 700, flexShrink: 0 }}>→</span>
           <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: 'var(--text-support)', lineHeight: 1.5 }}>{aiData.action}</p>
         </motion.div>
       )}
+    </motion.div>
+  );
+}
+
+// ── Priority card ─────────────────────────────────────────────────────────────
+function PriorityCard({ p, anchor, index }) {
+  const c = p.color;
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.5, delay: index * 0.07, ease: [0.22,1,0.36,1] }}
+      style={{
+        background: 'var(--card-bg, rgba(35,40,41,0.9))',
+        border: `1px solid ${c}22`,
+        borderRadius: 14,
+        overflow: 'hidden',
+        display: 'flex', flexDirection: 'column',
+      }}
+    >
+      {/* Color top bar */}
+      <div style={{ height: 3, background: c }} />
+
+      <div style={{ padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: 12, flex: 1 }}>
+        {/* Badge + number */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span style={{ background: `${c}18`, borderRadius: 20, padding: '3px 10px', fontFamily: MONO, fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', color: c }}>
+            {p.category}
+          </span>
+          <span style={{ fontFamily: MONO, fontSize: 20, color: c, opacity: 0.18, fontWeight: 900, letterSpacing: '-0.02em' }}>{p.num}</span>
+        </div>
+
+        {/* Title */}
+        <div style={{ fontFamily: SANS, fontSize: 17, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.01em', lineHeight: 1.25 }}>
+          {p.title}
+        </div>
+
+        {/* Action text — the card body */}
+        <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: 'var(--text-bridge)', lineHeight: 1.65, flex: 1 }}>
+          {p.callout}
+        </p>
+
+        {/* Anchor stat — bottom divider row */}
+        <div style={{ borderTop: `1px solid ${c}18`, paddingTop: 12, display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
+          <span style={{ fontFamily: SANS, fontSize: 'clamp(20px, 2vw, 26px)', fontWeight: 900, color: c, lineHeight: 1, letterSpacing: '-0.03em', flexShrink: 0 }}>
+            {anchor.val}
+          </span>
+          <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: 'var(--text-support)', lineHeight: 1.4 }}>
+            {anchor.label}
+          </span>
+        </div>
+      </div>
     </motion.div>
   );
 }
@@ -321,10 +302,10 @@ function Wave4Scorecard({ transforms }) {
           <span style={{ fontFamily: MONO, fontSize: 10, color: '#2EA84A', letterSpacing: '0.15em', textTransform: 'uppercase', fontWeight: 700 }}>Wave 4</span>
         </div>
         <h2 style={{ fontFamily: SANS, fontSize: 'clamp(22px, 2.6vw, 32px)', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.025em', lineHeight: 1.1, margin: '0 0 8px' }}>
-          What success should look like <span style={{ color: '#2EA84A' }}>by the next survey</span>
+          Wave 4 Goals
         </h2>
         <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 15, color: 'var(--text-support)', margin: 0 }}>
-          Live Wave 3 numbers vs. Wave 4 targets — green means on track, coral means needs work.
+          Where we want to be by the next survey. Current Wave 3 numbers shown alongside each target.
         </p>
       </div>
 
@@ -339,35 +320,43 @@ function Wave4Scorecard({ transforms }) {
             transition={{ duration: 0.4, delay: i * 0.06 }}
             style={{
               background: 'var(--card-bg, rgba(35,40,41,0.9))',
-              border: `1px solid ${row.onTrack ? 'rgba(46,168,74,0.2)' : 'rgba(229,85,79,0.18)'}`,
+              border: '1px solid rgba(125,230,155,0.12)',
+              borderTop: '2px solid rgba(46,168,74,0.4)',
               borderRadius: 12,
               padding: '18px 20px',
               display: 'flex', flexDirection: 'column', gap: 10,
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: 'var(--text-medium)', fontWeight: 600, lineHeight: 1.3 }}>{row.metric}</span>
-              <span style={{
-                fontFamily: MONO, fontSize: 9, fontWeight: 700, letterSpacing: '0.1em',
-                color: row.onTrack ? '#2EA84A' : '#E5554F',
-                background: row.onTrack ? 'rgba(46,168,74,0.1)' : 'rgba(229,85,79,0.1)',
-                border: `1px solid ${row.onTrack ? 'rgba(46,168,74,0.25)' : 'rgba(229,85,79,0.25)'}`,
-                borderRadius: 20, padding: '2px 8px',
-              }}>
-                {row.onTrack ? 'ON TRACK' : 'NEEDS WORK'}
-              </span>
+            {/* Metric name */}
+            <div style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: 'var(--text-medium)', fontWeight: 600, lineHeight: 1.3 }}>
+              {row.metric}
             </div>
 
+            {/* Now → Goal */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ fontFamily: SANS, fontSize: 'clamp(28px, 3vw, 38px)', fontWeight: 900, color: row.onTrack ? '#2EA84A' : '#E5554F', lineHeight: 1, letterSpacing: '-0.03em' }}>
-                {row.val}{row.unit}
-              </span>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <span style={{ fontFamily: MONO, fontSize: 10, color: 'var(--text-support)', letterSpacing: '0.04em' }}>Wave 3</span>
-                <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: 'var(--text-support)', opacity: 0.7 }}>
-                  → {row.targetLabel}
+              {/* Current value */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                <span style={{ fontFamily: MONO, fontSize: 9, color: 'var(--text-support)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Now</span>
+                <span style={{ fontFamily: SANS, fontSize: 'clamp(24px, 2.5vw, 30px)', fontWeight: 900, color: row.onTrack ? '#2EA84A' : 'var(--text-medium)', lineHeight: 1, letterSpacing: '-0.02em' }}>
+                  {row.val}{row.unit}
                 </span>
               </div>
+
+              {/* Arrow */}
+              <span style={{ color: '#2EA84A', fontSize: 16, opacity: 0.4, flexShrink: 0 }}>→</span>
+
+              {/* Target */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                <span style={{ fontFamily: MONO, fontSize: 9, color: '#2EA84A', letterSpacing: '0.08em', textTransform: 'uppercase', opacity: 0.8 }}>Goal</span>
+                <span style={{ fontFamily: SANS, fontSize: 'clamp(24px, 2.5vw, 30px)', fontWeight: 900, color: '#2EA84A', lineHeight: 1, letterSpacing: '-0.02em' }}>
+                  {row.targetDisplay}
+                </span>
+              </div>
+            </div>
+
+            {/* Target description */}
+            <div style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: 'var(--text-support)', lineHeight: 1.4 }}>
+              {row.targetLabel}
             </div>
           </motion.div>
         ))}
@@ -380,12 +369,11 @@ function Wave4Scorecard({ transforms }) {
 export default function WhatsnextInsights({ transforms, vaultUnlocked }) {
   const [aiResults, setAiResults] = useState(null);
   const [loading, setLoading]     = useState(true);
-  const [error, setError]         = useState(false);
   const fetchedRef                = useRef(false);
 
-  const anchors    = PRIORITIES.map(p => p.getAnchor(transforms ?? {}));
-  const otStats    = OPEN_TEXT_CARDS.map(c => c.getStat(transforms ?? {}));
-  const otQuotes   = OPEN_TEXT_CARDS.map(c => c.getQuote(transforms ?? {}));
+  const anchors  = PRIORITIES.map(p => p.getAnchor(transforms ?? {}));
+  const otStats  = OPEN_TEXT_CARDS.map(c => c.getStat(transforms ?? {}));
+  const otQuotes = OPEN_TEXT_CARDS.map(c => c.getQuote(transforms ?? {}));
 
   useEffect(() => {
     if (fetchedRef.current || !transforms) return;
@@ -394,43 +382,19 @@ export default function WhatsnextInsights({ transforms, vaultUnlocked }) {
     async function fetchInsights() {
       try {
         const t = transforms;
-        const intTransPct = Math.round(['Integration','Transformation'].reduce((s, st) => s + (t.stageTrend?.find(e => e.stage === st)?.s3?.pct ?? 0), 0));
-        const s3ConfPct   = Math.round((t.confidenceTrend?.[2]?.distribution ?? []).filter(d => d.score >= 4).reduce((s,d) => s+d.pct, 0));
-        const impPct      = Math.round((t.importanceTrend?.[2]?.distribution ?? []).filter(d => d.score >= 4).reduce((s,d) => s+d.pct, 0) || 87);
-        const ownPocket   = Math.round(t.ownPocketS3?.yesPct ?? 32);
-        const tooManyPct  = Math.round(t.barriersTrend?.find(b => b.barrier?.toLowerCase().includes('too many'))?.s3?.pct ?? 16);
-        const timePct     = Math.round(t.barriersTrend?.find(b => b.barrier?.toLowerCase().includes('time'))?.s3?.pct ?? 34);
-        const transPct    = Math.round(t.stageTrend?.find(e => e.stage === 'Transformation')?.s3?.pct ?? 25);
-        const topBenefits = (t.benefitsS3 ?? []).slice(0, 3).map(b => `${b.label ?? b.benefit} (${Math.round(b.pct)}%)`).join(', ');
-        const ag          = t.openTextInsights?.aspirationGap ?? {};
-        const lv          = t.openTextInsights?.leadershipVoices ?? {};
-        const bi          = t.openTextInsights?.blockedInvestors ?? {};
-        const tm          = t.openTextInsights?.toolMindset ?? {};
+        const ag = t.openTextInsights?.aspirationGap ?? {};
+        const lv = t.openTextInsights?.leadershipVoices ?? {};
+        const bi = t.openTextInsights?.blockedInvestors ?? {};
+        const tm = t.openTextInsights?.toolMindset ?? {};
 
-        const prompt = `You are analyzing Baptist Health MarCom Wave 3 AI adoption survey data (n=101, Mar 2026).
-
-KEY STATS:
-- ${intTransPct}% Integration/Transformation, 90% daily use, 69% positive sentiment
-- ${s3ConfPct}% very/extremely confident, ${impPct}% rate AI highly important
-- 77% use unofficial tools, ${ownPocket}% pay out of pocket, ${tooManyPct}% cite too many tools, ${timePct}% cite time as barrier
-- ${transPct}% at Transformation stage, top benefits: ${topBenefits}
-- Aspiration gap: ${ag.pct ?? 0}% (n=${ag.count ?? 0}) write inspired text but use AI < weekly
-- Leadership voices: ${lv.pct ?? 0}% (n=${lv.count ?? 0}) show informal adoption leadership in open text
-- Blocked investors: ${bi.pct ?? 0}% (n=${bi.count ?? 0}) pay for AI AND face org friction
-- Tool mindset: ${tm.claude?.count ?? 0} Claude users vs ${tm.chatgpt?.count ?? 0} ChatGPT users
-
-Return ONLY valid JSON. No markdown, no explanation:
-{
-  "openText": [
-    { "id": "aspiration-gap", "body": "2 sentences on what this gap means for leadership", "action": "1 concrete action" },
-    { "id": "tool-mindset", "body": "...", "action": "..." },
-    { "id": "leadership-voices", "body": "...", "action": "..." },
-    { "id": "blocked-investors", "body": "...", "action": "..." }
-  ]
-}
-
-Open text patterns: aspiration-gap=hoping vs doing gap, tool-mindset=Claude vs ChatGPT mental model difference, leadership-voices=informal adoption champions in open text, blocked-investors=staff paying out of pocket AND facing org friction.
-Tone: direct, evidence-grounded, no hype. Audience: marketing leadership team.`;
+        const prompt = `Baptist Health MarCom Wave 3 AI survey (n=101). Return ONLY valid JSON, no markdown:
+{"openText":[
+  {"id":"aspiration-gap","body":"2 sentences for leadership","action":"1 concrete action"},
+  {"id":"tool-mindset","body":"...","action":"..."},
+  {"id":"leadership-voices","body":"...","action":"..."},
+  {"id":"blocked-investors","body":"...","action":"..."}
+]}
+Data: aspiration-gap=${ag.pct ?? 0}% (n=${ag.count ?? 0}) inspired but use AI<weekly; tool-mindset=${tm.claude?.count ?? 0} Claude vs ${tm.chatgpt?.count ?? 0} ChatGPT users; leadership-voices=${lv.pct ?? 0}% (n=${lv.count ?? 0}) informal champions; blocked-investors=${bi.pct ?? 0}% (n=${bi.count ?? 0}) pay out-of-pocket AND face org friction. Tone: direct, no hype. Audience: marketing leadership.`;
 
         const res = await fetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
@@ -441,8 +405,8 @@ Tone: direct, evidence-grounded, no hype. Audience: marketing leadership team.`;
             'content-type': 'application/json',
           },
           body: JSON.stringify({
-            model: 'claude-sonnet-4-6',
-            max_tokens: 900,
+            model: 'claude-haiku-4-5-20251001',
+            max_tokens: 500,
             messages: [{ role: 'user', content: prompt }],
           }),
         });
@@ -457,7 +421,6 @@ Tone: direct, evidence-grounded, no hype. Audience: marketing leadership team.`;
         setAiResults({ openText: otMap });
       } catch (err) {
         console.error('WhatsnextInsights error:', err);
-        setError(true);
       } finally {
         setLoading(false);
       }
@@ -483,20 +446,42 @@ Tone: direct, evidence-grounded, no hype. Audience: marketing leadership team.`;
         </p>
       </motion.div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 64 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 72 }}>
         {PRIORITIES.map((p, i) => (
           <PriorityCard key={p.id} p={p} anchor={anchors[i]} index={i} />
         ))}
       </div>
 
-      {/* ── Section 2: Wave 4 Scorecard ────────────────────────────────────── */}
-      <Wave4Scorecard transforms={transforms} />
-
-      {error && (
-        <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: 'var(--text-support)', textAlign: 'center', marginTop: 20, opacity: 0.6 }}>
-          Could not load AI interpretation — anchor data above is live from the survey.
+      {/* ── Section 2: Open Text Intelligence ───────────────────────────────── */}
+      <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }} style={{ marginBottom: 36 }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(125,230,155,0.06)', border: '1px solid rgba(125,230,155,0.2)', borderRadius: 20, padding: '4px 14px', marginBottom: 16 }}>
+          <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#7DE69B' }} />
+          <span style={{ fontFamily: MONO, fontSize: 10, color: '#7DE69B', letterSpacing: '0.15em', textTransform: 'uppercase', fontWeight: 700 }}>Open Text Intelligence</span>
+        </div>
+        <h2 style={{ fontFamily: SANS, fontSize: 'clamp(22px, 2.6vw, 32px)', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.025em', lineHeight: 1.1, margin: '0 0 8px' }}>
+          What staff said, <span style={{ color: '#7DE69B' }}>read between the lines</span>
+        </h2>
+        <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 15, color: 'var(--text-support)', margin: 0 }}>
+          Cross-cuts from Wave 3 open text — patterns not visible in the quantitative data alone.
         </p>
-      )}
+      </motion.div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16, marginBottom: 72 }}>
+        {OPEN_TEXT_CARDS.map((card, i) => (
+          <OpenTextCard
+            key={card.id}
+            card={card}
+            stat={otStats[i]}
+            quote={otQuotes[i]}
+            aiData={aiResults?.openText?.[card.id]}
+            loading={loading}
+            index={i}
+          />
+        ))}
+      </div>
+
+      {/* ── Section 3: Wave 4 Goals ──────────────────────────────────────────── */}
+      <Wave4Scorecard transforms={transforms} />
 
     </div>
   );
