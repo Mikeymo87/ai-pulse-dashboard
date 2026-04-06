@@ -398,7 +398,18 @@ export default function WhatsnextInsights({ transforms, vaultUnlocked }) {
 STATS: ${intTransPct}% integration/transformation, 90% daily use, 69% positive sentiment, ${s3ConfHigh}% very/extremely confident (${s3ConfAny}% any confidence — ${s3ConfAny - s3ConfHigh}pt gap), ${impPct}% rate AI highly important, ${partner}% strategic thought partner, ${ownPocket}% pay out of pocket, ${tooManyPct}% too many tools barrier, ${timePct}% time barrier, ${transPct}% at transformation stage, 77% use unofficial tools.
 OPEN TEXT: aspiration-gap=${ag.pct ?? 0}% (n=${ag.count ?? 0}); leadership-voices=${lv.pct ?? 0}% (n=${lv.count ?? 0}); blocked-investors=${bi.pct ?? 0}% (n=${bi.count ?? 0}); tool-mindset: ${tm.claude?.count ?? 0} Claude vs ${tm.chatgpt?.count ?? 0} ChatGPT users.${vaultSection}
 
-Return ONLY valid JSON (no markdown). Each "body" is 2 direct sentences for marketing leaders. Each "action" is 1 concrete next step.
+Return ONLY valid JSON (no markdown).
+
+TONE: Write like a trusted colleague talking to a marketing director — plain, direct, human. No consultant-speak ("leverage synergies", "operationalize", "strategic imperative"). No bullet-point thinking disguised as sentences. Say what it actually means, not what sounds impressive.
+
+Each "body": 2 sentences that explain why this matters RIGHT NOW for this specific team. Ground it in the numbers above. Sound like a person, not a report.
+
+Each "action": 1 realistic, specific next step — something a marketing leader could actually do this month, not a program or initiative. No "conduct an audit" or "develop a framework."
+
+SPECIAL INSTRUCTIONS:
+- rd-lane: Our team has builders who are already at transformation stage and experimenting on their own. The point is giving them a real R&D budget and permission to experiment — not a structured pilot with deliverables and timelines. The action should be about getting them budget and air cover, not assigning a project.
+- access-integration: People aren't frustrated with AI — they're frustrated with the walls around it. The access problem is emotional, not just technical. Acknowledge that.
+- performance-narrative: The risk isn't that people aren't using AI. It's that "sport mode" is emerging — people feel pressure to perform AI use rather than actually benefit from it. That's what needs to be reset.
 
 {"priorities":[
 {"id":"workflow-pilots","body":"...","action":"..."},
@@ -419,7 +430,7 @@ Return ONLY valid JSON (no markdown). Each "body" is 2 direct sentences for mark
           },
           body: JSON.stringify({
             model: 'claude-haiku-4-5-20251001',
-            max_tokens: 800,
+            max_tokens: 900,
             messages: [{ role: 'user', content: prompt }],
           }),
         });
