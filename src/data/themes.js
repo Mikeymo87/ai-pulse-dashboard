@@ -156,6 +156,7 @@ export const USE_CASE_THEMES = [
 export const STRUGGLE_THEMES = [
   {
     key: 'time_bandwidth',
+    icon: 'Clock',
     label: 'Not enough time / bandwidth',
     keywords: [
       'time', 'busy', 'bandwidth', 'workload', 'work volume', 'competing',
@@ -164,6 +165,7 @@ export const STRUGGLE_THEMES = [
   },
   {
     key: 'it_access_blocks',
+    icon: 'ShieldOff',
     label: 'IT / T&D access blocks',
     keywords: [
       't&d', 'it block', 'network', 'download', '3rd party', 'blocked',
@@ -173,6 +175,7 @@ export const STRUGGLE_THEMES = [
   },
   {
     key: 'tool_overwhelm',
+    icon: 'Layers',
     label: 'Too many tools / keeping up',
     keywords: [
       'too many', 'which tool', 'keep up', 'so many', 'overwhelm',
@@ -181,6 +184,7 @@ export const STRUGGLE_THEMES = [
   },
   {
     key: 'accuracy_reliability',
+    icon: 'AlertTriangle',
     label: 'Accuracy & reliability',
     keywords: [
       'accurate', 'accuracy', 'reliable', 'reliability', 'errors',
@@ -189,6 +193,7 @@ export const STRUGGLE_THEMES = [
   },
   {
     key: 'team_adoption',
+    icon: 'Users',
     label: 'Team adoption & human judgment',
     keywords: [
       'adoption', 'teammates', 'colleague', 'others', 'consensus',
@@ -198,6 +203,7 @@ export const STRUGGLE_THEMES = [
   },
   {
     key: 'learning_curve',
+    icon: 'GraduationCap',
     label: 'Learning curve / upskilling',
     keywords: [
       'learn', 'training', 'upskill', 'familiar', 'experiment',
@@ -206,6 +212,7 @@ export const STRUGGLE_THEMES = [
   },
   {
     key: 'system_integration',
+    icon: 'Plug',
     label: 'System / software integration',
     keywords: [
       'integrat', 'connect', 'outlook', 'workfront', 'office', 'platform',
@@ -214,6 +221,7 @@ export const STRUGGLE_THEMES = [
   },
   {
     key: 'custom_gpt_agents',
+    icon: 'Bot',
     label: 'Building Custom GPTs / Agents',
     keywords: [
       'custom gpt', 'agent', 'custom gpts', 'finalize', 'build', 'developing',
@@ -222,6 +230,7 @@ export const STRUGGLE_THEMES = [
   },
   {
     key: 'cost_personal',
+    icon: 'Wallet',
     label: 'Personal cost / out-of-pocket',
     keywords: [
       'cost', 'pay', 'pocket', 'fund', 'expense', 'subscri', 'personal cost',
@@ -229,6 +238,7 @@ export const STRUGGLE_THEMES = [
   },
   {
     key: 'scaling_structure',
+    icon: 'Network',
     label: 'Scaling AI across the team',
     keywords: [
       'scaling', 'structured', 'sustainable', 'department-wide',
@@ -237,6 +247,7 @@ export const STRUGGLE_THEMES = [
   },
   {
     key: 'old_habits',
+    icon: 'RotateCcw',
     label: 'Breaking old habits',
     keywords: [
       'old habit', 'habit', 'routine', 'used to', 'break', 'muscle memory',
@@ -251,6 +262,7 @@ export const STRUGGLE_THEMES = [
 export const EXCITEMENT_THEMES = [
   {
     key: 'efficiency_time',
+    icon: 'Zap',
     label: 'Efficiency & time savings',
     keywords: [
       'efficien', 'time', 'faster', 'productivity', 'streamline',
@@ -260,6 +272,7 @@ export const EXCITEMENT_THEMES = [
   },
   {
     key: 'quality_creativity',
+    icon: 'Sparkles',
     label: 'Elevated quality & creativity',
     keywords: [
       'creative', 'creativity', 'innovation', 'quality', 'polish',
@@ -269,6 +282,7 @@ export const EXCITEMENT_THEMES = [
   },
   {
     key: 'strategic_thinking',
+    icon: 'Lightbulb',
     label: 'AI as a strategic thought partner',
     keywords: [
       'strateg', 'thought partner', 'decision', 'big picture',
@@ -277,6 +291,7 @@ export const EXCITEMENT_THEMES = [
   },
   {
     key: 'future_capabilities',
+    icon: 'Telescope',
     label: 'Future capabilities / evolution',
     keywords: [
       'future', 'next', 'evolv', 'capabilit', 'update', 'what comes next',
@@ -285,6 +300,7 @@ export const EXCITEMENT_THEMES = [
   },
   {
     key: 'dept_transformation',
+    icon: 'Building2',
     label: 'Department-wide transformation',
     keywords: [
       'department', 'team', 'together', 'collaborat', 'entire',
@@ -293,6 +309,7 @@ export const EXCITEMENT_THEMES = [
   },
   {
     key: 'personal_growth',
+    icon: 'TrendingUp',
     label: 'Personal growth & learning',
     keywords: [
       'learn', 'grow', 'skill', 'knowledge', 'proficient', 'expert',
@@ -301,6 +318,7 @@ export const EXCITEMENT_THEMES = [
   },
   {
     key: 'doing_more_less',
+    icon: 'ArrowUpRight',
     label: 'Doing more with less',
     keywords: [
       'more with less', 'doing more', 'accomplish', "couldn't do before",
@@ -309,6 +327,7 @@ export const EXCITEMENT_THEMES = [
   },
   {
     key: 'automation_agents',
+    icon: 'Cpu',
     label: 'Automation & AI agents',
     keywords: [
       'automat', 'agent', 'custom gpt', 'workflow automat',
@@ -317,6 +336,7 @@ export const EXCITEMENT_THEMES = [
   },
   {
     key: 'access_tools',
+    icon: 'KeyRound',
     label: 'Getting full access to tools',
     keywords: [
       'access', 'full access', 'tools we need', 'endorsed', 'more tools',
