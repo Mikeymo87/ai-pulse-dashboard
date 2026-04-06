@@ -9,6 +9,7 @@ const PRIORITIES = [
   {
     id: 'workflow-pilots', num: '01', category: 'WORKFLOW', color: '#2EA84A',
     title: 'Run workflow redesign pilots',
+    fallback: 'Three quarters of the team are already integrating or transforming how they work with AI. The next move is making that change visible and repeatable at the team level, not just the individual level.',
     getAnchor: (t) => {
       const pct = ['Integration','Transformation'].reduce((s, st) => s + (t.stageTrend?.find(e => e.stage === st)?.s3?.pct ?? 0), 0);
       return { val: `${Math.round(pct)}%`, label: 'at integration or transformation — ready for team-level redesign' };
@@ -17,6 +18,7 @@ const PRIORITIES = [
   {
     id: 'tool-stack', num: '02', category: 'TOOLS', color: '#FFCD00',
     title: 'Rationalize the tool stack',
+    fallback: 'Staff aren\'t waiting for permission — they\'re paying out of pocket and building their own stack. That\'s not a discipline problem, it\'s a signal that demand has outrun the sanctioned options.',
     getAnchor: (t) => {
       const ownPocket = Math.round(t.ownPocketS3?.yesPct ?? 32);
       const tooMany   = Math.round(t.barriersTrend?.find(b => b.barrier?.toLowerCase().includes('too many'))?.s3?.pct ?? 16);
@@ -26,6 +28,7 @@ const PRIORITIES = [
   {
     id: 'access-integration', num: '03', category: 'ACCESS', color: '#E5554F',
     title: 'Fix access and integration',
+    fallback: 'People aren\'t frustrated with AI — they\'re frustrated with the walls around it. When someone can\'t connect AI to the files and systems they use every day, the friction lands as a personal blocker, not a technical one.',
     getAnchor: (t) => {
       const access = Math.round(t.barriersTrend?.find(b => b.barrier?.toLowerCase().includes('access') || b.barrier?.toLowerCase().includes('limited'))?.s3?.pct ?? 11);
       return { val: `${access}%`, label: 'cite limited access as a barrier — open text shows this is far more widespread' };
@@ -34,6 +37,7 @@ const PRIORITIES = [
   {
     id: 'role-enablement', num: '04', category: 'ENABLEMENT', color: '#59BEC9',
     title: 'Build role-based enablement',
+    fallback: 'Nearly everyone feels confident — but that confidence has a ceiling. Generic training got us here; the gap that remains is about people not seeing how AI applies to their specific job, their specific workflows, their specific output.',
     getAnchor: (t) => {
       const highConf = Math.round((t.confidenceTrend?.[2]?.distribution ?? []).filter(d => d.score >= 4).reduce((s,d) => s+d.pct, 0));
       const anyConf  = Math.round((t.confidenceTrend?.[2]?.distribution ?? []).filter(d => d.score >= 3).reduce((s,d) => s+d.pct, 0));
@@ -44,6 +48,7 @@ const PRIORITIES = [
   {
     id: 'performance-narrative', num: '05', category: 'NARRATIVE', color: '#7DE69B',
     title: 'Reset the performance narrative',
+    fallback: 'When 87% of people rate AI as important to their work, there\'s real risk that "using AI" becomes a performance rather than a practice. The goal isn\'t more AI activity — it\'s better work. That distinction needs to come from the top.',
     getAnchor: (t) => {
       const imp     = Math.round((t.importanceTrend?.[2]?.distribution ?? []).filter(d => d.score >= 4).reduce((s,d) => s+d.pct, 0) || 87);
       const partner = Math.round((t.benefitsS3 ?? []).find(b => (b.label ?? b.benefit)?.toLowerCase().includes('strategic'))?.pct ?? 42);
@@ -53,6 +58,7 @@ const PRIORITIES = [
   {
     id: 'rd-lane', num: '06', category: 'INNOVATION', color: '#2EA84A',
     title: 'Create a small R&D lane',
+    fallback: 'You already have builders — people at transformation stage who are experimenting on their own time with their own tools. They don\'t need a pilot program. They need a budget, permission, and someone to share what they find with the rest of the team.',
     getAnchor: (t) => {
       const pct = Math.round(t.stageTrend?.find(e => e.stage === 'Transformation')?.s3?.pct ?? 25);
       return { val: `${pct}%`, label: 'already at transformation stage — internal builders ready for a dedicated lane' };
@@ -193,21 +199,21 @@ function PriorityCard({ p, anchor, aiData, loading, index }) {
           </span>
         </div>
 
-        {/* AI body text — shimmer while loading */}
+        {/* AI body text — shimmer while loading, fallback if API fails */}
         <div style={{ flex: 1, minHeight: 52 }}>
           {loading
             ? <TextShimmer lines={3} />
             : (
               <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}
                 style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: 'var(--text-bridge)', lineHeight: 1.65, margin: 0 }}>
-                {aiData?.body ?? ''}
+                {aiData?.body ?? p.fallback ?? ''}
               </motion.p>
             )
           }
         </div>
 
         {/* AI action line */}
-        {!loading && aiData?.action && (
+        {!loading && (aiData?.action) && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}
             style={{ borderTop: `1px solid ${c}15`, paddingTop: 12, display: 'flex', gap: 8, alignItems: 'flex-start' }}>
             <span style={{ color: textColor, fontSize: 12, fontWeight: 700, flexShrink: 0, paddingTop: 1 }}>→</span>
@@ -368,7 +374,7 @@ export default function WhatsnextInsights({ transforms, vaultUnlocked }) {
 
   useEffect(() => {
     if (fetchedRef.current) return;
-    if (!transforms?.sentimentTrend?.length) return; // wait for data
+    if (!transforms) return; // wait for data
     fetchedRef.current = true;
 
     async function fetchInsights() {
@@ -407,7 +413,7 @@ Each "body": 2 sentences that explain why this matters RIGHT NOW for this specif
 Each "action": 1 realistic, specific next step — something a marketing leader could actually do this month, not a program or initiative. No "conduct an audit" or "develop a framework."
 
 SPECIAL INSTRUCTIONS:
-- rd-lane: Our team has builders who are already at transformation stage and experimenting on their own. The point is giving them a real R&D budget and permission to experiment — not a structured pilot with deliverables and timelines. The action should be about getting them budget and air cover, not assigning a project.
+- rd-lane: Our team has builders already at transformation stage experimenting on their own. The action is giving them a monthly R&D budget (not quarterly — monthly) and permission to experiment with no defined outcome except "show us what you learned." No structured pilot, no deliverables, no timeline — just budget and air cover.
 - access-integration: People aren't frustrated with AI — they're frustrated with the walls around it. The access problem is emotional, not just technical. Acknowledge that.
 - performance-narrative: The risk isn't that people aren't using AI. It's that "sport mode" is emerging — people feel pressure to perform AI use rather than actually benefit from it. That's what needs to be reset.
 
