@@ -1,30 +1,60 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import SlideCover       from './slides/SlideCover';
-import SlideOverview    from './slides/SlideOverview';
-import SlideArchetypes  from './slides/SlideArchetypes';
-import SlideBellCurve   from './slides/SlideBellCurve';
-import SlideStruggle    from './slides/SlideStruggle';
-import SlideWave        from './slides/SlideWave';
-import SlideTrends      from './slides/SlideTrends';
-import SlideTeam        from './slides/SlideTeam';
-import SlideSpotlight   from './slides/SlideSpotlight';
+import SlideCover             from './slides/SlideCover';
+import SlideOverview          from './slides/SlideOverview';
+import SlideArchetypes        from './slides/SlideArchetypes';
+import SlideBellCurve         from './slides/SlideBellCurve';
+import SlideStruggle          from './slides/SlideStruggle';
+import SlideWave              from './slides/SlideWave';
+import SlideTrends            from './slides/SlideTrends';
+import SlideTeam              from './slides/SlideTeam';
+import SlideSpotlight         from './slides/SlideSpotlight';
+import SlideW3OneLiner        from './slides/SlideW3OneLiner';
+import SlideW3BigPicture      from './slides/SlideW3BigPicture';
+import SlideW3Feelings        from './slides/SlideW3Feelings';
+import SlideW3Journey         from './slides/SlideW3Journey';
+import SlideW3FamConf         from './slides/SlideW3FamConf';
+import SlideW3Daily           from './slides/SlideW3Daily';
+import SlideW3Benefits        from './slides/SlideW3Benefits';
+import SlideW3Tools           from './slides/SlideW3Tools';
+import SlideW3Barriers        from './slides/SlideW3Barriers';
+import SlideW3Quotes          from './slides/SlideW3Quotes';
+import SlideW3Support         from './slides/SlideW3Support';
+import SlideW3Priorities      from './slides/SlideW3Priorities';
+import SlideW3Scorecard       from './slides/SlideW3Scorecard';
+import SlideW3Closing         from './slides/SlideW3Closing';
 
 // ── All available slides ───────────────────────────────────────────────────────
 const SLIDES_ALL = [
-  { id: 'cover',       label: 'Cover' },
-  { id: 'overview',    label: 'Overview — Participation + Transformation' },
-  { id: 'wave-0',      label: 'Wave 01 — The Baseline' },
-  { id: 'wave-1',      label: 'Wave 02 — The Momentum' },
-  { id: 'wave-2',      label: 'Wave 03 — The New Normal' },
-  { id: 'bell-curve',  label: 'The Adoption Arc' },
-  { id: 'archetypes',  label: 'The Team — Five Personas' },
-  { id: 'struggle',    label: 'Friction & Excitement' },
-  { id: 'trends-a',    label: 'Trends — Adoption' },
-  { id: 'trends-b',    label: 'Trends — Readiness' },
-  { id: 'trends-c',    label: 'Trends — Landscape' },
-  { id: 'team',        label: 'Team Readiness' },
-  { id: 'spotlight',   label: 'Opportunity Spotlight' },
+  { id: 'cover',            label: 'Cover' },
+  { id: 'overview',         label: 'Overview — Participation + Transformation' },
+  { id: 'wave-0',           label: 'Wave 01 — The Baseline' },
+  { id: 'wave-1',           label: 'Wave 02 — The Momentum' },
+  { id: 'wave-2',           label: 'Wave 03 — The New Normal' },
+  { id: 'bell-curve',       label: 'The Adoption Arc' },
+  { id: 'archetypes',       label: 'The Team — Five Personas' },
+  { id: 'struggle',         label: 'Friction & Excitement' },
+  { id: 'trends-a',         label: 'Trends — Adoption' },
+  { id: 'trends-b',         label: 'Trends — Readiness' },
+  { id: 'trends-c',         label: 'Trends — Landscape' },
+  { id: 'team',             label: 'Team Readiness' },
+  { id: 'spotlight',        label: 'Opportunity Spotlight' },
+  // ── Wave 3 Full Department slides ─────────────────────────────────────────
+  { id: 'w3-one-liner',     label: 'The Story in One Line' },
+  { id: 'w3-big-picture',   label: 'The Big Picture — Adoption vs. Enablement' },
+  { id: 'w3-feelings',      label: 'How Staff Feel About AI' },
+  { id: 'w3-journey',       label: 'Where Staff Are on the AI Journey' },
+  { id: 'w3-famconf',       label: 'Familiarity & Confidence' },
+  { id: 'w3-daily',         label: 'AI in the Daily Rhythm' },
+  { id: 'w3-benefits',      label: 'The Value Story Is Maturing' },
+  { id: 'w3-tools',         label: 'Tool Demand vs. Official Stack' },
+  { id: 'w3-barriers',      label: 'The Barriers Have Changed' },
+  { id: 'w3-excited',       label: 'What Staff Are Excited About' },
+  { id: 'w3-struggling',    label: 'What Staff Are Struggling With' },
+  { id: 'w3-support',       label: 'Where Support May Be More Targeted' },
+  { id: 'w3-priorities',    label: '6 Leadership Priorities' },
+  { id: 'w3-scorecard',     label: 'Wave 4 Scorecard' },
+  { id: 'w3-closing',       label: 'The Next Milestone — Better Work' },
 ];
 
 // ── Lens-specific sequences (IDs reference SLIDES_ALL) ────────────────────────
@@ -42,16 +72,22 @@ const SLIDE_SETS = {
     'spotlight',    // Recommendations — The Ask
   ],
   dept: [
-    'cover',        // Cinematic opening
-    'overview',     // Your story — who showed up + what changed
-    'wave-0',       // Where you started
-    'wave-1',       // The shift you didn't know was happening
-    'wave-2',       // Who you are now
-    'bell-curve',   // The shape of your adoption arc
-    'archetypes',   // Five ways to be on this team
-    'struggle',     // Your friction and your fuel
-    'trends-b',     // How you feel about where you are
-    'spotlight',    // What comes next — for you
+    'cover',            // Cinematic opening
+    'w3-one-liner',     // The story in one line — 4 headline stats
+    'w3-big-picture',   // Adoption vs. Enablement — 4 quadrants
+    'w3-feelings',      // How staff feel + importance trend
+    'w3-journey',       // Maturity stage shift + momentum
+    'w3-famconf',       // Familiarity high, confidence climbing
+    'w3-daily',         // 90% daily — the rhythm has changed
+    'w3-benefits',      // Value story beyond speed
+    'w3-tools',         // Tool sprawl — 77% beyond official stack
+    'w3-barriers',      // Barriers shifted from access to time/friction
+    'w3-excited',       // What staff are excited about
+    'w3-struggling',    // What staff are struggling with
+    'w3-support',       // Where support may be more targeted (vault)
+    'w3-priorities',    // 6 leadership priorities
+    'w3-scorecard',     // Wave 4 scorecard
+    'w3-closing',       // The next milestone is better work
   ],
 };
 
@@ -79,11 +115,11 @@ const LENSES = [
   },
   {
     key: 'dept',
-    title: 'Full Department',
-    subtitle: 'Your team, your story',
-    duration: '~18 min',
+    title: 'Wave 3 Readout',
+    subtitle: 'Full department narrative — Wave 3 findings',
+    duration: '~20 min',
     slides: SLIDE_SETS.dept.length,
-    description: 'The full arc — where you started, who you became, and what comes next. Your story, in your own data.',
+    description: 'The full Wave 3 story — feelings, journey, confidence, tools, barriers, what staff said, priorities, and what success looks like next.',
     accent: '#FFCD00',
     icon: '◉',
   },
@@ -299,7 +335,7 @@ const variants = {
 };
 
 // ── Main presentation component ───────────────────────────────────────────────
-export default function PresentationMode({ transforms, surveys, onClose }) {
+export default function PresentationMode({ transforms, surveys, vaultUnlocked, onClose }) {
   const [lens, setLens]           = useState(null);   // null = pre-flight screen
   const [current, setCurrent]     = useState(0);
   const [direction, setDirection] = useState(1);
@@ -341,8 +377,24 @@ export default function PresentationMode({ transforms, surveys, onClose }) {
     if (id === 'trends-a')  return <SlideTrends     transforms={transforms} charts={['sentiment','frequency']} />;
     if (id === 'trends-b')  return <SlideTrends     transforms={transforms} charts={['familiarity','confidence']} />;
     if (id === 'trends-c')  return <SlideTrends     transforms={transforms} charts={['journey','barriers']} />;
-    if (id === 'team')      return <SlideTeam        transforms={transforms} surveys={surveys} />;
-    if (id === 'spotlight') return <SlideSpotlight  transforms={transforms} />;
+    if (id === 'team')           return <SlideTeam          transforms={transforms} surveys={surveys} />;
+    if (id === 'spotlight')      return <SlideSpotlight     transforms={transforms} />;
+    // ── Wave 3 Full Department slides ────────────────────────────────────────
+    if (id === 'w3-one-liner')   return <SlideW3OneLiner    transforms={transforms} />;
+    if (id === 'w3-big-picture') return <SlideW3BigPicture  transforms={transforms} />;
+    if (id === 'w3-feelings')    return <SlideW3Feelings    transforms={transforms} />;
+    if (id === 'w3-journey')     return <SlideW3Journey     transforms={transforms} />;
+    if (id === 'w3-famconf')     return <SlideW3FamConf     transforms={transforms} />;
+    if (id === 'w3-daily')       return <SlideW3Daily       transforms={transforms} />;
+    if (id === 'w3-benefits')    return <SlideW3Benefits    transforms={transforms} />;
+    if (id === 'w3-tools')       return <SlideW3Tools       transforms={transforms} />;
+    if (id === 'w3-barriers')    return <SlideW3Barriers    transforms={transforms} />;
+    if (id === 'w3-excited')     return <SlideW3Quotes      type="excited" />;
+    if (id === 'w3-struggling')  return <SlideW3Quotes      type="struggling" />;
+    if (id === 'w3-support')     return <SlideW3Support     vaultUnlocked={vaultUnlocked} />;
+    if (id === 'w3-priorities')  return <SlideW3Priorities />;
+    if (id === 'w3-scorecard')   return <SlideW3Scorecard   transforms={transforms} />;
+    if (id === 'w3-closing')     return <SlideW3Closing />;
   }
 
   // ── Pre-flight screen ──────────────────────────────────────────────────────

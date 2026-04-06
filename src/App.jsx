@@ -349,6 +349,7 @@ export default function App() {
           <PresentationMode
             transforms={transforms}
             surveys={surveys}
+            vaultUnlocked={vaultUnlocked}
             onClose={() => setPresentMode(false)}
           />
         )}
