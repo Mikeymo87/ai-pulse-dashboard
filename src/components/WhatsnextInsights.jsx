@@ -1,4 +1,3 @@
-import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 
 const MONO = "'JetBrains Mono', 'Fira Code', monospace";
@@ -27,13 +26,13 @@ const PRIORITIES = [
     },
   },
   {
-    id: 3, num: '03', category: 'ACCESS', color: '#E5554F',
+    id: 3, num: '03', category: 'ACCESS', color: '#FFCD00',
     title: 'Fix access and integration',
     callout: 'Map the three most common integration blockers (shared files, email, project management) and escalate as a formal IT request — with business impact data from this survey attached.',
     getAnchor: () => ({ val: '77%', label: 'use tools beyond the official stack — workarounds signal unmet integration needs' }),
   },
   {
-    id: 4, num: '04', category: 'ENABLEMENT', color: '#FFCD00',
+    id: 4, num: '04', category: 'ENABLEMENT', color: '#7DE69B',
     title: 'Build role-based enablement',
     callout: 'Design one function-specific AI lab per team — 90 minutes, built around that team\'s actual work — with a follow-up office hours slot two weeks later to close the gap between session and practice.',
     getAnchor: (t) => {
@@ -42,7 +41,7 @@ const PRIORITIES = [
     },
   },
   {
-    id: 5, num: '05', category: 'NARRATIVE', color: '#7DE69B',
+    id: 5, num: '05', category: 'NARRATIVE', color: '#59BEC9',
     title: 'Reset the performance narrative',
     callout: 'Replace AI usage metrics with outcome metrics in team check-ins — ask "what did AI help you do better?" instead of "did you use AI?" and share strong examples publicly to model the right behavior.',
     getAnchor: (t) => {
@@ -51,53 +50,13 @@ const PRIORITIES = [
     },
   },
   {
-    id: 6, num: '06', category: 'R&D', color: '#59BEC9',
+    id: 6, num: '06', category: 'R&D', color: '#2EA84A',
     title: 'Create a small R&D lane',
     callout: 'Give three volunteer builders a small budget, a 30-day window, and a simple brief — build something that saves your team time. Share results at the next all-hands and fast-track anything worth scaling.',
     getAnchor: (t) => {
       const pct = t.stageTrend?.find(e => e.stage === 'Transformation')?.s3?.pct ?? 25;
       return { val: `${Math.round(pct)}%`, label: 'already at transformation stage — builders are ready for a dedicated lane' };
     },
-  },
-];
-
-// ── Open text card config ─────────────────────────────────────────────────────
-const OPEN_TEXT_CARDS = [
-  {
-    id: 'aspiration-gap', color: '#FFCD00', category: 'ASPIRATION GAP',
-    title: 'Hoping vs. doing',
-    getStat: (t) => {
-      const ag = t.openTextInsights?.aspirationGap ?? {};
-      return { val: `${ag.pct ?? 0}%`, label: `of respondents (n=${ag.count ?? 0}) write inspired excitement text but use AI less than weekly` };
-    },
-    getQuote: (t) => t.openTextInsights?.aspirationGap?.quotes?.[0]?.text ?? null,
-  },
-  {
-    id: 'tool-mindset', color: '#59BEC9', category: 'TOOL → MINDSET',
-    title: 'How tool choice shapes AI thinking',
-    getStat: (t) => {
-      const tm = t.openTextInsights?.toolMindset ?? {};
-      return { val: `${tm.claude?.count ?? 0} vs ${tm.chatgpt?.count ?? 0}`, label: 'Claude users vs. ChatGPT users — different language, different mental model of AI value' };
-    },
-    getQuote: (t) => t.openTextInsights?.toolMindset?.claude?.sampleQuote ?? null,
-  },
-  {
-    id: 'leadership-voices', color: '#7DE69B', category: 'LEADERSHIP VOICES',
-    title: 'Informal adoption leaders already exist',
-    getStat: (t) => {
-      const lv = t.openTextInsights?.leadershipVoices ?? {};
-      return { val: `${lv.pct ?? 0}%`, label: `of staff (n=${lv.count ?? 0}) use leadership language around AI adoption in open text` };
-    },
-    getQuote: (t) => t.openTextInsights?.leadershipVoices?.quotes?.[0] ?? null,
-  },
-  {
-    id: 'blocked-investors', color: '#E5554F', category: 'BLOCKED INVESTORS',
-    title: 'Paying out of pocket, hitting org friction',
-    getStat: (t) => {
-      const bi = t.openTextInsights?.blockedInvestors ?? {};
-      return { val: `${bi.pct ?? 0}%`, label: `of staff (n=${bi.count ?? 0}) pay for AI tools AND face organizational access barriers` };
-    },
-    getQuote: (t) => t.openTextInsights?.blockedInvestors?.quotes?.[0] ?? null,
   },
 ];
 
@@ -150,82 +109,6 @@ const SCORECARD_ROWS = [
   },
 ];
 
-// ── Shared shimmer ────────────────────────────────────────────────────────────
-function Shimmer({ lines = 2 }) {
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-      {Array.from({ length: lines }, (_, i) => (
-        <motion.div key={i} animate={{ opacity: [0.3, 0.6, 0.3] }} transition={{ repeat: Infinity, duration: 1.5, delay: i * 0.15 }}
-          style={{ height: 13, width: `${[100, 78][i] ?? 80}%`, borderRadius: 4, background: 'var(--skeleton-line-2, rgba(125,230,155,0.1))' }} />
-      ))}
-    </div>
-  );
-}
-
-// ── Open text card ────────────────────────────────────────────────────────────
-function OpenTextCard({ card, stat, quote, aiData, loading, index }) {
-  const c = card.color;
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.5, delay: index * 0.08, ease: [0.22,1,0.36,1] }}
-      style={{
-        background: 'var(--card-bg, rgba(35,40,41,0.9))',
-        border: `1px solid ${c}22`,
-        borderLeft: `3px solid ${c}`,
-        borderRadius: 14,
-        padding: '20px 22px',
-        display: 'flex', flexDirection: 'column', gap: 12,
-      }}
-    >
-      <span style={{ background: `${c}18`, borderRadius: 20, padding: '3px 10px', fontFamily: MONO, fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', color: c, alignSelf: 'flex-start' }}>
-        {card.category}
-      </span>
-
-      <div style={{ fontFamily: SANS, fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.01em', lineHeight: 1.25 }}>
-        {card.title}
-      </div>
-
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
-        <span style={{ fontFamily: SANS, fontSize: 'clamp(20px, 2.2vw, 26px)', fontWeight: 900, color: c, lineHeight: 1, letterSpacing: '-0.02em', flexShrink: 0 }}>
-          {stat.val}
-        </span>
-        <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: 'var(--text-support)', lineHeight: 1.4 }}>
-          {stat.label}
-        </span>
-      </div>
-
-      {quote && (
-        <div style={{ background: `${c}08`, border: `1px solid ${c}18`, borderRadius: 8, padding: '10px 12px' }}>
-          <span style={{ color: c, fontSize: '1.1em', lineHeight: 0, verticalAlign: '-0.1em', marginRight: 4, fontFamily: 'Georgia, serif' }}>&ldquo;</span>
-          <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: 'var(--text-bridge)', fontStyle: 'italic', lineHeight: 1.55 }}>
-            {typeof quote === 'string' ? quote : quote.text ?? ''}
-          </span>
-        </div>
-      )}
-
-      <div style={{ flex: 1 }}>
-        {loading ? <Shimmer /> : (
-          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}
-            style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: 'var(--text-bridge)', lineHeight: 1.6, margin: 0 }}>
-            {aiData?.body ?? ''}
-          </motion.p>
-        )}
-      </div>
-
-      {!loading && aiData?.action && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}
-          style={{ borderTop: `1px solid ${c}18`, paddingTop: 10, display: 'flex', gap: 7, alignItems: 'flex-start' }}>
-          <span style={{ color: c, fontSize: 12, fontWeight: 700, flexShrink: 0 }}>→</span>
-          <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: 'var(--text-support)', lineHeight: 1.5 }}>{aiData.action}</p>
-        </motion.div>
-      )}
-    </motion.div>
-  );
-}
-
 // ── Priority card ─────────────────────────────────────────────────────────────
 function PriorityCard({ p, anchor, index }) {
   const c = p.color;
@@ -260,12 +143,25 @@ function PriorityCard({ p, anchor, index }) {
           {p.title}
         </div>
 
-        {/* Action text — the card body */}
-        <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: 'var(--text-bridge)', lineHeight: 1.65, flex: 1 }}>
-          {p.callout}
-        </p>
+        {/* ★ Callout */}
+        <div style={{
+          background: `${c}10`,
+          border: `1px solid ${c}30`,
+          borderLeft: `3px solid ${c}`,
+          borderRadius: 8,
+          padding: '10px 12px',
+          display: 'flex',
+          gap: 8,
+          alignItems: 'flex-start',
+          flex: 1,
+        }}>
+          <span style={{ color: c, fontSize: 13, flexShrink: 0, lineHeight: 1.5 }}>★</span>
+          <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 500, color: 'var(--text-medium)', lineHeight: 1.6 }}>
+            {p.callout}
+          </p>
+        </div>
 
-        {/* Anchor stat — bottom divider row */}
+        {/* Anchor stat — bottom divider */}
         <div style={{ borderTop: `1px solid ${c}18`, paddingTop: 12, display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
           <span style={{ fontFamily: SANS, fontSize: 'clamp(20px, 2vw, 26px)', fontWeight: 900, color: c, lineHeight: 1, letterSpacing: '-0.03em', flexShrink: 0 }}>
             {anchor.val}
@@ -327,25 +223,18 @@ function Wave4Scorecard({ transforms }) {
               display: 'flex', flexDirection: 'column', gap: 10,
             }}
           >
-            {/* Metric name */}
             <div style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: 'var(--text-medium)', fontWeight: 600, lineHeight: 1.3 }}>
               {row.metric}
             </div>
 
-            {/* Now → Goal */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              {/* Current value */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 <span style={{ fontFamily: MONO, fontSize: 9, color: 'var(--text-support)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Now</span>
                 <span style={{ fontFamily: SANS, fontSize: 'clamp(24px, 2.5vw, 30px)', fontWeight: 900, color: row.onTrack ? '#2EA84A' : 'var(--text-medium)', lineHeight: 1, letterSpacing: '-0.02em' }}>
                   {row.val}{row.unit}
                 </span>
               </div>
-
-              {/* Arrow */}
               <span style={{ color: '#2EA84A', fontSize: 16, opacity: 0.4, flexShrink: 0 }}>→</span>
-
-              {/* Target */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 <span style={{ fontFamily: MONO, fontSize: 9, color: '#2EA84A', letterSpacing: '0.08em', textTransform: 'uppercase', opacity: 0.8 }}>Goal</span>
                 <span style={{ fontFamily: SANS, fontSize: 'clamp(24px, 2.5vw, 30px)', fontWeight: 900, color: '#2EA84A', lineHeight: 1, letterSpacing: '-0.02em' }}>
@@ -354,7 +243,6 @@ function Wave4Scorecard({ transforms }) {
               </div>
             </div>
 
-            {/* Target description */}
             <div style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: 'var(--text-support)', lineHeight: 1.4 }}>
               {row.targetLabel}
             </div>
@@ -366,68 +254,8 @@ function Wave4Scorecard({ transforms }) {
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
-export default function WhatsnextInsights({ transforms, vaultUnlocked }) {
-  const [aiResults, setAiResults] = useState(null);
-  const [loading, setLoading]     = useState(true);
-  const fetchedRef                = useRef(false);
-
-  const anchors  = PRIORITIES.map(p => p.getAnchor(transforms ?? {}));
-  const otStats  = OPEN_TEXT_CARDS.map(c => c.getStat(transforms ?? {}));
-  const otQuotes = OPEN_TEXT_CARDS.map(c => c.getQuote(transforms ?? {}));
-
-  useEffect(() => {
-    if (fetchedRef.current || !transforms) return;
-    fetchedRef.current = true;
-
-    async function fetchInsights() {
-      try {
-        const t = transforms;
-        const ag = t.openTextInsights?.aspirationGap ?? {};
-        const lv = t.openTextInsights?.leadershipVoices ?? {};
-        const bi = t.openTextInsights?.blockedInvestors ?? {};
-        const tm = t.openTextInsights?.toolMindset ?? {};
-
-        const prompt = `Baptist Health MarCom Wave 3 AI survey (n=101). Return ONLY valid JSON, no markdown:
-{"openText":[
-  {"id":"aspiration-gap","body":"2 sentences for leadership","action":"1 concrete action"},
-  {"id":"tool-mindset","body":"...","action":"..."},
-  {"id":"leadership-voices","body":"...","action":"..."},
-  {"id":"blocked-investors","body":"...","action":"..."}
-]}
-Data: aspiration-gap=${ag.pct ?? 0}% (n=${ag.count ?? 0}) inspired but use AI<weekly; tool-mindset=${tm.claude?.count ?? 0} Claude vs ${tm.chatgpt?.count ?? 0} ChatGPT users; leadership-voices=${lv.pct ?? 0}% (n=${lv.count ?? 0}) informal champions; blocked-investors=${bi.pct ?? 0}% (n=${bi.count ?? 0}) pay out-of-pocket AND face org friction. Tone: direct, no hype. Audience: marketing leadership.`;
-
-        const res = await fetch('https://api.anthropic.com/v1/messages', {
-          method: 'POST',
-          headers: {
-            'x-api-key': import.meta.env.VITE_ANTHROPIC_API_KEY,
-            'anthropic-version': '2023-06-01',
-            'anthropic-dangerous-direct-browser-access': 'true',
-            'content-type': 'application/json',
-          },
-          body: JSON.stringify({
-            model: 'claude-haiku-4-5-20251001',
-            max_tokens: 500,
-            messages: [{ role: 'user', content: prompt }],
-          }),
-        });
-
-        if (!res.ok) throw new Error(`API ${res.status}`);
-        const data = await res.json();
-        let raw = data.content?.[0]?.text ?? '';
-        raw = raw.replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/```\s*$/i,'').trim();
-        const parsed = JSON.parse(raw);
-        const otMap = {};
-        (parsed.openText ?? []).forEach(o => { otMap[o.id] = o; });
-        setAiResults({ openText: otMap });
-      } catch (err) {
-        console.error('WhatsnextInsights error:', err);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchInsights();
-  }, [transforms]);
+export default function WhatsnextInsights({ transforms }) {
+  const anchors = PRIORITIES.map(p => p.getAnchor(transforms ?? {}));
 
   return (
     <div style={{ padding: '56px 40px 0', maxWidth: 1400, margin: '0 auto' }}>
@@ -452,35 +280,7 @@ Data: aspiration-gap=${ag.pct ?? 0}% (n=${ag.count ?? 0}) inspired but use AI<we
         ))}
       </div>
 
-      {/* ── Section 2: Open Text Intelligence ───────────────────────────────── */}
-      <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }} style={{ marginBottom: 36 }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(125,230,155,0.06)', border: '1px solid rgba(125,230,155,0.2)', borderRadius: 20, padding: '4px 14px', marginBottom: 16 }}>
-          <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#7DE69B' }} />
-          <span style={{ fontFamily: MONO, fontSize: 10, color: '#7DE69B', letterSpacing: '0.15em', textTransform: 'uppercase', fontWeight: 700 }}>Open Text Intelligence</span>
-        </div>
-        <h2 style={{ fontFamily: SANS, fontSize: 'clamp(22px, 2.6vw, 32px)', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.025em', lineHeight: 1.1, margin: '0 0 8px' }}>
-          What staff said, <span style={{ color: '#7DE69B' }}>read between the lines</span>
-        </h2>
-        <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 15, color: 'var(--text-support)', margin: 0 }}>
-          Cross-cuts from Wave 3 open text — patterns not visible in the quantitative data alone.
-        </p>
-      </motion.div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16, marginBottom: 72 }}>
-        {OPEN_TEXT_CARDS.map((card, i) => (
-          <OpenTextCard
-            key={card.id}
-            card={card}
-            stat={otStats[i]}
-            quote={otQuotes[i]}
-            aiData={aiResults?.openText?.[card.id]}
-            loading={loading}
-            index={i}
-          />
-        ))}
-      </div>
-
-      {/* ── Section 3: Wave 4 Goals ──────────────────────────────────────────── */}
+      {/* ── Section 2: Wave 4 Goals ──────────────────────────────────────────── */}
       <Wave4Scorecard transforms={transforms} />
 
     </div>
