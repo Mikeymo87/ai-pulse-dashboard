@@ -18,7 +18,7 @@ const PRIORITIES = [
   {
     id: 'tool-stack', num: '02', category: 'TOOLS', color: '#FFCD00',
     title: 'Rationalize the tool stack',
-    fallback: 'Staff aren\'t waiting for permission — they\'re paying out of pocket and building their own stack. That\'s not a discipline problem, it\'s a signal that demand has outrun the sanctioned options.',
+    fallback: 'Staff aren\'t waiting for permission — they\'re paying out of pocket and building their own stack. That\'s not a discipline problem, it\'s a signal that demand has outrun what\'s been officially sanctioned. The Council needs a clear picture of what\'s actually winning in the wild before making any decisions.',
     getAnchor: (t) => {
       const ownPocket = Math.round(t.ownPocketS3?.yesPct ?? 32);
       const tooMany   = Math.round(t.barriersTrend?.find(b => b.barrier?.toLowerCase().includes('too many'))?.s3?.pct ?? 16);
@@ -414,6 +414,7 @@ Each "action": 1 realistic, specific next step — something a marketing leader 
 
 SPECIAL INSTRUCTIONS:
 - rd-lane: Our team has builders already at transformation stage experimenting on their own. The action is giving them a monthly R&D budget (not quarterly — monthly) and permission to experiment with no defined outcome except "show us what you learned." No structured pilot, no deliverables, no timeline — just budget and air cover.
+- tool-stack: This recommendation goes to the AI Council, not just general leadership. The action is NOT "conduct an audit" — it's to ask the top 5 AI users what tools they're actually using and why, take that list to IT, and get clarity on what's winning in the wild before deciding what to standardize. Don't ask for permission to standardize yet — just get the intelligence first.
 - access-integration: People aren't frustrated with AI — they're frustrated with the walls around it. The access problem is emotional, not just technical. Acknowledge that.
 - performance-narrative: The risk isn't that people aren't using AI. It's that "sport mode" is emerging — people feel pressure to perform AI use rather than actually benefit from it. That's what needs to be reset.
 
