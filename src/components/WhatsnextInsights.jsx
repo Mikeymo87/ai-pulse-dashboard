@@ -1,181 +1,304 @@
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 
 const MONO = "'JetBrains Mono', 'Fira Code', monospace";
 const SANS = "'Plus Jakarta Sans', DM Sans, sans-serif";
 
-// ── Priority config ───────────────────────────────────────────────────────────
+// ── Priority config (per plan spec colors) ────────────────────────────────────
 const PRIORITIES = [
   {
-    id: 1, num: '01', category: 'WORKFLOW', color: '#2EA84A',
+    id: 'workflow-pilots', num: '01', category: 'WORKFLOW', color: '#2EA84A',
     title: 'Run workflow redesign pilots',
-    callout: 'Identify three high-frequency MarCom workflows and run a 60-day redesign pilot with a small cross-functional team — measuring cycle time and revision rounds before and after.',
     getAnchor: (t) => {
-      const pct = ['Integration','Transformation']
-        .reduce((s, st) => s + (t.stageTrend?.find(e => e.stage === st)?.s3?.pct ?? 0), 0);
-      return { val: `${Math.round(pct)}%`, label: 'at integration or transformation — ready for deeper redesign' };
+      const pct = ['Integration','Transformation'].reduce((s, st) => s + (t.stageTrend?.find(e => e.stage === st)?.s3?.pct ?? 0), 0);
+      return { val: `${Math.round(pct)}%`, label: 'at integration or transformation — ready for team-level redesign' };
     },
   },
   {
-    id: 2, num: '02', category: 'TOOLS', color: '#59BEC9',
+    id: 'tool-stack', num: '02', category: 'TOOLS', color: '#FFCD00',
     title: 'Rationalize the tool stack',
-    callout: 'Audit the current tool landscape, define a core stack with clear use cases for each tool, and publish a one-page decision guide so staff know what to use — and how to request exceptions.',
     getAnchor: (t) => {
       const ownPocket = Math.round(t.ownPocketS3?.yesPct ?? 32);
       const tooMany   = Math.round(t.barriersTrend?.find(b => b.barrier?.toLowerCase().includes('too many'))?.s3?.pct ?? 16);
-      return { val: `${ownPocket}%`, label: `pay out of pocket for AI tools — ${tooMany}% cite too many tools as a barrier` };
+      return { val: `${ownPocket}%`, label: `pay out of pocket · ${tooMany}% cite too many tools as a barrier` };
     },
   },
   {
-    id: 3, num: '03', category: 'ACCESS', color: '#FFCD00',
+    id: 'access-integration', num: '03', category: 'ACCESS', color: '#E5554F',
     title: 'Fix access and integration',
-    callout: 'Map the three most common integration blockers (shared files, email, project management) and escalate as a formal IT request — with business impact data from this survey attached.',
-    getAnchor: () => ({ val: '77%', label: 'use tools beyond the official stack — workarounds signal unmet integration needs' }),
+    getAnchor: (t) => {
+      const access = Math.round(t.barriersTrend?.find(b => b.barrier?.toLowerCase().includes('access') || b.barrier?.toLowerCase().includes('limited'))?.s3?.pct ?? 11);
+      return { val: `${access}%`, label: 'cite limited access as a barrier — open text shows this is far more widespread' };
+    },
   },
   {
-    id: 4, num: '04', category: 'ENABLEMENT', color: '#7DE69B',
+    id: 'role-enablement', num: '04', category: 'ENABLEMENT', color: '#59BEC9',
     title: 'Build role-based enablement',
-    callout: 'Design one function-specific AI lab per team — 90 minutes, built around that team\'s actual work — with a follow-up office hours slot two weeks later to close the gap between session and practice.',
     getAnchor: (t) => {
-      const pct = (t.confidenceTrend?.[2]?.distribution ?? []).filter(d => d.score >= 4).reduce((s,d) => s+d.pct, 0);
-      return { val: `${Math.round(pct) || 67}%`, label: 'very or extremely confident — uneven across roles and functions' };
+      const highConf = Math.round((t.confidenceTrend?.[2]?.distribution ?? []).filter(d => d.score >= 4).reduce((s,d) => s+d.pct, 0));
+      const anyConf  = Math.round((t.confidenceTrend?.[2]?.distribution ?? []).filter(d => d.score >= 3).reduce((s,d) => s+d.pct, 0));
+      const gap = anyConf - highConf;
+      return { val: `${gap > 0 ? gap : 66}pt`, label: 'gap between "confident" and "very/extremely confident" — the enablement opportunity' };
     },
   },
   {
-    id: 5, num: '05', category: 'NARRATIVE', color: '#59BEC9',
+    id: 'performance-narrative', num: '05', category: 'NARRATIVE', color: '#7DE69B',
     title: 'Reset the performance narrative',
-    callout: 'Replace AI usage metrics with outcome metrics in team check-ins — ask "what did AI help you do better?" instead of "did you use AI?" and share strong examples publicly to model the right behavior.',
     getAnchor: (t) => {
-      const pct = (t.importanceTrend?.[2]?.distribution ?? []).filter(d => d.score >= 4).reduce((s,d) => s+d.pct, 0);
-      return { val: `${Math.round(pct) || 87}%`, label: 'rate AI highly important — making performative use a real risk' };
+      const imp     = Math.round((t.importanceTrend?.[2]?.distribution ?? []).filter(d => d.score >= 4).reduce((s,d) => s+d.pct, 0) || 87);
+      const partner = Math.round((t.benefitsS3 ?? []).find(b => (b.label ?? b.benefit)?.toLowerCase().includes('strategic'))?.pct ?? 42);
+      return { val: `${imp}%`, label: `rate AI highly important · ${partner}% already use it as a strategic thought partner` };
     },
   },
   {
-    id: 6, num: '06', category: 'R&D', color: '#2EA84A',
+    id: 'rd-lane', num: '06', category: 'INNOVATION', color: '#2EA84A',
     title: 'Create a small R&D lane',
-    callout: 'Give three volunteer builders a small budget, a 30-day window, and a simple brief — build something that saves your team time. Share results at the next all-hands and fast-track anything worth scaling.',
     getAnchor: (t) => {
-      const pct = t.stageTrend?.find(e => e.stage === 'Transformation')?.s3?.pct ?? 25;
-      return { val: `${Math.round(pct)}%`, label: 'already at transformation stage — builders are ready for a dedicated lane' };
+      const pct = Math.round(t.stageTrend?.find(e => e.stage === 'Transformation')?.s3?.pct ?? 25);
+      return { val: `${pct}%`, label: 'already at transformation stage — internal builders ready for a dedicated lane' };
     },
   },
 ];
 
-// ── Wave 4 scorecard rows ─────────────────────────────────────────────────────
-const SCORECARD_ROWS = [
+// ── Open text config ──────────────────────────────────────────────────────────
+const OPEN_TEXT_CARDS = [
   {
-    metric: 'Integration + Transformation',
-    targetLabel: 'Move above 80%', targetDisplay: '80%',
-    direction: 'above', threshold: 80,
-    getVal: (t) => {
-      const pct = ['Integration','Transformation'].reduce((s, st) => s + (t.stageTrend?.find(e => e.stage === st)?.s3?.pct ?? 0), 0);
-      return Math.round(pct);
-    },
-    unit: '%',
+    id: 'aspiration-gap', color: '#FFCD00', category: 'ASPIRATION GAP',
+    title: 'Hoping vs. doing',
+    getStat: (t) => { const ag = t.openTextInsights?.aspirationGap ?? {}; return { val: `${ag.pct ?? 0}%`, label: `of respondents (n=${ag.count ?? 0}) write inspired excitement but use AI less than weekly` }; },
+    getQuote: (t) => t.openTextInsights?.aspirationGap?.quotes?.[0]?.text ?? null,
   },
   {
-    metric: 'Very / extremely confident',
-    targetLabel: 'Move above 75%', targetDisplay: '75%',
-    direction: 'above', threshold: 75,
-    getVal: (t) => Math.round((t.confidenceTrend?.[2]?.distribution ?? []).filter(d => d.score >= 4).reduce((s,d) => s+d.pct, 0)),
-    unit: '%',
+    id: 'tool-mindset', color: '#59BEC9', category: 'TOOL → MINDSET',
+    title: 'How tool choice shapes AI thinking',
+    getStat: (t) => { const tm = t.openTextInsights?.toolMindset ?? {}; return { val: `${tm.claude?.count ?? 0} vs ${tm.chatgpt?.count ?? 0}`, label: 'Claude users vs. ChatGPT users — different language, different mental model' }; },
+    getQuote: (t) => t.openTextInsights?.toolMindset?.claude?.sampleQuote ?? null,
   },
   {
-    metric: 'Time / priorities as a barrier',
-    targetLabel: 'Pull below 25%', targetDisplay: '<25%',
-    direction: 'below', threshold: 25,
-    getVal: (t) => Math.round(t.barriersTrend?.find(b => b.barrier?.toLowerCase().includes('time'))?.s3?.pct ?? 34),
-    unit: '%',
+    id: 'leadership-voices', color: '#7DE69B', category: 'LEADERSHIP VOICES',
+    title: 'Informal adoption leaders already exist',
+    getStat: (t) => { const lv = t.openTextInsights?.leadershipVoices ?? {}; return { val: `${lv.pct ?? 0}%`, label: `of staff (n=${lv.count ?? 0}) use leadership language around AI adoption in open text` }; },
+    getQuote: (t) => t.openTextInsights?.leadershipVoices?.quotes?.[0] ?? null,
   },
   {
-    metric: 'Too many tools as a barrier',
-    targetLabel: 'Pull below 10%', targetDisplay: '<10%',
-    direction: 'below', threshold: 10,
-    getVal: (t) => Math.round(t.barriersTrend?.find(b => b.barrier?.toLowerCase().includes('too many'))?.s3?.pct ?? 16),
-    unit: '%',
-  },
-  {
-    metric: 'Strategic thought partner benefit',
-    targetLabel: 'Move above 50%', targetDisplay: '50%',
-    direction: 'above', threshold: 50,
-    getVal: (t) => Math.round((t.benefitsS3 ?? []).find(b => (b.label ?? b.benefit)?.toLowerCase().includes('strategic'))?.pct ?? 42),
-    unit: '%',
-  },
-  {
-    metric: 'Out-of-pocket tool spend',
-    targetLabel: 'Reduce via sanctioned support', targetDisplay: '↓',
-    direction: 'below', threshold: 20,
-    getVal: (t) => Math.round(t.ownPocketS3?.yesPct ?? 32),
-    unit: '%',
+    id: 'blocked-investors', color: '#E5554F', category: 'BLOCKED INVESTORS',
+    title: 'Paying out of pocket, hitting org friction',
+    getStat: (t) => { const bi = t.openTextInsights?.blockedInvestors ?? {}; return { val: `${bi.pct ?? 0}%`, label: `of staff (n=${bi.count ?? 0}) pay for AI tools AND face organizational access barriers` }; },
+    getQuote: (t) => t.openTextInsights?.blockedInvestors?.quotes?.[0] ?? null,
   },
 ];
+
+// ── Scorecard rows ────────────────────────────────────────────────────────────
+const SCORECARD_ROWS = [
+  { metric: 'Integration + Transformation', targetDisplay: '>80%', targetLabel: 'Move above 80%', direction: 'above', threshold: 80, unit: '%',
+    getVal: (t) => Math.round(['Integration','Transformation'].reduce((s, st) => s + (t.stageTrend?.find(e => e.stage === st)?.s3?.pct ?? 0), 0)) },
+  { metric: 'Very / extremely confident',   targetDisplay: '>75%', targetLabel: 'Move above 75%', direction: 'above', threshold: 75, unit: '%',
+    getVal: (t) => Math.round((t.confidenceTrend?.[2]?.distribution ?? []).filter(d => d.score >= 4).reduce((s,d) => s+d.pct, 0)) },
+  { metric: 'Time as a barrier',            targetDisplay: '<25%', targetLabel: 'Pull below 25%',  direction: 'below', threshold: 25, unit: '%',
+    getVal: (t) => Math.round(t.barriersTrend?.find(b => b.barrier?.toLowerCase().includes('time'))?.s3?.pct ?? 34) },
+  { metric: 'Too many tools as a barrier',  targetDisplay: '<10%', targetLabel: 'Pull below 10%',  direction: 'below', threshold: 10, unit: '%',
+    getVal: (t) => Math.round(t.barriersTrend?.find(b => b.barrier?.toLowerCase().includes('too many'))?.s3?.pct ?? 16) },
+  { metric: 'Strategic thought partner',    targetDisplay: '>50%', targetLabel: 'Move above 50%',  direction: 'above', threshold: 50, unit: '%',
+    getVal: (t) => Math.round((t.benefitsS3 ?? []).find(b => (b.label ?? b.benefit)?.toLowerCase().includes('strategic'))?.pct ?? 42) },
+  { metric: 'Out-of-pocket tool spend',     targetDisplay: '↓',    targetLabel: 'Reduce via sanctioned support', direction: 'below', threshold: 20, unit: '%',
+    getVal: (t) => Math.round(t.ownPocketS3?.yesPct ?? 32) },
+];
+
+// ── Shimmer skeleton ──────────────────────────────────────────────────────────
+function TextShimmer({ lines = 3 }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+      {Array.from({ length: lines }, (_, i) => (
+        <motion.div key={i}
+          animate={{ opacity: [0.25, 0.5, 0.25] }}
+          transition={{ repeat: Infinity, duration: 1.6, delay: i * 0.18 }}
+          style={{ height: 11, width: `${[100, 88, 64][i] ?? 76}%`, borderRadius: 3, background: 'var(--skeleton-line-2, rgba(125,230,155,0.08))' }}
+        />
+      ))}
+    </div>
+  );
+}
+
+// ── Section header ────────────────────────────────────────────────────────────
+function SectionHeader({ pill, pillColor = '#2EA84A', title, accent, subtitle, style = {} }) {
+  return (
+    <motion.div initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}
+      style={{ marginBottom: 32, ...style }}>
+      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: `${pillColor}12`, border: `1px solid ${pillColor}30`, borderRadius: 20, padding: '4px 13px', marginBottom: 14 }}>
+        <div style={{ width: 5, height: 5, borderRadius: '50%', background: pillColor }} />
+        <span style={{ fontFamily: MONO, fontSize: 10, color: pillColor, letterSpacing: '0.16em', textTransform: 'uppercase', fontWeight: 700 }}>{pill}</span>
+      </div>
+      <h2 style={{ fontFamily: SANS, fontSize: 'clamp(24px, 2.8vw, 36px)', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.025em', lineHeight: 1.1, margin: '0 0 10px' }}>
+        {title}{accent && <> <span style={{ color: pillColor }}>{accent}</span></>}
+      </h2>
+      {subtitle && <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 15, color: 'var(--text-support)', margin: 0, maxWidth: 600, lineHeight: 1.6 }}>{subtitle}</p>}
+    </motion.div>
+  );
+}
 
 // ── Priority card ─────────────────────────────────────────────────────────────
-function PriorityCard({ p, anchor, index }) {
+function PriorityCard({ p, anchor, aiData, loading, index }) {
   const c = p.color;
+  const isNarrative = c === '#7DE69B'; // mint — use slightly darker for text
+  const textColor = isNarrative ? '#4db86e' : c;
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 22 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.5, delay: index * 0.07, ease: [0.22,1,0.36,1] }}
+      transition={{ duration: 0.5, delay: index * 0.07, ease: [0.22, 1, 0.36, 1] }}
       style={{
-        background: 'var(--card-bg, rgba(35,40,41,0.9))',
-        border: `1px solid ${c}22`,
-        borderRadius: 14,
+        background: 'var(--card-bg, rgba(30,36,37,0.95))',
+        border: `1px solid ${c}20`,
+        borderRadius: 16,
         overflow: 'hidden',
-        display: 'flex', flexDirection: 'column',
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
-      {/* Color top bar */}
-      <div style={{ height: 3, background: c }} />
+      {/* Color accent bar */}
+      <div style={{ height: 3, background: `linear-gradient(90deg, ${c}, ${c}88)` }} />
 
-      <div style={{ padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: 12, flex: 1 }}>
-        {/* Badge + number */}
+      <div style={{ padding: '22px 24px 20px', display: 'flex', flexDirection: 'column', gap: 14, flex: 1 }}>
+
+        {/* Badge row */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ background: `${c}18`, borderRadius: 20, padding: '3px 10px', fontFamily: MONO, fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', color: c }}>
+          <span style={{
+            background: `${c}15`, border: `1px solid ${c}28`, borderRadius: 20,
+            padding: '3px 11px', fontFamily: MONO, fontSize: 9, fontWeight: 700,
+            letterSpacing: '0.14em', color: textColor,
+          }}>
             {p.category}
           </span>
-          <span style={{ fontFamily: MONO, fontSize: 20, color: c, opacity: 0.18, fontWeight: 900, letterSpacing: '-0.02em' }}>{p.num}</span>
+          <span style={{ fontFamily: MONO, fontSize: 22, color: c, opacity: 0.12, fontWeight: 900, letterSpacing: '-0.02em' }}>{p.num}</span>
         </div>
 
         {/* Title */}
-        <div style={{ fontFamily: SANS, fontSize: 17, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.01em', lineHeight: 1.25 }}>
+        <div style={{ fontFamily: SANS, fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.015em', lineHeight: 1.2 }}>
           {p.title}
         </div>
 
-        {/* ★ Callout */}
+        {/* Anchor stat — always visible */}
         <div style={{
-          background: `${c}10`,
-          border: `1px solid ${c}30`,
-          borderLeft: `3px solid ${c}`,
-          borderRadius: 8,
-          padding: '10px 12px',
-          display: 'flex',
-          gap: 8,
-          alignItems: 'flex-start',
-          flex: 1,
+          background: `${c}0e`, border: `1px solid ${c}22`, borderLeft: `3px solid ${c}`,
+          borderRadius: 8, padding: '12px 14px',
+          display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap',
         }}>
-          <span style={{ color: c, fontSize: 13, flexShrink: 0, lineHeight: 1.5 }}>★</span>
-          <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 500, color: 'var(--text-medium)', lineHeight: 1.6 }}>
-            {p.callout}
-          </p>
-        </div>
-
-        {/* Anchor stat — bottom divider */}
-        <div style={{ borderTop: `1px solid ${c}18`, paddingTop: 12, display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
-          <span style={{ fontFamily: SANS, fontSize: 'clamp(20px, 2vw, 26px)', fontWeight: 900, color: c, lineHeight: 1, letterSpacing: '-0.03em', flexShrink: 0 }}>
+          <span style={{ fontFamily: SANS, fontSize: 'clamp(26px, 2.6vw, 32px)', fontWeight: 900, color: textColor, lineHeight: 1, letterSpacing: '-0.03em', flexShrink: 0 }}>
             {anchor.val}
           </span>
-          <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: 'var(--text-support)', lineHeight: 1.4 }}>
+          <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: 'var(--text-support)', lineHeight: 1.4 }}>
             {anchor.label}
           </span>
         </div>
+
+        {/* AI body text — shimmer while loading */}
+        <div style={{ flex: 1, minHeight: 52 }}>
+          {loading
+            ? <TextShimmer lines={3} />
+            : (
+              <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}
+                style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: 'var(--text-bridge)', lineHeight: 1.65, margin: 0 }}>
+                {aiData?.body ?? ''}
+              </motion.p>
+            )
+          }
+        </div>
+
+        {/* AI action line */}
+        {!loading && aiData?.action && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}
+            style={{ borderTop: `1px solid ${c}15`, paddingTop: 12, display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+            <span style={{ color: textColor, fontSize: 12, fontWeight: 700, flexShrink: 0, paddingTop: 1 }}>→</span>
+            <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 600, color: 'var(--text-medium)', lineHeight: 1.5 }}>
+              {aiData.action}
+            </p>
+          </motion.div>
+        )}
+        {loading && (
+          <div style={{ borderTop: `1px solid ${c}15`, paddingTop: 12 }}>
+            <TextShimmer lines={1} />
+          </div>
+        )}
       </div>
     </motion.div>
   );
 }
 
-// ── Wave 4 Scorecard ──────────────────────────────────────────────────────────
+// ── Open text card ────────────────────────────────────────────────────────────
+function OpenTextCard({ card, stat, quote, aiData, loading, index }) {
+  const c = card.color;
+  const isNarrative = c === '#7DE69B';
+  const textColor = isNarrative ? '#4db86e' : c;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.5, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
+      style={{
+        background: 'var(--card-bg, rgba(30,36,37,0.95))',
+        border: `1px solid ${c}20`,
+        borderLeft: `3px solid ${c}`,
+        borderRadius: 14,
+        padding: '22px 22px 20px',
+        display: 'flex', flexDirection: 'column', gap: 12,
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <span style={{ background: `${c}15`, border: `1px solid ${c}28`, borderRadius: 20, padding: '3px 11px', fontFamily: MONO, fontSize: 9, fontWeight: 700, letterSpacing: '0.14em', color: textColor }}>
+          {card.category}
+        </span>
+      </div>
+
+      <div style={{ fontFamily: SANS, fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.01em', lineHeight: 1.25 }}>
+        {card.title}
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
+        <span style={{ fontFamily: SANS, fontSize: 'clamp(20px, 2.2vw, 26px)', fontWeight: 900, color: textColor, lineHeight: 1, letterSpacing: '-0.02em', flexShrink: 0 }}>
+          {stat.val}
+        </span>
+        <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: 'var(--text-support)', lineHeight: 1.4 }}>
+          {stat.label}
+        </span>
+      </div>
+
+      {quote && (
+        <div style={{ background: `${c}08`, border: `1px solid ${c}18`, borderRadius: 8, padding: '10px 13px' }}>
+          <span style={{ color: textColor, fontSize: '1.1em', lineHeight: 0, verticalAlign: '-0.1em', marginRight: 5, fontFamily: 'Georgia, serif', opacity: 0.7 }}>&ldquo;</span>
+          <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: 'var(--text-bridge)', fontStyle: 'italic', lineHeight: 1.55 }}>
+            {typeof quote === 'string' ? quote : quote.text ?? ''}
+          </span>
+        </div>
+      )}
+
+      <div style={{ flex: 1, minHeight: 42 }}>
+        {loading
+          ? <TextShimmer lines={2} />
+          : (
+            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}
+              style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: 'var(--text-bridge)', lineHeight: 1.65, margin: 0 }}>
+              {aiData?.body ?? ''}
+            </motion.p>
+          )
+        }
+      </div>
+
+      {!loading && aiData?.action && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}
+          style={{ borderTop: `1px solid ${c}15`, paddingTop: 10, display: 'flex', gap: 7, alignItems: 'flex-start' }}>
+          <span style={{ color: textColor, fontSize: 12, fontWeight: 700, flexShrink: 0 }}>→</span>
+          <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: 'var(--text-support)', lineHeight: 1.5 }}>{aiData.action}</p>
+        </motion.div>
+      )}
+    </motion.div>
+  );
+}
+
+// ── Wave 4 scorecard ──────────────────────────────────────────────────────────
 function Wave4Scorecard({ transforms }) {
   const rows = SCORECARD_ROWS.map(r => {
     const val = r.getVal(transforms ?? {});
@@ -184,66 +307,48 @@ function Wave4Scorecard({ transforms }) {
   });
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.55 }}
-      style={{ marginTop: 64 }}
-    >
-      {/* Section header */}
-      <div style={{ marginBottom: 28 }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(46,168,74,0.08)', border: '1px solid rgba(46,168,74,0.2)', borderRadius: 20, padding: '4px 14px', marginBottom: 14 }}>
-          <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#2EA84A' }} />
-          <span style={{ fontFamily: MONO, fontSize: 10, color: '#2EA84A', letterSpacing: '0.15em', textTransform: 'uppercase', fontWeight: 700 }}>Wave 4</span>
-        </div>
-        <h2 style={{ fontFamily: SANS, fontSize: 'clamp(22px, 2.6vw, 32px)', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.025em', lineHeight: 1.1, margin: '0 0 8px' }}>
-          Wave 4 Goals
-        </h2>
-        <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 15, color: 'var(--text-support)', margin: 0 }}>
-          Where we want to be by the next survey. Current Wave 3 numbers shown alongside each target.
-        </p>
-      </div>
-
-      {/* Scorecard tiles */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
+    <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.55 }}
+      style={{ marginTop: 72 }}>
+      <SectionHeader
+        pill="Wave 4" pillColor="#2EA84A"
+        title="Measuring" accent="what matters"
+        subtitle="Live Wave 3 numbers against the targets set in the readout. When Survey 4 data comes in, the Current column updates automatically."
+      />
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
         {rows.map((row, i) => (
-          <motion.div
-            key={row.metric}
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.4, delay: i * 0.06 }}
+          <motion.div key={row.metric}
+            initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.35, delay: i * 0.06 }}
             style={{
-              background: 'var(--card-bg, rgba(35,40,41,0.9))',
-              border: '1px solid rgba(125,230,155,0.12)',
-              borderTop: '2px solid rgba(46,168,74,0.4)',
+              background: 'var(--card-bg, rgba(30,36,37,0.95))',
+              border: `1px solid ${row.onTrack ? 'rgba(46,168,74,0.22)' : 'rgba(125,230,155,0.1)'}`,
               borderRadius: 12,
               padding: '18px 20px',
               display: 'flex', flexDirection: 'column', gap: 10,
             }}
           >
-            <div style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: 'var(--text-medium)', fontWeight: 600, lineHeight: 1.3 }}>
+            <div style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 600, color: 'var(--text-medium)', lineHeight: 1.35 }}>
               {row.metric}
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              {/* Current */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <span style={{ fontFamily: MONO, fontSize: 9, color: 'var(--text-support)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Now</span>
-                <span style={{ fontFamily: SANS, fontSize: 'clamp(24px, 2.5vw, 30px)', fontWeight: 900, color: row.onTrack ? '#2EA84A' : 'var(--text-medium)', lineHeight: 1, letterSpacing: '-0.02em' }}>
+                <span style={{ fontFamily: SANS, fontSize: 'clamp(22px, 2.3vw, 28px)', fontWeight: 900, color: row.onTrack ? '#2EA84A' : 'var(--text-medium)', lineHeight: 1, letterSpacing: '-0.02em' }}>
                   {row.val}{row.unit}
                 </span>
               </div>
-              <span style={{ color: '#2EA84A', fontSize: 16, opacity: 0.4, flexShrink: 0 }}>→</span>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <span style={{ fontFamily: MONO, fontSize: 9, color: '#2EA84A', letterSpacing: '0.08em', textTransform: 'uppercase', opacity: 0.8 }}>Goal</span>
-                <span style={{ fontFamily: SANS, fontSize: 'clamp(24px, 2.5vw, 30px)', fontWeight: 900, color: '#2EA84A', lineHeight: 1, letterSpacing: '-0.02em' }}>
+              <span style={{ color: '#2EA84A', fontSize: 14, opacity: 0.35, flexShrink: 0 }}>→</span>
+              {/* Goal */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <span style={{ fontFamily: MONO, fontSize: 9, color: '#2EA84A', letterSpacing: '0.08em', textTransform: 'uppercase', opacity: 0.7 }}>Goal</span>
+                <span style={{ fontFamily: SANS, fontSize: 'clamp(22px, 2.3vw, 28px)', fontWeight: 900, color: '#2EA84A', lineHeight: 1, letterSpacing: '-0.02em' }}>
                   {row.targetDisplay}
                 </span>
               </div>
             </div>
 
-            <div style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: 'var(--text-support)', lineHeight: 1.4 }}>
+            <div style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: 'var(--text-support)', lineHeight: 1.4, opacity: 0.75 }}>
               {row.targetLabel}
             </div>
           </motion.div>
@@ -254,29 +359,107 @@ function Wave4Scorecard({ transforms }) {
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
-export default function WhatsnextInsights({ transforms }) {
+export default function WhatsnextInsights({ transforms, vaultUnlocked }) {
+  const [aiResults, setAiResults] = useState(null);
+  const [loading, setLoading]     = useState(true);
+  const fetchedRef                = useRef(false);
+
   const anchors = PRIORITIES.map(p => p.getAnchor(transforms ?? {}));
+
+  useEffect(() => {
+    if (fetchedRef.current) return;
+    if (!transforms?.sentimentTrend?.length) return; // wait for data
+    fetchedRef.current = true;
+
+    async function fetchInsights() {
+      try {
+        const t = transforms;
+        const intTransPct = Math.round(['Integration','Transformation'].reduce((s, st) => s + (t.stageTrend?.find(e => e.stage === st)?.s3?.pct ?? 0), 0));
+        const s3ConfHigh  = Math.round((t.confidenceTrend?.[2]?.distribution ?? []).filter(d => d.score >= 4).reduce((s,d) => s+d.pct, 0));
+        const s3ConfAny   = Math.round((t.confidenceTrend?.[2]?.distribution ?? []).filter(d => d.score >= 3).reduce((s,d) => s+d.pct, 0));
+        const impPct      = Math.round((t.importanceTrend?.[2]?.distribution ?? []).filter(d => d.score >= 4).reduce((s,d) => s+d.pct, 0) || 87);
+        const ownPocket   = Math.round(t.ownPocketS3?.yesPct ?? 32);
+        const tooManyPct  = Math.round(t.barriersTrend?.find(b => b.barrier?.toLowerCase().includes('too many'))?.s3?.pct ?? 16);
+        const timePct     = Math.round(t.barriersTrend?.find(b => b.barrier?.toLowerCase().includes('time'))?.s3?.pct ?? 34);
+        const transPct    = Math.round(t.stageTrend?.find(e => e.stage === 'Transformation')?.s3?.pct ?? 25);
+        const partner     = Math.round((t.benefitsS3 ?? []).find(b => (b.label ?? b.benefit)?.toLowerCase().includes('strategic'))?.pct ?? 42);
+        const ag          = t.openTextInsights?.aspirationGap ?? {};
+        const lv          = t.openTextInsights?.leadershipVoices ?? {};
+        const bi          = t.openTextInsights?.blockedInvestors ?? {};
+        const tm          = t.openTextInsights?.toolMindset ?? {};
+
+        // Conditionally include vault data
+        const vaultSection = vaultUnlocked && t.byRole
+          ? `\nLEADERSHIP VAULT: ${JSON.stringify({ byRole: t.byRole, byFunction: t.byFunction })}`
+          : '';
+
+        const prompt = `You are a strategic advisor to the Baptist Health MarCom leadership team. Wave 3 AI adoption survey, n=101.
+
+STATS: ${intTransPct}% integration/transformation, 90% daily use, 69% positive sentiment, ${s3ConfHigh}% very/extremely confident (${s3ConfAny}% any confidence — ${s3ConfAny - s3ConfHigh}pt gap), ${impPct}% rate AI highly important, ${partner}% strategic thought partner, ${ownPocket}% pay out of pocket, ${tooManyPct}% too many tools barrier, ${timePct}% time barrier, ${transPct}% at transformation stage, 77% use unofficial tools.
+OPEN TEXT: aspiration-gap=${ag.pct ?? 0}% (n=${ag.count ?? 0}); leadership-voices=${lv.pct ?? 0}% (n=${lv.count ?? 0}); blocked-investors=${bi.pct ?? 0}% (n=${bi.count ?? 0}); tool-mindset: ${tm.claude?.count ?? 0} Claude vs ${tm.chatgpt?.count ?? 0} ChatGPT users.${vaultSection}
+
+Return ONLY valid JSON (no markdown). Each "body" is 2 direct sentences for marketing leaders. Each "action" is 1 concrete next step.
+
+{"priorities":[
+{"id":"workflow-pilots","body":"...","action":"..."},
+{"id":"tool-stack","body":"...","action":"..."},
+{"id":"access-integration","body":"...","action":"..."},
+{"id":"role-enablement","body":"...","action":"..."},
+{"id":"performance-narrative","body":"...","action":"..."},
+{"id":"rd-lane","body":"...","action":"..."}
+]}`;
+
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'x-api-key': import.meta.env.VITE_ANTHROPIC_API_KEY,
+            'anthropic-version': '2023-06-01',
+            'anthropic-dangerous-direct-browser-access': 'true',
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'claude-haiku-4-5-20251001',
+            max_tokens: 800,
+            messages: [{ role: 'user', content: prompt }],
+          }),
+        });
+
+        if (!res.ok) throw new Error(`API ${res.status}`);
+        const data = await res.json();
+        let raw = data.content?.[0]?.text ?? '';
+        raw = raw.replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/```\s*$/i,'').trim();
+        const parsed = JSON.parse(raw);
+
+        const pMap = {};
+        (parsed.priorities ?? []).forEach(p => { pMap[p.id] = p; });
+        setAiResults({ priorities: pMap });
+      } catch (err) {
+        console.error('WhatsnextInsights AI error:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchInsights();
+  }, [transforms, vaultUnlocked]);
 
   return (
     <div style={{ padding: '56px 40px 0', maxWidth: 1400, margin: '0 auto' }}>
 
-      {/* ── Section 1: 6 Leadership Priorities ─────────────────────────────── */}
-      <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }} style={{ marginBottom: 36 }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(46,168,74,0.08)', border: '1px solid rgba(46,168,74,0.2)', borderRadius: 20, padding: '4px 14px', marginBottom: 16 }}>
-          <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#2EA84A' }} />
-          <span style={{ fontFamily: MONO, fontSize: 10, color: '#2EA84A', letterSpacing: '0.15em', textTransform: 'uppercase', fontWeight: 700 }}>Wave 3 findings</span>
-        </div>
-        <h2 style={{ fontFamily: SANS, fontSize: 'clamp(26px, 3vw, 38px)', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.025em', lineHeight: 1.1, margin: '0 0 10px' }}>
-          6 priorities for{' '}<span style={{ color: '#2EA84A' }}>what leaders should do next</span>
-        </h2>
-        <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 16, color: 'var(--text-support)', margin: 0, maxWidth: 640 }}>
-          These come directly from what staff said in the survey. Each card shows the data behind the priority and a concrete next step.
-        </p>
-      </motion.div>
+      {/* ── Section 1: Leadership Priorities ───────────────────────────────── */}
+      <SectionHeader
+        pill="Wave 3 findings" pillColor="#2EA84A"
+        title="6 priorities for" accent="what leaders should do next"
+        subtitle="These come directly from what staff said in the survey. Each card shows the data behind the priority. AI interpretation loads in after a moment."
+      />
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 72 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 80 }}>
         {PRIORITIES.map((p, i) => (
-          <PriorityCard key={p.id} p={p} anchor={anchors[i]} index={i} />
+          <PriorityCard
+            key={p.id} p={p} anchor={anchors[i]} index={i}
+            aiData={aiResults?.priorities?.[p.id]}
+            loading={loading}
+          />
         ))}
       </div>
 
