@@ -405,6 +405,7 @@ function OpenTextCard({ card, stat, quote, aiData, loading, index }) {
 
 // ── Wave 4 scorecard ──────────────────────────────────────────────────────────
 function Wave4Scorecard({ transforms }) {
+  const isMobile = useIsMobile();
   const rows = SCORECARD_ROWS.map(r => {
     const val = r.getVal(transforms ?? {});
     const onTrack = r.direction === 'above' ? val >= r.threshold : val <= r.threshold;
