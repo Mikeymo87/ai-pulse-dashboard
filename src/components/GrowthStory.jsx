@@ -28,7 +28,7 @@ const CHAPTERS = [
     dateRange: 'Mar 18 – Mar 30, 2026',
     watermark: '03',
     title: 'The New Normal',
-    narrative: `The national average for daily AI use at work is 8%. This team is at 92%. That's not a rounding error — it's more than ten times the national benchmark, and it's the proof that "Human-first, AI-forward" wasn't just a philosophy. It became a practice. Positive sentiment held strong at 69%. Confidence kept climbing. Survey 3 introduced new questions that revealed the full picture for the first time: who is using AI, in what roles, and how deeply it has changed the way they work. Time savings and quality improvements top the list of benefits. And one number stands apart from all the rest — a significant share of the team is now spending their own money on AI tools. Not because anyone asked them to. Because they're convinced.`,
+    narrative: `The national average for daily AI use at work is 8%. This team is at 90%. That's not a rounding error — it's more than ten times the national benchmark, and it's the proof that "Human-first, AI-forward" wasn't just a philosophy. It became a practice. Positive sentiment held strong at 69%. Confidence kept climbing. Survey 3 introduced new questions that revealed the full picture for the first time: who is using AI, in what roles, and how deeply it has changed the way they work. Time savings and quality improvements top the list of benefits. And one number stands apart from all the rest — a significant share of the team is now spending their own money on AI tools. Not because anyone asked them to. Because they're convinced.`,
   },
 ];
 
@@ -627,7 +627,7 @@ export default function GrowthStory({ transforms, presentationWave }) {
               position: 'relative',
               zIndex: 1,
             }}>
-              The national average for daily AI use at work is 8%. This team reached 92% — more than
+              The national average for daily AI use at work is 8%. This team reached 90% — more than
               ten times the benchmark. That gap is the direct result of leadership that modeled the change,
               built the infrastructure, and trusted a team of 117 to run with it. Since Survey 3, that
               investment hasn't stopped. New staff are onboarding into a department where AI fluency is

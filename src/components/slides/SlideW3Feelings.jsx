@@ -114,7 +114,7 @@ export default function SlideW3Feelings({ transforms }) {
           }}>
             <span style={{ fontFamily: SANS, fontSize: 15, fontWeight: 800, color: 'var(--text-medium)' }}>Read on the chart  </span>
             <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 15, color: 'var(--text-bridge)', lineHeight: 1.55 }}>
-              Positive sentiment rose from 50% in Wave 1 to 69% in Wave 3. Mixed feelings remain, but outright negativity is minimal.
+              Positive sentiment rose from 49% in Wave 1 to 69% in Wave 3. Mixed feelings remain, but outright negativity is minimal.
             </span>
           </div>
         </motion.div>

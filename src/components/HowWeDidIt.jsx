@@ -81,9 +81,9 @@ function buildPrinciples(transforms) {
       title: 'Treat AI Enablement as a People Change Effort, Not a Tech Rollout',
       oneLiner: 'Install the tools last. Install the mindset first.',
       narrative: 'The team didn\'t launch a new software platform — they launched a change initiative that happened to involve software. That meant measuring human indicators (confidence, sentiment, barriers) not just license utilization. It meant talking about fears openly. Every training session was a chance to ask "what worries you?" not just "here\'s how to use it."',
-      stat: '89% → 30%',
-      statLabel: 'reporting barriers to AI use',
-      statSub: 'dropped between Survey 1 and Survey 3',
+      stat: '63% → 20%',
+      statLabel: 'facing training, access & clarity barriers',
+      statSub: 'the barriers the program directly addressed — dropped dramatically S1 → S3',
       quote: 'The biggest challenge right now is scaling it in a way that\'s structured and sustainable across teams.',
       actions: [
         'Open the initiative with a clear statement: this is a people-centered operating change, not a tool rollout. Brief managers on what behavior change is being asked of the team.',

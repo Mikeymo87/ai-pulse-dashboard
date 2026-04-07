@@ -31,10 +31,10 @@ const CHAPTERS = [
     dateRange: 'Mar 18 – Mar 30, 2026',
     eyebrow: '14 months in — this is who you are now',
     title: 'The New Normal',
-    heroValue: '92%',
+    heroValue: '90%',
     heroLabel: 'Daily usage — 14 months later',
-    narrative: `Fourteen months in, AI is woven into the daily rhythm of how this team works. 92% use it every day. Positive sentiment held strong at 69%, and confidence continued climbing. A significant share of the team is spending their own money on AI tools — not because they were asked to, but because they're convinced it makes their work better. This is no longer an experiment. It's identity.`,
-    thesis: '92% daily. They didn\'t wait for permission — they decided. One in three is paying out of their own pocket to keep going. That\'s not compliance. That\'s conviction.',
+    narrative: `Fourteen months in, AI is woven into the daily rhythm of how this team works. 90% use it every day. Positive sentiment held strong at 69%, and confidence continued climbing. A significant share of the team is spending their own money on AI tools — not because they were asked to, but because they're convinced it makes their work better. This is no longer an experiment. It's identity.`,
+    thesis: '90% daily. They didn\'t wait for permission — they decided. One in three is paying out of their own pocket to keep going. That\'s not compliance. That\'s conviction.',
   },
 ];
 

@@ -10,7 +10,7 @@ const BEATS = [
     accentBorder: 'rgba(46,168,74,0.28)',
     label: 'Where We Started',
     heading: 'A team curious but cautious.',
-    body: `In January 2025, 42% of MarCom used AI daily — twice the national average, but unevenly distributed. Sentiment was cautiously optimistic. The biggest barriers were time to learn and unclear guidelines about what was even allowed. The tools existed. The conviction hadn't formed yet.`,
+    body: `In January 2025, 42% of MarCom used AI daily — more than five times the national average, but unevenly distributed. Sentiment was cautiously optimistic. The biggest barriers were time to learn and unclear guidelines about what was even allowed. The tools existed. The conviction hadn't formed yet.`,
   },
   {
     number: '02',

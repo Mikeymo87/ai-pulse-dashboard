@@ -11,7 +11,7 @@ const STAT_CARDS = [
       return pos ? `${Math.round(pos.s3.pct)}%` : '69%';
     },
     label: 'Positive sentiment in Wave 3',
-    sub: 'vs. 50% in Wave 1',
+    sub: 'vs. 49% in Wave 1',
   },
   {
     color: '#59BEC9',
