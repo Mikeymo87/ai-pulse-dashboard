@@ -1,13 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useIsMobile } from '../hooks/useIsMobile';
 
 const TABS = [
-  { id: 'story',      label: 'The Story' },
-  { id: 'numbers',    label: 'The Numbers' },
-  { id: 'team',       label: 'The Team' },
-  { id: 'whats-next', label: "What's Next" },
-  { id: 'playbook',   label: 'The Playbook' },
+  { id: 'story',      label: 'The Story',    mobileLabel: 'Story' },
+  { id: 'numbers',    label: 'The Numbers',  mobileLabel: 'Numbers' },
+  { id: 'team',       label: 'The Team',     mobileLabel: 'Team' },
+  { id: 'whats-next', label: "What's Next",  mobileLabel: "What's Next" },
+  { id: 'playbook',   label: 'The Playbook', mobileLabel: 'Playbook' },
 ];
 
 // ── Theme toggle helpers ──────────────────────────────────────────────────────
@@ -59,6 +59,14 @@ function MoonIcon() {
 export default function Nav({ onOpenChat, onPresent, activeTab, onTabChange }) {
   const [theme, setTheme] = useState(getInitialTheme);
   const isMobile = useIsMobile();
+  const tabRowRef = useRef(null);
+
+  // Scroll active tab into view whenever it changes on mobile
+  useEffect(() => {
+    if (!isMobile || !tabRowRef.current) return;
+    const activeBtn = tabRowRef.current.querySelector('[data-active="true"]');
+    if (activeBtn) activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  }, [activeTab, isMobile]);
 
   // Apply theme on mount and whenever it changes
   useEffect(() => {
@@ -151,32 +159,37 @@ export default function Nav({ onOpenChat, onPresent, activeTab, onTabChange }) {
         </div>
 
         {/* Row 2: Scrollable tabs */}
-        <div style={{
-          display: 'flex',
-          overflowX: 'auto',
-          padding: '0 12px 0',
-          gap: 0,
-          scrollbarWidth: 'none',
-          msOverflowStyle: 'none',
-          borderTop: '1px solid var(--nav-border)',
-        }}>
+        <div
+          ref={tabRowRef}
+          style={{
+            display: 'flex',
+            overflowX: 'auto',
+            padding: '0 8px 0',
+            gap: 0,
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+            borderTop: '1px solid var(--nav-border)',
+            WebkitOverflowScrolling: 'touch',
+          }}
+        >
           {TABS.map(tab => {
             const isActive = activeTab === tab.id;
             return (
               <button
                 key={tab.id}
+                data-active={isActive}
                 onClick={() => handleTabChange(tab.id)}
                 style={{
                   position: 'relative',
-                  padding: '9px 14px',
+                  padding: '9px 12px',
                   background: 'none', border: 'none', cursor: 'pointer',
                   fontFamily: 'DM Sans, sans-serif', fontSize: 12,
-                  fontWeight: isActive ? 600 : 400,
+                  fontWeight: isActive ? 700 : 400,
                   color: isActive ? 'var(--accent-mint)' : 'var(--text-support)',
                   whiteSpace: 'nowrap', outline: 'none', flexShrink: 0,
                 }}
               >
-                {tab.label}
+                {tab.mobileLabel}
                 {isActive && (
                   <motion.div
                     layoutId="tab-indicator-mobile"
