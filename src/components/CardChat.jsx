@@ -27,13 +27,14 @@ export function CardChatButton({ color, contextMessage, label }) {
         background: 'transparent',
         border: `1px solid ${color}22`,
         borderRadius: 8,
-        padding: '8px 14px',
+        padding: '11px 14px',
         cursor: 'pointer',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         transition: 'all 0.15s ease',
         marginTop: 2,
+        minHeight: 44,
       }}
       onMouseEnter={e => {
         e.currentTarget.style.background = `${color}10`;

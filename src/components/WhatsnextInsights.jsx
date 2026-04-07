@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { CardChatButton } from './CardChat';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 const MONO = "'JetBrains Mono', 'Fira Code', monospace";
 const SANS = "'Plus Jakarta Sans', DM Sans, sans-serif";
@@ -418,7 +419,7 @@ function Wave4Scorecard({ transforms }) {
         title="If the priorities work," accent="these numbers move"
         subtitle="Each metric below is the direct outcome measure for one of the 6 priorities above. Wave 3 baselines are live. When Wave 4 data comes in, this scorecard updates automatically."
       />
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: 12 }}>
         {rows.map((row, i) => (
           <motion.div key={row.metric}
             initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.35, delay: i * 0.06 }}
@@ -467,6 +468,7 @@ export default function WhatsnextInsights({ transforms, vaultUnlocked }) {
   const [aiResults, setAiResults] = useState(null);
   const [loading, setLoading]     = useState(true);
   const fetchedRef                = useRef(false);
+  const isMobile                  = useIsMobile();
 
   const anchors = PRIORITIES.map(p => p.getAnchor(transforms ?? {}));
 
@@ -602,7 +604,7 @@ SPECIAL INSTRUCTIONS per card:
   }, [transforms, vaultUnlocked]);
 
   return (
-    <div style={{ padding: '56px 40px 0', maxWidth: 1400, margin: '0 auto' }}>
+    <div style={{ padding: isMobile ? '32px 16px 0' : '56px 40px 0', maxWidth: 1400, margin: '0 auto' }}>
 
       {/* ── Section 1: Leadership Priorities ───────────────────────────────── */}
       <SectionHeader
@@ -611,7 +613,7 @@ SPECIAL INSTRUCTIONS per card:
         subtitle="These come directly from what staff said in the survey. Each card shows the data behind the priority. AI interpretation loads in after a moment."
       />
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 80 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: 16, marginBottom: isMobile ? 40 : 80 }}>
         {PRIORITIES.map((p, i) => (
           <PriorityCard
             key={p.id} p={p} anchor={anchors[i]} index={i}

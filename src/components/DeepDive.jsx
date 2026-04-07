@@ -5,6 +5,7 @@ import {
   Tooltip, ResponsiveContainer, ReferenceLine,
 } from 'recharts';
 import { useTheme } from '../hooks/useTheme';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 // ─── Color palette for roles ──────────────────────────────────────────────────
 const ROLE_PALETTE = [
@@ -154,6 +155,7 @@ export default function DeepDive({ surveys, transforms }) {
   const [sortBy, setSortBy] = useState('confidence');
   const [cardFilter, setCardFilter] = useState('all');
   const [scatterFilter, setScatterFilter] = useState('all');
+  const isMobile = useIsMobile();
 
   // Reset cross-filter whenever the primary grouping switches
   useEffect(() => { setCardFilter('all'); }, [groupBy]);
@@ -264,7 +266,7 @@ export default function DeepDive({ surveys, transforms }) {
     <section
       id="deepdive"
       style={{
-        padding: '96px 32px 80px',
+        padding: isMobile ? '40px 16px 48px' : '96px 32px 80px',
         maxWidth: 1360,
         margin: '0 auto',
         fontFamily: 'DM Sans, sans-serif',
@@ -331,11 +333,11 @@ export default function DeepDive({ surveys, transforms }) {
           marginBottom: 48,
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: 4, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 4, flexWrap: 'wrap', flexDirection: isMobile ? 'column' : 'row' }}>
           <p style={{ margin: 0, fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '0.01em' }}>
             Confidence vs. Importance
           </p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0, width: isMobile ? '100%' : 'auto' }}>
             <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-support)', fontFamily: 'DM Sans, sans-serif', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Filter</span>
             <select
               value={scatterFilter}
@@ -373,20 +375,20 @@ export default function DeepDive({ surveys, transforms }) {
 
         {/* Quadrant labels overlay */}
         <div style={{ position: 'relative' }}>
-          <div style={{ position: 'absolute', top: 8, right: 40, zIndex: 1, textAlign: 'right' }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#7DE69B', opacity: 0.6, letterSpacing: '0.07em', textTransform: 'uppercase' }}>Ready to Lead</div>
+          <div style={{ position: 'absolute', top: 8, right: isMobile ? 8 : 40, zIndex: 1, textAlign: 'right' }}>
+            <div style={{ fontSize: isMobile ? 9 : 11, fontWeight: 700, color: '#7DE69B', opacity: 0.6, letterSpacing: '0.07em', textTransform: 'uppercase' }}>Ready to Lead</div>
           </div>
-          <div style={{ position: 'absolute', top: 8, left: 40, zIndex: 1 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#FFCD00', opacity: 0.6, letterSpacing: '0.07em', textTransform: 'uppercase' }}>Quiet Users</div>
+          <div style={{ position: 'absolute', top: 8, left: isMobile ? 8 : 40, zIndex: 1 }}>
+            <div style={{ fontSize: isMobile ? 9 : 11, fontWeight: 700, color: '#FFCD00', opacity: 0.6, letterSpacing: '0.07em', textTransform: 'uppercase' }}>Quiet Users</div>
           </div>
-          <div style={{ position: 'absolute', bottom: 36, right: 40, zIndex: 1, textAlign: 'right' }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#E5554F', opacity: 0.6, letterSpacing: '0.07em', textTransform: 'uppercase' }}>Needs Support</div>
+          <div style={{ position: 'absolute', bottom: 36, right: isMobile ? 8 : 40, zIndex: 1, textAlign: 'right' }}>
+            <div style={{ fontSize: isMobile ? 9 : 11, fontWeight: 700, color: '#E5554F', opacity: 0.6, letterSpacing: '0.07em', textTransform: 'uppercase' }}>Needs Support</div>
           </div>
-          <div style={{ position: 'absolute', bottom: 36, left: 40, zIndex: 1 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#797D80', opacity: 0.6, letterSpacing: '0.07em', textTransform: 'uppercase' }}>Not Engaged</div>
+          <div style={{ position: 'absolute', bottom: 36, left: isMobile ? 8 : 40, zIndex: 1 }}>
+            <div style={{ fontSize: isMobile ? 9 : 11, fontWeight: 700, color: '#797D80', opacity: 0.6, letterSpacing: '0.07em', textTransform: 'uppercase' }}>Not Engaged</div>
           </div>
 
-          <ResponsiveContainer width="100%" height={400}>
+          <ResponsiveContainer width="100%" height={isMobile ? 280 : 400}>
             <ScatterChart margin={{ top: 20, right: 30, bottom: 20, left: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} />
               <XAxis
@@ -438,7 +440,7 @@ export default function DeepDive({ surveys, transforms }) {
       <div>
         {/* Toggle + sort controls */}
         <div style={{ marginBottom: 24 }}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 12, flexDirection: isMobile ? 'column' : 'row' }}>
             <div>
               <p style={{ margin: '0 0 2px', fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '0.01em' }}>Team Breakdown</p>
               <p style={{ margin: 0, fontSize: 13, color: 'var(--text-support)', lineHeight: 1.5 }}>
@@ -482,7 +484,7 @@ export default function DeepDive({ surveys, transforms }) {
             </div>
           </div>
           {/* Sort + cross-filter row */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: isMobile ? 'flex-start' : 'center', gap: isMobile ? 10 : 16, flexWrap: 'wrap', flexDirection: isMobile ? 'column' : 'row' }}>
             {/* Sort pills */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
               <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-support)', fontFamily: 'DM Sans, sans-serif', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Sort</span>

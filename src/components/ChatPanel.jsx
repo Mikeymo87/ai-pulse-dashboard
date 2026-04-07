@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useIsMobile } from '../hooks/useIsMobile';
 import {
   Document, Paragraph, TextRun, Table, TableRow, TableCell,
   Packer, HeadingLevel, AlignmentType, BorderStyle, WidthType,
@@ -294,6 +295,16 @@ function generateBriefHTML(brief) {
     .page { box-shadow: none; border-radius: 0; margin: 0; max-width: 100%; }
   }
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+  @media (max-width: 600px) {
+    .page { border-radius: 0; margin: 0; }
+    .header { padding: 24px 20px 20px; }
+    .body { padding: 24px 20px 32px; }
+    .header h1 { font-size: 22px; }
+    .section h2 { font-size: 16px; }
+    table { font-size: 11px; }
+    thead th, tbody td { padding: 7px 8px; }
+    footer { padding: 0 20px 24px; }
+  }
 </style>
 </head>
 <body>
@@ -1041,6 +1052,7 @@ export default function ChatPanel({ transforms, open, setOpen, vaultUnlocked = f
   const [thinking, setThinking] = useState(false);
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
+  const isMobile = useIsMobile();
 
   // Auto-scroll to bottom on new messages
   useEffect(() => {
@@ -1130,8 +1142,8 @@ export default function ChatPanel({ transforms, open, setOpen, vaultUnlocked = f
         whileTap={{ scale: 0.95 }}
         style={{
           position: 'fixed',
-          bottom: 28,
-          right: 28,
+          bottom: isMobile ? 20 : 28,
+          right: isMobile ? 16 : 28,
           width: 52,
           height: 52,
           borderRadius: '50%',
@@ -1163,14 +1175,15 @@ export default function ChatPanel({ transforms, open, setOpen, vaultUnlocked = f
             transition={{ duration: 0.25, ease: 'easeOut' }}
             style={{
               position: 'fixed',
-              bottom: 92,
-              right: 28,
-              width: 380,
-              maxWidth: 'calc(100vw - 40px)',
-              height: 520,
+              bottom: isMobile ? 84 : 92,
+              right: isMobile ? 0 : 28,
+              left: isMobile ? 0 : 'auto',
+              width: isMobile ? '100%' : 380,
+              height: isMobile ? 'calc(100dvh - 96px)' : 520,
               background: 'var(--tooltip-bg)',
-              border: '1px solid rgba(125,230,155,0.2)',
-              borderRadius: 18,
+              border: isMobile ? 'none' : '1px solid rgba(125,230,155,0.2)',
+              borderTop: '1px solid rgba(125,230,155,0.2)',
+              borderRadius: isMobile ? '18px 18px 0 0' : 18,
               boxShadow: '0 16px 48px rgba(0,0,0,0.5)',
               display: 'flex',
               flexDirection: 'column',
