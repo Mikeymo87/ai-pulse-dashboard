@@ -56,7 +56,7 @@ const PRIORITIES = [
     action: 'At the next all-hands or team meeting, say it plainly: we don\'t measure AI by how often people use it. We measure it by whether the work got better. One sentence from a leader does more than a policy doc.',
     getAnchor: (t) => {
       const imp     = Math.round((t.importanceTrend?.[2]?.distribution ?? []).filter(d => d.score >= 4).reduce((s,d) => s+d.pct, 0) || 87);
-      const partner = Math.round((t.benefitsS3 ?? []).find(b => (b.label ?? b.benefit)?.toLowerCase().includes('strategic'))?.pct ?? 42);
+      const partner = Math.round((t.benefitsS3 ?? []).find(b => b.label?.toLowerCase().includes('strategic'))?.pct ?? 42);
       return { val: `${imp}%`, label: `rate AI highly important · ${partner}% already use it as a strategic thought partner` };
     },
   },
@@ -83,8 +83,8 @@ const OPEN_TEXT_CARDS = [
   {
     id: 'tool-mindset', color: '#59BEC9', category: 'TOOL → MINDSET',
     title: 'How tool choice shapes AI thinking',
-    getStat: (t) => { const tm = t.openTextInsights?.toolMindset ?? {}; return { val: `${tm.claude?.count ?? 0} vs ${tm.chatgpt?.count ?? 0}`, label: 'Claude users vs. ChatGPT users — different language, different mental model' }; },
-    getQuote: (t) => t.openTextInsights?.toolMindset?.claude?.sampleQuote ?? null,
+    getStat: (t) => { const tm = t.openTextInsights?.toolMindset ?? {}; return { val: `${tm.claude?.count ?? 0}`, label: 'respondents use Claude as a supplemental tool alongside the official ChatGPT stack' }; },
+    getQuote: (t) => t.openTextInsights?.toolMindset?.claude?.quotes?.[0] ?? null,
   },
   {
     id: 'leadership-voices', color: '#7DE69B', category: 'LEADERSHIP VOICES',
@@ -111,7 +111,7 @@ const SCORECARD_ROWS = [
   { metric: 'Too many tools as a barrier',  targetDisplay: '<10%', targetLabel: 'Pull below 10%',  direction: 'below', threshold: 10, unit: '%',
     getVal: (t) => Math.round(t.barriersTrend?.find(b => b.barrier?.toLowerCase().includes('too many'))?.s3?.pct ?? 16) },
   { metric: 'Strategic thought partner',    targetDisplay: '>50%', targetLabel: 'Move above 50%',  direction: 'above', threshold: 50, unit: '%',
-    getVal: (t) => Math.round((t.benefitsS3 ?? []).find(b => (b.label ?? b.benefit)?.toLowerCase().includes('strategic'))?.pct ?? 42) },
+    getVal: (t) => Math.round((t.benefitsS3 ?? []).find(b => b.label?.toLowerCase().includes('strategic'))?.pct ?? 42) },
   { metric: 'Out-of-pocket tool spend',     targetDisplay: '↓',    targetLabel: 'Reduce via sanctioned support', direction: 'below', threshold: 20, unit: '%',
     getVal: (t) => Math.round(t.ownPocketS3?.yesPct ?? 32) },
 ];
@@ -408,7 +408,7 @@ export default function WhatsnextInsights({ transforms, vaultUnlocked }) {
         const tooManyPct  = Math.round(t.barriersTrend?.find(b => b.barrier?.toLowerCase().includes('too many'))?.s3?.pct ?? 16);
         const timePct     = Math.round(t.barriersTrend?.find(b => b.barrier?.toLowerCase().includes('time'))?.s3?.pct ?? 34);
         const transPct    = Math.round(t.stageTrend?.find(e => e.stage === 'Transformation')?.s3?.pct ?? 25);
-        const partner     = Math.round((t.benefitsS3 ?? []).find(b => (b.label ?? b.benefit)?.toLowerCase().includes('strategic'))?.pct ?? 42);
+        const partner     = Math.round((t.benefitsS3 ?? []).find(b => b.label?.toLowerCase().includes('strategic'))?.pct ?? 42);
         const ag          = t.openTextInsights?.aspirationGap ?? {};
         const lv          = t.openTextInsights?.leadershipVoices ?? {};
         const bi          = t.openTextInsights?.blockedInvestors ?? {};
@@ -425,7 +425,7 @@ export default function WhatsnextInsights({ transforms, vaultUnlocked }) {
         const prompt = `You are a strategic advisor to the Baptist Health MarCom leadership team. Wave 3 AI adoption survey, n=101.
 
 STATS: ${intTransPct}% integration/transformation, 90% daily use, 69% positive sentiment, ${s3ConfHigh}% very/extremely confident (${s3ConfAny}% any confidence — ${s3ConfAny - s3ConfHigh}pt gap), ${impPct}% rate AI highly important, ${partner}% strategic thought partner, ${ownPocket}% pay out of pocket, ${tooManyPct}% too many tools barrier, ${timePct}% time barrier, ${transPct}% at transformation stage.
-OPEN TEXT: aspiration-gap=${ag.pct ?? 0}% (n=${ag.count ?? 0}); leadership-voices=${lv.pct ?? 0}% (n=${lv.count ?? 0}); blocked-investors=${bi.pct ?? 0}% (n=${bi.count ?? 0}); tool-mindset (from open-text language analysis, not the tools question): ${tm.claude?.count ?? 0} respondents write in Claude-style language vs ${tm.chatgpt?.count ?? 0} in ChatGPT-style language.${vaultSection}
+OPEN TEXT: aspiration-gap=${ag.pct ?? 0}% (n=${ag.count ?? 0}); leadership-voices=${lv.pct ?? 0}% (n=${lv.count ?? 0}); blocked-investors=${bi.pct ?? 0}% (n=${bi.count ?? 0}); supplemental-tool-users: ${tm.claude?.count ?? 0} respondents use Claude as a personal supplemental tool alongside the official ChatGPT stack.${vaultSection}
 
 CRITICAL TOOL CONTEXT — READ CAREFULLY BEFORE WRITING ANYTHING ABOUT TOOLS:
 The official Baptist Health MarCom endorsed tools are: OpenAI ChatGPT (Enterprise), Microsoft Copilot, Adobe Firefly, and Jasper. Everyone on the team has access to these. The Survey 3 tools question specifically asked: "Besides the AI tools the company officially endorses (ChatGPT, Copilot, Adobe Firefly, etc.), what other AI tools do you use?" — so ChatGPT, Copilot, and Firefly DO NOT appear in the tool data below because they were intentionally excluded from the question. The 77% "unofficial tools" figure means 77% use ADDITIONAL tools ON TOP OF the official stack, not instead of it.
