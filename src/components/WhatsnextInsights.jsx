@@ -46,8 +46,8 @@ const PRIORITIES = [
     id: 'role-enablement', num: '04', category: 'ENABLEMENT', color: '#59BEC9',
     title: 'Build role-based enablement',
     wave4: { metric: 'Very / extremely confident', target: '>75%' },
-    fallback: 'Broad AI literacy got the team to where it is. The ceiling now is that people can\'t always see how AI applies to their specific work — the deliverables they own, the workflows they run, the problems they actually face day to day. Shifting from general AI education to function-specific labs, real examples, and regular office hours is how the team moves from "I know AI exists" to "I know how to use it on my job."',
-    action: 'Schedule one function-specific AI lab this month. Bring three real deliverables from that team\'s actual work — a content brief, a social post, an analytics summary — and rebuild each one with AI in the room. Skip the slides. The point is doing it, not explaining it.',
+    fallback: 'Broad AI literacy got the team to where it is. The ceiling now is that people can\'t always see how AI applies to their specific work — the deliverables they own, the workflows they run, the problems they actually face day to day. Shifting from general AI education to hands-on labs built around real work, real examples, and regular office hours is how the team moves from "I know AI exists" to "I know how to use it on my job."',
+    action: 'Schedule one hands-on AI lab this month built around actual team deliverables — a content brief, a social post, an analytics summary — and rebuild each one with AI in the room. Skip the slides. The point is doing it, not explaining it.',
     getAnchor: (t) => {
       const highConf = Math.round((t.confidenceTrend?.[2]?.distribution ?? []).filter(d => d.score >= 4).reduce((s,d) => s+d.pct, 0));
       const anyConf  = Math.round((t.confidenceTrend?.[2]?.distribution ?? []).filter(d => d.score >= 3).reduce((s,d) => s+d.pct, 0));
@@ -523,7 +523,7 @@ WHAT EACH PRIORITY IS ABOUT — use these as your source of truth for what each 
 - workflow-pilots: Pick recurring team processes and rebuild them with AI in the loop, end to end. The goal is making AI-powered workflow change visible and repeatable, not just individual.
 - tool-stack: Clarify the core set of tools, what each is for, and where exceptions make sense. The team has official tools (ChatGPT, Copilot, Firefly, Jasper) but 77% are self-assembling supplemental stacks — the Council needs to bring clarity, not more ambiguity.
 - access-integration: Address blocked tools, file connectivity, and software handoffs that are slowing down adoption. The frustration is practical and specific, not philosophical.
-- role-enablement: Shift from broad AI education to function-specific labs, real examples, and office hours. The gap is people not seeing how AI applies to THEIR work, not lack of awareness that AI exists.
+- role-enablement: Shift from broad AI education to work-specific labs, real examples, and office hours. The gap is people not seeing how AI applies to THEIR actual deliverables and workflows, not lack of awareness that AI exists. Do NOT name which teams or functions need this most.
 - performance-narrative: Make the goal stronger work and better outcomes, not visible AI performativity. The risk is that "using AI" becomes a performance metric rather than a quality lever.
 - rd-lane: Give builders room and budget to test useful tools, GPTs, and automations that can scale. The builders already exist on this team — they need air cover and a channel to share what they find.
 
@@ -548,7 +548,7 @@ Each "action": 1 concrete next step the reader can START THIS WEEK. Follow SMART
 - Relevant: directly connected to the data stat driving this card
 - Time-bound: include a real deadline ("this week", "before the next AI Council meeting", "by end of month", "this month")
 
-ROLE/FUNCTION RESTRICTION — CRITICAL:${vaultUnlocked ? '\nVault is UNLOCKED — you MAY reference specific roles and functions from the vault data when it improves the action\'s specificity.' : '\nVault is LOCKED — do NOT mention specific roles (Director, Manager, Specialist) or functions (Strategic Communications, Web & Tech, Account Services) in any body or action. Keep all language at the team level — "the highest-confidence users on the team", "staff", "the team", "your builders". Never name a role or function.'}
+ROLE/FUNCTION RESTRICTION — ABSOLUTE HARD WALL:${vaultUnlocked ? '\nVault is UNLOCKED — you MAY reference specific roles and functions from the vault data when it improves the action\'s specificity.' : '\nVault is LOCKED. You are FORBIDDEN from naming, implying, referencing, or alluding to ANY specific role title, job title, department name, function name, or team name — including every Baptist Health M&C function and role that exists. Do not name any group, even as an example, even as a hypothetical. Do not write anything that allows a reader to identify which group is ahead or behind. This applies to ALL six cards without exception. Speak only to "the team", "staff", "your builders", "your highest-confidence users", "people on the team" — never a named group. This restriction exists because role and function readiness data is leadership-confidential and has not been cleared for general viewing.'}
 
 NEVER use deferral language: do NOT write "wait", "hold off", "get clarity first", "don't do this yet", "gather more information before acting", or any variation. Every action starts NOW.
 
