@@ -112,10 +112,14 @@ ${topMomentum}
 TOP BENEFITS EXPERIENCED (S3 only):
 ${topBenefits}
 
-TOOLS USED — Survey 2 (all tools):
+OFFICIAL ENDORSED TOOLS (available to everyone — NOT in Survey 3 data because the question excluded them):
+OpenAI ChatGPT Enterprise, Microsoft Copilot, Adobe Firefly, Jasper
+
+TOOLS USED — Survey 2 (structured list, all tools including endorsed):
 ${topToolsS2 || 'No data'}
 
-TOOLS USED — Survey 3 (personal/non-endorsed tools):
+TOOLS USED — Survey 3 (SUPPLEMENTAL tools only — used ON TOP OF the official stack):
+IMPORTANT: The S3 question asked "Besides ChatGPT, Copilot, Firefly, Jasper — what other tools do you use?" So these are personal/supplemental tools added on top of the official endorsed tools. ChatGPT not appearing here does NOT mean the team doesn't use it — it's the primary official tool. 77% of S3 respondents use at least one supplemental tool beyond the official stack.
 ${topToolsS3 || 'No data'}
 
 TEAM READINESS BY ROLE (S3 only — confidence avg / importance avg):

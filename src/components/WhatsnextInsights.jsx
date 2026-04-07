@@ -419,10 +419,18 @@ export default function WhatsnextInsights({ transforms, vaultUnlocked }) {
           ? `\nLEADERSHIP VAULT: ${JSON.stringify({ byRole: t.byRole, byFunction: t.byFunction })}`
           : '';
 
+        // Top S3 supplemental tools for context
+        const topTools = (t.toolsS3 ?? []).slice(0, 6).map(tool => `${tool.label} (${tool.count})`).join(', ');
+
         const prompt = `You are a strategic advisor to the Baptist Health MarCom leadership team. Wave 3 AI adoption survey, n=101.
 
-STATS: ${intTransPct}% integration/transformation, 90% daily use, 69% positive sentiment, ${s3ConfHigh}% very/extremely confident (${s3ConfAny}% any confidence — ${s3ConfAny - s3ConfHigh}pt gap), ${impPct}% rate AI highly important, ${partner}% strategic thought partner, ${ownPocket}% pay out of pocket, ${tooManyPct}% too many tools barrier, ${timePct}% time barrier, ${transPct}% at transformation stage, 77% use unofficial tools.
-OPEN TEXT: aspiration-gap=${ag.pct ?? 0}% (n=${ag.count ?? 0}); leadership-voices=${lv.pct ?? 0}% (n=${lv.count ?? 0}); blocked-investors=${bi.pct ?? 0}% (n=${bi.count ?? 0}); tool-mindset: ${tm.claude?.count ?? 0} Claude vs ${tm.chatgpt?.count ?? 0} ChatGPT users.${vaultSection}
+STATS: ${intTransPct}% integration/transformation, 90% daily use, 69% positive sentiment, ${s3ConfHigh}% very/extremely confident (${s3ConfAny}% any confidence — ${s3ConfAny - s3ConfHigh}pt gap), ${impPct}% rate AI highly important, ${partner}% strategic thought partner, ${ownPocket}% pay out of pocket, ${tooManyPct}% too many tools barrier, ${timePct}% time barrier, ${transPct}% at transformation stage.
+OPEN TEXT: aspiration-gap=${ag.pct ?? 0}% (n=${ag.count ?? 0}); leadership-voices=${lv.pct ?? 0}% (n=${lv.count ?? 0}); blocked-investors=${bi.pct ?? 0}% (n=${bi.count ?? 0}); tool-mindset (from open-text language analysis, not the tools question): ${tm.claude?.count ?? 0} respondents write in Claude-style language vs ${tm.chatgpt?.count ?? 0} in ChatGPT-style language.${vaultSection}
+
+CRITICAL TOOL CONTEXT — READ CAREFULLY BEFORE WRITING ANYTHING ABOUT TOOLS:
+The official Baptist Health MarCom endorsed tools are: OpenAI ChatGPT (Enterprise), Microsoft Copilot, Adobe Firefly, and Jasper. Everyone on the team has access to these. The Survey 3 tools question specifically asked: "Besides the AI tools the company officially endorses (ChatGPT, Copilot, Adobe Firefly, etc.), what other AI tools do you use?" — so ChatGPT, Copilot, and Firefly DO NOT appear in the tool data below because they were intentionally excluded from the question. The 77% "unofficial tools" figure means 77% use ADDITIONAL tools ON TOP OF the official stack, not instead of it.
+TOP SUPPLEMENTAL TOOLS (beyond the official stack): ${topTools || 'Gemini (44), NotebookLM (43), Claude (27), Otter.ai (17), WISPR Flow (14), Perplexity (12)'}.
+When writing about tools: never imply the team doesn't use ChatGPT — they all have it. The insight is that staff are self-assembling personal stacks on top of the official tools because the official answer on what else to use is unclear.
 
 Return ONLY valid JSON (no markdown).
 
@@ -434,7 +442,7 @@ Each "action": 1 realistic, specific next step — something a marketing leader 
 
 SPECIAL INSTRUCTIONS:
 - rd-lane: Our team has builders already at transformation stage experimenting on their own. The action is giving them a monthly R&D budget (not quarterly — monthly) and permission to experiment with no defined outcome except "show us what you learned." No structured pilot, no deliverables, no timeline — just budget and air cover.
-- tool-stack: This recommendation goes to the AI Council, not just general leadership. The action is NOT "conduct an audit" — it's to ask the top 5 AI users what tools they're actually using and why, take that list to IT, and get clarity on what's winning in the wild before deciding what to standardize. Don't ask for permission to standardize yet — just get the intelligence first.
+- tool-stack: The team already has ChatGPT, Copilot, and Firefly as official tools. The question is what to do about the unofficial supplemental stack that 77% are building on their own (Gemini, NotebookLM, Claude, Otter.ai, etc.). This recommendation goes to the AI Council. The action is NOT "conduct an audit" — it's to ask the top 5 highest-confidence AI users what supplemental tools they're actually using daily and why, take that list to IT, and get clarity before deciding what to fund or standardize. Get the intelligence first, then decide.
 - access-integration: People aren't frustrated with AI — they're frustrated with the walls around it. The access problem is emotional, not just technical. Acknowledge that.
 - performance-narrative: The risk isn't that people aren't using AI. It's that "sport mode" is emerging — people feel pressure to perform AI use rather than actually benefit from it. That's what needs to be reset.
 
