@@ -304,6 +304,10 @@ function normalizeFunction(v) {
     'comms',
   ];
   if (noise.includes(v.toLowerCase())) return null;
+  // Merge Hospital / Hospital Care / Hospital Marketing variants
+  if (['hospital', 'hospital care', 'hospital marketing'].includes(v.toLowerCase())) {
+    return 'Hospital Marketing';
+  }
   return v;
 }
 
