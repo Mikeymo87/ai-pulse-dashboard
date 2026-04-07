@@ -1,21 +1,26 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Document, Paragraph, TextRun, Table, TableRow, TableCell,
+  Packer, HeadingLevel, AlignmentType, BorderStyle, WidthType,
+  ShadingType, convertInchesToTwip,
+} from 'docx';
 
 // ─── Prompt chips ─────────────────────────────────────────────────────────────
-const CHIPS = [
+const CHIPS_BASE = [
   "What's changed most since Survey 1?",
-  "Which team needs the most support?",
   "What's the biggest barrier to adoption?",
   "Who's paying out of pocket and why does it matter?",
   "How has confidence trended across surveys?",
   "What tools is the team actually using?",
 ];
+const CHIP_VAULT = "Which team needs the most support?";
 
-const FOLLOW_UP_CHIPS = [
+const FOLLOW_UP_CHIPS_BASE = [
   "Give me a deeper analysis on that",
   "What should leadership do with this?",
-  "Break that down by role or function",
 ];
+const FOLLOW_UP_CHIP_VAULT = "Break that down by role or function";
 
 // ─── Build system prompt from live transforms ────────────────────────────────
 function buildSystemPrompt(transforms, vaultUnlocked = false) {
@@ -163,7 +168,56 @@ BRIEF RULES:
 - eyebrow is a short ALL-CAPS category label (e.g. "BARRIERS", "MOMENTUM", "TOOLS")
 - bottomLine is the executive takeaway — plain language, no jargon
 - If a section has no table, omit the table key entirely
-- If a section has no bullets, omit the bullets key entirely`;
+- If a section has no bullets, omit the bullets key entirely
+
+---
+
+AGENT MODES — Based on what the user is asking, automatically adopt the writing mode that fits best. Do not announce the mode — just use it.
+
+ANALYST MODE — Use when the question is about themes, patterns, open text responses, struggles, excitement, what people said/wrote, or evidence from responses.
+Write like a research analyst presenting findings to leadership:
+- Group findings by theme; state theme name + count + % (e.g. "Time Pressure — 34 mentions, 34% of respondents")
+- Lead each theme with the number, then one sentence of interpretation
+- Use 2–3 verbatim-style evidence bullets per theme (describe the pattern if exact quotes not available)
+- Close major sections with "**What it means:** [plain English so-what]"
+- Tone: precise, unsparing, evidence-first. No cheerleading.
+
+ADOPTION ADVISOR MODE — Use when the question asks what to do, next steps, action plans, strategy, recommendations, or references the playbook or priorities.
+Write like a prescriptive consultant giving a roadmap:
+- Lead with the action (e.g. "Launch workflow pilots with the 90% who use AI daily")
+- Number every step; use concrete verbs: Launch, Assign, Create, Track, Pilot, Measure
+- Reference specific priorities (Priority 01 Workflow Pilots, Priority 02 Tool Stack, etc.) and playbook phases when relevant
+- Tie each recommendation to a specific data point
+- End with the leading indicator to watch
+- Tone: direct, executive-ready, roadmap energy. No hedging.
+
+BEHAVIORAL ANALYST MODE — Use when the question is about why people behave a certain way, resistance, psychology, motivation, fear, culture, or mindset.
+Write like an organizational psychologist:
+- Name the psychological dynamic first (e.g. "This is the competence-confidence ceiling — familiarity grew, but workflow behavior didn't follow")
+- Explain the underlying behavior pattern (adoption curve position, loss aversion, status quo bias, social proof dynamics)
+- Connect it to the specific data (cite numbers)
+- End with the change lever — what actually moves the needle behaviorally
+- Tone: clinical but accessible, names dynamics without jargon.
+
+DEFAULT MODE — For direct data lookups, trend comparisons, stat questions: concise, 2–4 sentences, cite numbers.
+
+---
+
+TABLE FORMAT — Whenever you have 3 or more rows of comparative data (barriers by survey, tools by count, archetypes by metric, role readiness, etc.), wrap it in TABLE tags so it renders inline with a download button:
+
+<TABLE>
+Optional Title Here
+Header1,Header2,Header3
+Row1Col1,Row1Col2,Row1Col3
+Row2Col1,Row2Col2,Row2Col3
+</TABLE>
+
+TABLE RULES:
+- If the first line has no commas, it is treated as the table title; headers start on the next line
+- Use commas ONLY as column delimiters; avoid commas inside cell values
+- Always use TABLE when comparing 3+ items side by side — never describe tabular data in plain text when a table works better
+- TABLE and BRIEF are mutually exclusive — TABLE for inline data views, BRIEF for full export documents
+- After a TABLE block, continue your response as normal markdown text outside the tags`;
 }
 
 // ─── Brief helpers ────────────────────────────────────────────────────────────
@@ -239,6 +293,7 @@ function generateBriefHTML(brief) {
     body { background: #fff; }
     .page { box-shadow: none; border-radius: 0; margin: 0; max-width: 100%; }
   }
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
 </style>
 </head>
 <body>
@@ -281,6 +336,388 @@ function downloadBrief(brief) {
   URL.revokeObjectURL(url);
 }
 
+function printBriefAsPDF(brief) {
+  const html = generateBriefHTML(brief);
+  // Inject auto-print trigger so the print dialog opens immediately
+  const printHTML = html.replace(
+    '</body>',
+    `<script>window.onload=function(){setTimeout(function(){window.print();},400);}<\/script></body>`
+  );
+  const w = window.open('', '_blank');
+  if (!w) return;
+  w.document.write(printHTML);
+  w.document.close();
+}
+
+async function downloadBriefAsWord(brief) {
+  const GREEN    = '2EA84A';
+  const MINT     = '7DE69B';
+  const DARK     = '1a1d1e';
+  const BLACK    = '25282A';
+  const BODY     = '444444';
+  const GRAY     = 'aab0b7';
+  const LT_GREEN = 'f0faf3';
+  const OFF_WHT  = 'f9fafb';
+
+  const NO = { style: BorderStyle.NONE, size: 0, color: 'ffffff' };
+  const noBorders = { top: NO, bottom: NO, left: NO, right: NO };
+  const rowSep    = { top: NO, bottom: { style: BorderStyle.SINGLE, size: 4, color: 'e8eaec' }, left: NO, right: NO };
+  const lastRow   = noBorders;
+
+  const pad = (v, h) => ({ top: v, bottom: v, left: h, right: h });
+
+  const children = [];
+
+  // ── Dark header block ────────────────────────────────────────────────────
+  const headerCellChildren = [
+    new Paragraph({
+      spacing: { before: 0, after: 120 },
+      children: [
+        new TextRun({ text: 'BH', color: 'ffffff', bold: true, size: 20, font: 'Arial',
+          shading: { type: ShadingType.SOLID, fill: GREEN, color: GREEN } }),
+        new TextRun({ text: '   ' + (brief.org ?? 'Baptist Health Marketing & Communications').toUpperCase(),
+          color: MINT, bold: true, size: 17, font: 'Arial' }),
+        new TextRun({ text: '     ', size: 17 }),
+        new TextRun({ text: (brief.type ?? 'Leadership Brief').toUpperCase(),
+          color: '555555', size: 17, font: 'Arial' }),
+      ],
+    }),
+    new Paragraph({
+      spacing: { before: 0, after: 80 },
+      children: [new TextRun({ text: brief.title ?? '', color: 'ffffff', bold: true, size: 52, font: 'Arial' })],
+    }),
+    ...(brief.subtitle ? [new Paragraph({
+      spacing: { before: 0, after: 80 },
+      children: [new TextRun({ text: brief.subtitle, color: MINT, size: 26, font: 'Arial' })],
+    })] : []),
+    new Paragraph({
+      spacing: { before: 0, after: 0 },
+      children: [new TextRun({ text: brief.date ?? '', color: GRAY, size: 20, font: 'Arial' })],
+    }),
+  ];
+
+  children.push(new Table({
+    width: { size: 100, type: WidthType.PERCENTAGE },
+    borders: noBorders,
+    rows: [new TableRow({
+      children: [new TableCell({
+        shading: { type: ShadingType.SOLID, fill: DARK, color: DARK },
+        borders: noBorders,
+        margins: pad(convertInchesToTwip(0.32), convertInchesToTwip(0.42)),
+        children: headerCellChildren,
+      })],
+    })],
+  }));
+
+  // Green gradient divider bar (simulated as thick border paragraph)
+  children.push(new Paragraph({
+    spacing: { before: 0, after: 280 },
+    border: { bottom: { style: BorderStyle.SINGLE, size: 18, color: GREEN } },
+    children: [new TextRun({ text: '', size: 4 })],
+  }));
+
+  // ── Sections ─────────────────────────────────────────────────────────────
+  for (let si = 0; si < (brief.sections ?? []).length; si++) {
+    const section = brief.sections[si];
+    const isLast  = si === brief.sections.length - 1;
+
+    if (section.eyebrow) {
+      children.push(new Paragraph({
+        spacing: { before: si === 0 ? 0 : 320, after: 80 },
+        children: [new TextRun({ text: section.eyebrow.toUpperCase(), color: GREEN, bold: true, size: 17, font: 'Arial' })],
+      }));
+    }
+
+    children.push(new Paragraph({
+      spacing: { before: section.eyebrow ? 0 : (si === 0 ? 0 : 320), after: 120 },
+      children: [new TextRun({ text: section.heading, color: BLACK, bold: true, size: 34, font: 'Arial' })],
+    }));
+
+    if (section.narrative) {
+      children.push(new Paragraph({
+        spacing: { after: 160 },
+        children: [new TextRun({ text: section.narrative, color: BODY, size: 22, font: 'Arial' })],
+      }));
+    }
+
+    // ── Data table ──
+    if (section.table) {
+      const nCols = section.table.headers.length;
+      const colPct = Math.floor(100 / nCols);
+
+      const tableRows = [
+        // Header row
+        new TableRow({
+          tableHeader: true,
+          children: section.table.headers.map(h => new TableCell({
+            shading: { type: ShadingType.SOLID, fill: DARK, color: DARK },
+            borders: noBorders,
+            margins: pad(convertInchesToTwip(0.08), convertInchesToTwip(0.14)),
+            width: { size: colPct, type: WidthType.PERCENTAGE },
+            children: [new Paragraph({
+              children: [new TextRun({ text: h.toUpperCase(), color: MINT, bold: true, size: 17, font: 'Arial' })],
+            })],
+          })),
+        }),
+        // Data rows
+        ...section.table.rows.map((row, i) => {
+          const isLastRow = i === section.table.rows.length - 1;
+          return new TableRow({
+            children: row.map((cell, j) => new TableCell({
+              shading: {
+                type: ShadingType.SOLID,
+                fill: i % 2 === 0 ? 'ffffff' : OFF_WHT,
+                color: i % 2 === 0 ? 'ffffff' : OFF_WHT,
+              },
+              borders: isLastRow ? lastRow : rowSep,
+              margins: pad(convertInchesToTwip(0.08), convertInchesToTwip(0.14)),
+              width: { size: colPct, type: WidthType.PERCENTAGE },
+              children: [new Paragraph({
+                children: [new TextRun({
+                  text: cell,
+                  color: j === row.length - 1 ? GREEN : (j === 0 ? BLACK : BODY),
+                  bold: j === row.length - 1,
+                  size: 20,
+                  font: 'Arial',
+                })],
+              })],
+            })),
+          });
+        }),
+      ];
+
+      children.push(new Table({
+        rows: tableRows,
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        borders: noBorders,
+      }));
+      children.push(new Paragraph({ spacing: { after: 160 }, children: [new TextRun({ text: '', size: 4 })] }));
+    }
+
+    // ── Bullets ──
+    for (const bullet of (section.bullets ?? [])) {
+      children.push(new Paragraph({
+        bullet: { level: 0 },
+        spacing: { after: 80 },
+        indent: { left: convertInchesToTwip(0.25), hanging: convertInchesToTwip(0.18) },
+        children: [new TextRun({ text: bullet, color: BODY, size: 21, font: 'Arial' })],
+      }));
+    }
+
+    // Section divider (not after last section)
+    if (!isLast) {
+      children.push(new Paragraph({
+        spacing: { before: 280, after: 0 },
+        border: { bottom: { style: BorderStyle.SINGLE, size: 4, color: 'e8eaec' } },
+        children: [new TextRun({ text: '', size: 4 })],
+      }));
+    }
+  }
+
+  // ── Bottom line callout box ───────────────────────────────────────────────
+  if (brief.bottomLine) {
+    children.push(new Paragraph({ spacing: { before: 280, after: 0 }, children: [new TextRun({ text: '', size: 4 })] }));
+    children.push(new Table({
+      width: { size: 100, type: WidthType.PERCENTAGE },
+      borders: noBorders,
+      rows: [new TableRow({
+        children: [new TableCell({
+          shading: { type: ShadingType.SOLID, fill: LT_GREEN, color: LT_GREEN },
+          borders: {
+            top:    { style: BorderStyle.SINGLE, size: 6,  color: GREEN },
+            bottom: { style: BorderStyle.SINGLE, size: 6,  color: GREEN },
+            left:   { style: BorderStyle.SINGLE, size: 24, color: GREEN },
+            right:  { style: BorderStyle.SINGLE, size: 6,  color: 'c8e8d0' },
+          },
+          margins: pad(convertInchesToTwip(0.18), convertInchesToTwip(0.22)),
+          children: [
+            new Paragraph({
+              spacing: { before: 0, after: 80 },
+              children: [new TextRun({ text: 'BOTTOM LINE', color: GREEN, bold: true, size: 17, font: 'Arial' })],
+            }),
+            new Paragraph({
+              spacing: { before: 0, after: 0 },
+              children: [new TextRun({ text: brief.bottomLine, color: BLACK, bold: true, size: 24, font: 'Arial' })],
+            }),
+          ],
+        })],
+      })],
+    }));
+  }
+
+  // ── Footnote ─────────────────────────────────────────────────────────────
+  if (brief.footnote) {
+    children.push(new Paragraph({
+      spacing: { before: 400, after: 0 },
+      alignment: AlignmentType.CENTER,
+      children: [new TextRun({ text: brief.footnote, color: GRAY, size: 17, font: 'Arial' })],
+    }));
+  }
+
+  const doc = new Document({
+    sections: [{
+      properties: {
+        page: {
+          margin: {
+            top:    convertInchesToTwip(0.9),
+            bottom: convertInchesToTwip(0.9),
+            left:   convertInchesToTwip(1.0),
+            right:  convertInchesToTwip(1.0),
+          },
+        },
+      },
+      children,
+    }],
+  });
+
+  const blob = await Packer.toBlob(doc);
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  const slug = (brief.title ?? 'brief').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+  a.href     = url;
+  a.download = `BH-AI-Pulse-${slug}.docx`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ─── Table helpers ────────────────────────────────────────────────────────────
+function parseTableContent(raw) {
+  const lines = raw.trim().split('\n').filter(l => l.trim());
+  if (lines.length < 2) return null;
+  let title = null;
+  let startIdx = 0;
+  if (!lines[0].includes(',')) {
+    title = lines[0];
+    startIdx = 1;
+  }
+  if (lines.length <= startIdx) return null;
+  const headers = lines[startIdx].split(',').map(h => h.trim());
+  const rows = lines.slice(startIdx + 1).map(l => l.split(',').map(c => c.trim()));
+  return { title, headers, rows };
+}
+
+function downloadCSV(tableData) {
+  const lines = [tableData.headers.join(','), ...tableData.rows.map(r => r.join(','))];
+  const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const slug = (tableData.title ?? 'data').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+  a.href = url;
+  a.download = `BH-AI-Pulse-${slug}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function TableCard({ raw }) {
+  const data = parseTableContent(raw);
+  if (!data) return null;
+  const { title, headers, rows } = data;
+  return (
+    <div style={{
+      background: 'var(--card-bg)',
+      border: '1px solid rgba(125,230,155,0.2)',
+      borderRadius: 12,
+      overflow: 'hidden',
+      fontFamily: 'DM Sans, sans-serif',
+      margin: '4px 0',
+    }}>
+      {title && (
+        <div style={{ padding: '10px 14px 8px', borderBottom: '1px solid rgba(125,230,155,0.1)' }}>
+          <p style={{ margin: 0, fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>{title}</p>
+        </div>
+      )}
+      <div style={{ overflowX: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+          <thead>
+            <tr style={{ background: 'rgba(125,230,155,0.08)' }}>
+              {headers.map((h, i) => (
+                <th key={i} style={{
+                  padding: '7px 12px',
+                  textAlign: i === 0 ? 'left' : 'center',
+                  fontSize: 10,
+                  fontWeight: 800,
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
+                  color: 'var(--accent-mint)',
+                  whiteSpace: 'nowrap',
+                  borderBottom: '1px solid rgba(125,230,155,0.15)',
+                }}>
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row, i) => (
+              <tr key={i} style={{ background: i % 2 === 0 ? 'transparent' : 'rgba(125,230,155,0.03)' }}>
+                {row.map((cell, j) => (
+                  <td key={j} style={{
+                    padding: '7px 12px',
+                    textAlign: j === 0 ? 'left' : 'center',
+                    color: j === 0 ? 'var(--text-medium)' : 'var(--text-primary)',
+                    fontWeight: j === row.length - 1 ? 700 : 400,
+                    borderBottom: i < rows.length - 1 ? '1px solid rgba(125,230,155,0.07)' : 'none',
+                    whiteSpace: 'nowrap',
+                  }}>
+                    {cell}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div style={{ padding: '8px 12px', borderTop: '1px solid rgba(125,230,155,0.08)' }}>
+        <button
+          onClick={() => downloadCSV(data)}
+          style={{
+            background: 'transparent',
+            border: '1px solid rgba(125,230,155,0.25)',
+            borderRadius: 7,
+            padding: '4px 10px',
+            cursor: 'pointer',
+            color: 'var(--accent-mint)',
+            fontFamily: 'DM Sans, sans-serif',
+            fontSize: 11,
+            fontWeight: 600,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 5,
+          }}
+          onMouseEnter={e => e.currentTarget.style.background = 'rgba(125,230,155,0.08)'}
+          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+        >
+          ↓ CSV
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// Split a message that may contain <TABLE> blocks into ordered content blocks
+function parseContentBlocks(content) {
+  const blocks = [];
+  const regex = /<TABLE>([\s\S]*?)<\/TABLE>/g;
+  let lastIndex = 0;
+  let match;
+  while ((match = regex.exec(content)) !== null) {
+    if (match.index > lastIndex) {
+      blocks.push({ type: 'text', content: content.slice(lastIndex, match.index) });
+    }
+    blocks.push({ type: 'table', content: match[1].trim() });
+    lastIndex = match.index + match[0].length;
+  }
+  if (lastIndex < content.length) {
+    const remaining = content.slice(lastIndex);
+    if (remaining.trim()) blocks.push({ type: 'text', content: remaining });
+  }
+  return blocks;
+}
+
 // ─── Brief card (rendered in chat when Claude returns a <BRIEF>) ──────────────
 function BriefCard({ brief }) {
   return (
@@ -310,7 +747,7 @@ function BriefCard({ brief }) {
             {s.table && (
               <div style={{ marginBottom: 6 }}>
                 {s.table.rows.slice(0, 3).map((row, j) => (
-                  <div key={j} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--text-muted)', padding: '3px 0', borderBottom: j < 2 ? '1px solid var(--border)' : 'none' }}>
+                  <div key={j} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--text-medium)', padding: '3px 0', borderBottom: j < 2 ? '1px solid var(--border)' : 'none' }}>
                     <span>{row[0]}</span>
                     <span style={{ fontWeight: 700, color: '#2EA84A' }}>{row[1]}</span>
                   </div>
@@ -319,7 +756,7 @@ function BriefCard({ brief }) {
               </div>
             )}
             {(s.bullets ?? []).slice(0, 2).map((b, j) => (
-              <p key={j} style={{ margin: '3px 0', fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.5 }}>› {b}</p>
+              <p key={j} style={{ margin: '3px 0', fontSize: 11, color: 'var(--text-medium)', lineHeight: 1.5 }}>› {b}</p>
             ))}
           </div>
         ))}
@@ -331,43 +768,71 @@ function BriefCard({ brief }) {
         )}
       </div>
 
-      {/* Download button */}
-      <div style={{ padding: '0 18px 16px', display: 'flex', gap: 8 }}>
+      {/* Download buttons */}
+      <div style={{ padding: '0 18px 16px', display: 'flex', gap: 7 }}>
         <button
-          onClick={() => downloadBrief(brief)}
+          onClick={() => printBriefAsPDF(brief)}
           style={{
             flex: 1,
             background: 'rgba(46,168,74,0.9)',
             border: 'none',
             borderRadius: 9,
-            padding: '9px 14px',
+            padding: '9px 10px',
             cursor: 'pointer',
             color: '#fff',
             fontFamily: 'DM Sans, sans-serif',
             fontSize: 12,
             fontWeight: 700,
-            letterSpacing: '0.04em',
+            letterSpacing: '0.03em',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: 7,
+            gap: 5,
           }}
+          onMouseEnter={e => e.currentTarget.style.background = 'rgba(46,168,74,1)'}
+          onMouseLeave={e => e.currentTarget.style.background = 'rgba(46,168,74,0.9)'}
         >
-          ↓ Download Brief
+          ↓ PDF
         </button>
         <button
-          onClick={() => { const w = window.open('', '_blank'); w.document.write(generateBriefHTML(brief)); w.document.close(); }}
+          onClick={() => downloadBriefAsWord(brief).catch(console.error)}
           style={{
-            background: 'rgba(125,230,155,0.1)',
-            border: '1px solid rgba(125,230,155,0.25)',
+            flex: 1,
+            background: 'rgba(89,190,201,0.12)',
+            border: '1px solid rgba(89,190,201,0.35)',
             borderRadius: 9,
-            padding: '9px 14px',
+            padding: '9px 10px',
+            cursor: 'pointer',
+            color: '#59BEC9',
+            fontFamily: 'DM Sans, sans-serif',
+            fontSize: 12,
+            fontWeight: 700,
+            letterSpacing: '0.03em',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 5,
+          }}
+          onMouseEnter={e => e.currentTarget.style.background = 'rgba(89,190,201,0.22)'}
+          onMouseLeave={e => e.currentTarget.style.background = 'rgba(89,190,201,0.12)'}
+        >
+          ↓ Word
+        </button>
+        <button
+          onClick={() => { const w = window.open('', '_blank'); if (!w) return; w.document.write(generateBriefHTML(brief)); w.document.close(); }}
+          style={{
+            background: 'rgba(125,230,155,0.07)',
+            border: '1px solid rgba(125,230,155,0.2)',
+            borderRadius: 9,
+            padding: '9px 11px',
             cursor: 'pointer',
             color: 'var(--accent-mint)',
             fontFamily: 'DM Sans, sans-serif',
             fontSize: 12,
             fontWeight: 600,
           }}
+          onMouseEnter={e => e.currentTarget.style.background = 'rgba(125,230,155,0.14)'}
+          onMouseLeave={e => e.currentTarget.style.background = 'rgba(125,230,155,0.07)'}
         >
           Preview
         </button>
@@ -385,7 +850,7 @@ function inlineFormat(text, key) {
         if (part.startsWith('**') && part.endsWith('**'))
           return <strong key={i} style={{ color: 'var(--text-primary)', fontWeight: 700 }}>{part.slice(2, -2)}</strong>;
         if (part.startsWith('*') && part.endsWith('*'))
-          return <em key={i} style={{ color: '#c8e0d0' }}>{part.slice(1, -1)}</em>;
+          return <em key={i} style={{ color: 'var(--text-medium)', opacity: 0.8 }}>{part.slice(1, -1)}</em>;
         if (part.startsWith('`') && part.endsWith('`'))
           return <code key={i} style={{ background: 'rgba(125,230,155,0.1)', borderRadius: 4, padding: '1px 5px', fontSize: 11, color: 'var(--accent-mint)', fontFamily: 'monospace' }}>{part.slice(1, -1)}</code>;
         return part;
@@ -426,7 +891,7 @@ function renderMarkdown(text) {
       elements.push(
         <ul key={`ul-${i}`} style={{ margin: '6px 0', paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 4 }}>
           {items.map((item, j) => (
-            <li key={j} style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.55, listStyleType: 'none', display: 'flex', gap: 8 }}>
+            <li key={j} style={{ fontSize: 13, color: 'var(--text-medium)', lineHeight: 1.55, listStyleType: 'none', display: 'flex', gap: 8 }}>
               <span style={{ color: 'var(--accent-mint)', flexShrink: 0, marginTop: 1 }}>›</span>
               <span>{inlineFormat(item, j)}</span>
             </li>
@@ -447,7 +912,7 @@ function renderMarkdown(text) {
       elements.push(
         <ol key={`ol-${i}`} style={{ margin: '6px 0', paddingLeft: 0, display: 'flex', flexDirection: 'column', gap: 4, listStyle: 'none' }}>
           {items.map((item, j) => (
-            <li key={j} style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.55, display: 'flex', gap: 8 }}>
+            <li key={j} style={{ fontSize: 13, color: 'var(--text-medium)', lineHeight: 1.55, display: 'flex', gap: 8 }}>
               <span style={{ color: 'var(--accent-mint)', fontWeight: 700, flexShrink: 0, minWidth: 16 }}>{j + 1}.</span>
               <span>{inlineFormat(item, j)}</span>
             </li>
@@ -459,7 +924,7 @@ function renderMarkdown(text) {
 
     // Regular paragraph
     elements.push(
-      <p key={i} style={{ margin: '0 0 6px', fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6 }}>
+      <p key={i} style={{ margin: '0 0 6px', fontSize: 13, color: 'var(--text-medium)', lineHeight: 1.6 }}>
         {inlineFormat(line, 0)}
       </p>
     );
@@ -489,7 +954,7 @@ function TypingIndicator() {
 function Message({ msg }) {
   const isUser = msg.role === 'user';
 
-  // Brief detection — if assistant message contains <BRIEF> JSON, render BriefCard
+  // Brief detection — full message is a BRIEF, render BriefCard
   if (!isUser) {
     const brief = parseBrief(msg.content);
     if (brief) {
@@ -506,6 +971,10 @@ function Message({ msg }) {
     }
   }
 
+  // For assistant messages, split into text/table blocks
+  const blocks = !isUser ? parseContentBlocks(msg.content) : null;
+  const hasTables = blocks && blocks.some(b => b.type === 'table');
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -517,19 +986,50 @@ function Message({ msg }) {
         marginBottom: 10,
       }}
     >
-      <div style={{
-        maxWidth: '86%',
-        padding: '10px 14px',
-        borderRadius: isUser ? '14px 14px 4px 14px' : '14px 14px 14px 4px',
-        background: isUser ? 'rgba(125,230,155,0.18)' : 'var(--card-bg)',
-        border: isUser ? '1px solid rgba(125,230,155,0.3)' : '1px solid var(--border)',
-        fontFamily: 'DM Sans, sans-serif',
-      }}>
-        {isUser
-          ? <p style={{ margin: 0, fontSize: 13, lineHeight: 1.55, color: 'var(--text-primary)' }}>{msg.content}</p>
-          : renderMarkdown(msg.content)
-        }
-      </div>
+      {isUser ? (
+        <div style={{
+          maxWidth: '86%',
+          padding: '10px 14px',
+          borderRadius: '14px 14px 4px 14px',
+          background: 'rgba(125,230,155,0.18)',
+          border: '1px solid rgba(125,230,155,0.3)',
+          fontFamily: 'DM Sans, sans-serif',
+        }}>
+          <p style={{ margin: 0, fontSize: 13, lineHeight: 1.55, color: 'var(--text-primary)' }}>{msg.content}</p>
+        </div>
+      ) : hasTables ? (
+        // Mixed content — render each block in order, full width
+        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {blocks.map((block, i) => block.type === 'table'
+            ? <TableCard key={i} raw={block.content} />
+            : block.content.trim()
+              ? (
+                <div key={i} style={{
+                  maxWidth: '86%',
+                  padding: '10px 14px',
+                  borderRadius: '14px 14px 14px 4px',
+                  background: 'var(--surface-green)',
+                  border: '1px solid var(--border)',
+                  fontFamily: 'DM Sans, sans-serif',
+                }}>
+                  {renderMarkdown(block.content)}
+                </div>
+              )
+              : null
+          )}
+        </div>
+      ) : (
+        <div style={{
+          maxWidth: '86%',
+          padding: '10px 14px',
+          borderRadius: '14px 14px 14px 4px',
+          background: 'var(--surface-green)',
+          border: '1px solid var(--border)',
+          fontFamily: 'DM Sans, sans-serif',
+        }}>
+          {renderMarkdown(msg.content)}
+        </div>
+      )}
     </motion.div>
   );
 }
@@ -551,6 +1051,22 @@ export default function ChatPanel({ transforms, open, setOpen, vaultUnlocked = f
   useEffect(() => {
     if (open) setTimeout(() => inputRef.current?.focus(), 300);
   }, [open]);
+
+  // Stable ref to always-current sendMessage (avoids stale closure in event listener)
+  const sendMessageRef = useRef(null);
+
+  // Listen for card-chat events fired by priority/playbook cards
+  // Registers once; uses ref so it always calls the latest sendMessage
+  useEffect(() => {
+    function handleCardChat(e) {
+      const { contextMessage } = e.detail ?? {};
+      if (!contextMessage) return;
+      setOpen(true);
+      setTimeout(() => sendMessageRef.current?.(contextMessage), 250);
+    }
+    document.addEventListener('card-chat', handleCardChat);
+    return () => document.removeEventListener('card-chat', handleCardChat);
+  }, [setOpen]);
 
   async function sendMessage(text) {
     const userText = text.trim();
@@ -592,6 +1108,9 @@ export default function ChatPanel({ transforms, open, setOpen, vaultUnlocked = f
       setThinking(false);
     }
   }
+
+  // Keep ref current so the card-chat event listener always calls the latest sendMessage
+  sendMessageRef.current = sendMessage;
 
   function handleKeyDown(e) {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -703,7 +1222,7 @@ export default function ChatPanel({ transforms, open, setOpen, vaultUnlocked = f
                     Try asking…
                   </p>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-                    {CHIPS.map(chip => (
+                    {[...CHIPS_BASE, ...(vaultUnlocked ? [CHIP_VAULT] : [])].map(chip => (
                       <button
                         key={chip}
                         onClick={() => sendMessage(chip)}
@@ -716,7 +1235,7 @@ export default function ChatPanel({ transforms, open, setOpen, vaultUnlocked = f
                           cursor: 'pointer',
                           fontFamily: 'DM Sans, sans-serif',
                           fontSize: 12,
-                          color: 'var(--text-bridge)',
+                          color: 'var(--text-medium)',
                           transition: 'background 0.15s',
                         }}
                         onMouseEnter={e => e.currentTarget.style.background = 'rgba(125,230,155,0.13)'}
@@ -744,7 +1263,7 @@ export default function ChatPanel({ transforms, open, setOpen, vaultUnlocked = f
                         Want to go deeper?
                       </span>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                        {FOLLOW_UP_CHIPS.map(chip => (
+                        {[...FOLLOW_UP_CHIPS_BASE, ...(vaultUnlocked ? [FOLLOW_UP_CHIP_VAULT] : [])].map(chip => (
                           <button
                             key={chip}
                             onClick={() => sendMessage(chip)}

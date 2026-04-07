@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { CardChatButton } from './CardChat';
 import { useIsMobile } from '../hooks/useIsMobile';
 import {
   Users, Heart, Compass, Shield,
@@ -559,6 +560,28 @@ function PrincipleAccordion({ card, globalIndex, isOpen, onToggle, isMobile }) {
                 </div>
               </div>
 
+            </div>
+
+            {/* Ask AI about this principle */}
+            <div style={{ padding: '0 22px 22px' }}>
+              <CardChatButton
+                color={card.accentColor}
+                label="ASK AI ABOUT THIS PRINCIPLE"
+                contextMessage={`I'm looking at playbook principle **#${card.number} — ${card.title}** from the Baptist Health MarCom AI adoption playbook.
+
+One-liner: ${card.oneLiner}
+
+How MarCom did it: ${card.narrative}
+
+Key stat: ${card.stat} — ${card.statLabel} (${card.statSub})
+
+Actions for my department:
+${card.actions.map((a, i) => `${i + 1}. ${a}`).join('\n')}
+
+Common mistake to avoid: ${card.mistake}
+
+I want to think through how to apply this principle in my own department. What questions should I be asking? What does success look like at 90 days? And what's the most common way teams get this wrong?`}
+              />
             </div>
           </motion.div>
         )}
