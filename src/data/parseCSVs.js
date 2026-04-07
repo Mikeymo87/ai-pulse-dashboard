@@ -235,10 +235,24 @@ function normalizeBarriers(v) {
 // Fix known tool name typos/variants so counts consolidate correctly
 function normalizeTool(t) {
   t = t.trim();
+  if (!t) return null;
+  // Filter out non-tool strings (sentence fragments, "None" variants, filler)
+  const lower = t.toLowerCase();
+  if (lower.startsWith('none')) return null;
+  if (lower.startsWith('and ')) return null;
+  if (lower.startsWith('suite of')) return null;
+  if (lower.startsWith('nano banana')) return null;
+  if (t.length > 50) return null; // too long to be a tool name
+  // Normalize variants
   if (t === 'Claud (Anthropic)') return 'Claude (Anthropic)';
   if (t === 'NotebookLM.Google' || t === 'Notebook LM') return 'NotebookLM';
   if (t === 'google AI studio') return 'Google AI Studio';
   if (t === 'Answer The Public' || t === 'AnswerThePublic') return 'AnswerThePublic';
+  if (t === 'CODEX') return 'Codex';
+  if (t === 'Genny Lovo AI' || t === 'Genny LOVO') return 'Genny (LOVO)';
+  if (t === 'Eleven Labs' || t === 'ElevenLabs') return 'ElevenLabs';
+  if (t === 'N8N') return 'n8n';
+  if (t === 'Perplexity AI') return 'Perplexity';
   return t;
 }
 
@@ -297,7 +311,7 @@ function normalizeFunction(v) {
 // S1: local CSV — the Google Sheet has extra rows not in the original 97-response export.
 //     Keep as local file to preserve the verified 97-response dataset.
 // S2: live Google Sheet — 106 responses, matches verified count.
-// S3: live Google Sheet — auto-updates as new responses come in; no file management needed.
+// S3: live Google Sheet — survey closed April 2026; data is final (101 responses).
 
 const DATA_SOURCES = {
   s1: '/data/survey1.csv',

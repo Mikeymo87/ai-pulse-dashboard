@@ -121,25 +121,29 @@ export default function ParticipationStory({ transforms }) {
         transition={{ duration: 0.5 }}
         style={{ maxWidth: 640, marginBottom: 52 }}
       >
-        <span style={{
+        <div style={{
           display: 'inline-block',
-          fontFamily: FONT,
-          fontSize: 10.5,
-          fontWeight: 800,
+          padding: '4px 12px',
+          borderRadius: 20,
+          background: 'var(--accent-mint-bg)',
+          border: '1px solid rgba(125,230,155,0.25)',
           color: 'var(--accent-mint)',
+          fontSize: 11,
+          fontWeight: 700,
+          letterSpacing: '0.1em',
           textTransform: 'uppercase',
-          letterSpacing: '0.12em',
-          marginBottom: 12,
+          marginBottom: 16,
+          fontFamily: 'DM Sans, sans-serif',
         }}>
           Participation Story
-        </span>
+        </div>
         <h2 style={{
-          fontFamily: "'Plus Jakarta Sans', sans-serif",
-          fontSize: 'clamp(26px, 3.5vw, 38px)',
-          fontWeight: 800,
+          fontFamily: 'DM Sans, sans-serif',
+          fontSize: 'clamp(28px, 4vw, 40px)',
+          fontWeight: 900,
           color: 'var(--text-primary)',
-          lineHeight: 1.2,
-          margin: '0 0 14px',
+          lineHeight: 1.15,
+          margin: '0 0 12px',
           letterSpacing: '-0.02em',
         }}>
           Most organizations can't get half their team to respond to a single survey.
@@ -147,9 +151,10 @@ export default function ParticipationStory({ transforms }) {
         <p style={{
           fontFamily: FONT,
           fontSize: 15,
-          lineHeight: 1.75,
+          lineHeight: 1.7,
           color: 'var(--text-support)',
           margin: 0,
+          maxWidth: 520,
         }}>
           Yours has shown up three times — over 14 months. Each dot below is a person.
           Not a data point. A person who made time, answered honestly, and did it again.

@@ -216,26 +216,35 @@ export default function TrendCharts({ transforms }) {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.5 }}
-        style={{ marginBottom: 56, textAlign: 'center' }}
+        style={{ marginBottom: 56 }}
       >
-        <p style={{
-          color: 'var(--accent-mint)', fontSize: 11, fontWeight: 700,
-          letterSpacing: '0.13em', textTransform: 'uppercase',
-          marginBottom: 12, fontFamily: 'DM Sans, sans-serif',
+        <div style={{
+          display: 'inline-block',
+          padding: '4px 12px',
+          borderRadius: 20,
+          background: 'var(--accent-mint-bg)',
+          border: '1px solid rgba(125,230,155,0.25)',
+          color: 'var(--accent-mint)',
+          fontSize: 11,
+          fontWeight: 700,
+          letterSpacing: '0.1em',
+          textTransform: 'uppercase',
+          marginBottom: 16,
+          fontFamily: 'DM Sans, sans-serif',
         }}>
           14-Month Trend
-        </p>
+        </div>
         <h2 style={{
-          color: 'var(--text-primary)', fontSize: 'clamp(30px, 4vw, 44px)',
-          fontWeight: 800, margin: '0 0 16px', fontFamily: "'Plus Jakarta Sans', sans-serif",
-          lineHeight: 1.1, letterSpacing: '-0.025em',
+          color: 'var(--text-primary)', fontSize: 'clamp(28px, 4vw, 40px)',
+          fontWeight: 900, margin: '0 0 12px', fontFamily: 'DM Sans, sans-serif',
+          lineHeight: 1.15, letterSpacing: '-0.02em',
         }}>
           The Numbers Tell the Story
         </h2>
         <p style={{
-          margin: 0, fontSize: 16, color: 'var(--text-support)',
-          lineHeight: 1.65, fontFamily: 'DM Sans, sans-serif',
-          maxWidth: 540, marginInline: 'auto',
+          margin: 0, fontSize: 15, color: 'var(--text-support)',
+          lineHeight: 1.7, fontFamily: 'DM Sans, sans-serif',
+          maxWidth: 520,
         }}>
           Four key adoption metrics — plus the single number that changes every conversation.
         </p>
@@ -372,6 +381,44 @@ export default function TrendCharts({ transforms }) {
 
       {/* ── Adoption Bell Curve (S1 → S2 → S3, shifting left) ───────────── */}
       <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5 }}
+        style={{ marginTop: 40, marginBottom: 8 }}
+      >
+        <div style={{
+          display: 'inline-block',
+          padding: '4px 12px',
+          borderRadius: 20,
+          background: 'var(--accent-mint-bg)',
+          border: '1px solid rgba(125,230,155,0.25)',
+          color: 'var(--accent-mint)',
+          fontSize: 11,
+          fontWeight: 700,
+          letterSpacing: '0.1em',
+          textTransform: 'uppercase',
+          marginBottom: 16,
+          fontFamily: 'DM Sans, sans-serif',
+        }}>
+          The Technology Adoption Curve
+        </div>
+        <h2 style={{
+          color: 'var(--text-primary)', fontSize: 'clamp(28px, 4vw, 40px)',
+          fontWeight: 900, margin: '0 0 12px', fontFamily: 'DM Sans, sans-serif',
+          lineHeight: 1.15, letterSpacing: '-0.02em',
+        }}>
+          We're Beating the Curve
+        </h2>
+        <p style={{
+          margin: 0, fontSize: 15, color: 'var(--text-support)',
+          lineHeight: 1.7, fontFamily: 'DM Sans, sans-serif',
+          maxWidth: 560,
+        }}>
+          Baptist Health MarCom's AI adoption is shifting left — more of the team is now in the Innovator and Pragmatist segments than at any prior point. Select a survey wave to see the curve move.
+        </p>
+      </motion.div>
+      <motion.div
         initial={{ opacity: 0, y: 28 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
@@ -380,7 +427,7 @@ export default function TrendCharts({ transforms }) {
           background: 'var(--surface-green)',
           border: '1px solid rgba(125,230,155,0.15)',
           borderRadius: 16,
-          padding: isMobile ? '20px 16px 16px' : '28px 32px 24px',
+          padding: isMobile ? '20px 16px 16px' : '24px 32px 20px',
           marginTop: 20,
         }}
       >

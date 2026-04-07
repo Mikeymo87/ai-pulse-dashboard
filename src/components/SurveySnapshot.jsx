@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { ChevronDown, ChevronUp, FileText } from './Icons';
 import {
   PieChart, Pie, Cell, Tooltip as ReTooltip,
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer,
 } from 'recharts';
 import { useTheme } from '../hooks/useTheme';
 
@@ -25,48 +24,176 @@ function rampColor(index, total) {
   return RAMP[i];
 }
 
-// ─── Survey instrument metadata ──────────────────────────────────────────────
+// ─── Survey instrument metadata — sourced from actual Google Form PDFs ───────
 const SURVEY_META = {
   s1: {
     label: 'Survey 1', period: 'January – February 2025',
     questions: [
-      { id: 'sentiment',   text: 'How do you feel about AI in your work right now?',                                 options: ['Positive', 'Mixed', 'Unsure', 'Negative'] },
-      { id: 'familiarity', text: 'How familiar are you with AI tools and capabilities? (1 = Unfamiliar → 5 = Expert)', options: ['1 – Unfamiliar', '2 – Heard of it', '3 – Know a bit', '4 – Experimented', '5 – Expert'] },
-      { id: 'confidence',  text: 'How confident are you using AI in your daily work?',                               options: ['Not confident at all', 'Somewhat confident', 'Confident', 'Very Confident'] },
-      { id: 'importance',  text: 'How important is AI to your current role? (1 = Not at all → 5 = Essential)',       options: ['1', '2', '3', '4', '5'] },
-      { id: 'frequency',   text: 'How often do you use AI tools?',                                                   options: ['Daily', 'Weekly', 'Monthly', 'Rarely', 'Never'] },
-      { id: 'barriers',    text: 'What are the biggest barriers preventing you from using AI more?',                 options: ['select all that apply'] },
-      { id: 'openEnded',   text: 'How do you see AI changing your work / what are you already using it for?',        options: ['open text'] },
+      {
+        id: 'sentiment',
+        text: 'How would you describe your current feelings about Artificial Intelligence (AI)?',
+        options: ['Positive', 'Negative', 'I have both positive and negative feelings about AI', "I'm not sure how I feel about it"],
+      },
+      {
+        id: 'familiarity',
+        text: 'How would you best describe your familiarity with AI tools and their applications in marketing & communications?',
+        options: ["I'm unfamiliar with AI and its applications in this space", "I've heard of them but don't know much", "I know a bit about them but haven't used them", 'I understand AI tools well and have experimented with them', 'I am highly knowledgeable and use AI regularly'],
+      },
+      {
+        id: 'frequency',
+        text: 'How often do you currently use AI tools (e.g., ChatGPT, Grammarly, Microsoft Copilot) in your work? Choose the option that most closely reflects your usage.',
+        options: ['Daily', 'At least once per week', 'At least once per month', 'Rarely (Less than once per month)', 'Never'],
+      },
+      {
+        id: 'barriers',
+        text: 'What do you think are the biggest barriers to using AI effectively in your role? (Select up to 2 options)',
+        options: ['select all that apply'],
+      },
+      {
+        id: 'importance',
+        text: 'How important is AI to the success of your individual or team work over the next 12 months?',
+        options: ['1 – Not important at all', '2', '3', '4', '5 – Critically important'],
+      },
+      {
+        id: 'confidence',
+        text: 'How confident are you today in your ability to use AI tools effectively in your role?',
+        options: ['Not confident at all', 'Somewhat confident', 'Confident', 'Very Confident'],
+      },
+      {
+        id: 'openEnded',
+        text: 'How do you see AI tools changing the way you work in the future? If you already use AI, what specific tasks or processes do you currently use it for?',
+        options: ['open text'],
+      },
     ],
   },
   s2: {
     label: 'Survey 2', period: 'August – September 2025',
     questions: [
-      { id: 'sentiment',   text: 'How do you feel about AI in your work right now?',                                 options: ['Positive', 'Mixed', 'Unsure', 'Negative'] },
-      { id: 'familiarity', text: 'How familiar are you with AI tools and capabilities? (1 = Unfamiliar → 5 = Expert)', options: ['1 – Unfamiliar', '2 – Heard of it', '3 – Know a bit', '4 – Experimented', '5 – Expert'] },
-      { id: 'confidence',  text: 'How confident are you using AI in your daily work?',                               options: ['Somewhat confident', 'Confident', 'Very Confident'] },
-      { id: 'importance',  text: 'How important is AI to your current role? (1 = Not at all → 5 = Essential)',       options: ['1', '2', '3', '4', '5'] },
-      { id: 'frequency',   text: 'How often do you use AI tools?',                                                   options: ['Daily', 'Weekly', 'Monthly', 'Rarely', 'Never'] },
-      { id: 'stage',       text: 'Where are you on your personal AI adoption journey?',                              options: ['Curiosity', 'Understanding', 'Experimentation', 'Integration', 'Transformation'] },
-      { id: 'barriers',    text: 'What are the biggest barriers preventing you from using AI more?',                 options: ['select all that apply'] },
-      { id: 'tools',       text: 'Which AI tools have you used in the past 30 days?',                               options: ['select all that apply'] },
-      { id: 'openEnded',   text: 'What are you currently using AI for in your work?',                               options: ['open text'] },
+      {
+        id: 'sentiment',
+        text: 'How would you describe your current feelings about Artificial Intelligence (AI)?',
+        options: ['Positive', 'Negative', 'I have both positive and negative feelings about AI', "I'm not sure how I feel about it"],
+      },
+      {
+        id: 'stage',
+        text: 'Which stage best describes your current progress on the AI journey?',
+        options: ['Currently – exploring AI, haven\'t developed much literacy yet', 'Understanding – learning the fundamentals, seeing relevance to my work', 'Experimentation – actively trying AI tools to improve efficiency or creativity', 'Integration – embedding AI into my workflows and processes', 'Transformation – reimagining how I work, AI as a core thought partner'],
+      },
+      {
+        id: 'familiarity',
+        text: 'How would you best describe your familiarity with AI tools and their applications in marketing & communications?',
+        options: ["I'm unfamiliar with AI and its applications in this space", "I've heard of them but don't know much", "I know a bit about them but haven't used them", 'I understand AI tools well and have experimented with them', 'I am highly knowledgeable and use AI regularly'],
+      },
+      {
+        id: 'frequency',
+        text: 'How often do you currently use AI tools (e.g., ChatGPT, Grammarly, Microsoft Copilot) in your work? Choose the option that most closely reflects your usage.',
+        options: ['Daily', 'At least once per week', 'At least once per month', 'Rarely (Less than once per month)', 'Never'],
+      },
+      {
+        id: 'tools',
+        text: 'Which AI tools do you currently use in your work? (Select all that apply)',
+        options: ['Adobe Firefly', 'ChatGPT (OpenAI)', 'Claude (Anthropic)', 'Copilot (Microsoft)', 'Descript', 'Gamma', 'Gemini (Google)', 'Grammarly', 'Grok (xAI)', 'Jasper', 'Perplexity AI', 'Other'],
+      },
+      {
+        id: 'barriers',
+        text: 'What do you think are the biggest barriers to using AI effectively in your role? (Select up to 2 options)',
+        options: ['select all that apply'],
+      },
+      {
+        id: 'importance',
+        text: 'How important is AI to the success of your individual or team work over the next 12 months?',
+        options: ['1 – Not important at all', '2', '3', '4', '5 – Critically important'],
+      },
+      {
+        id: 'confidence',
+        text: 'How confident are you today in your ability to use AI tools effectively in your role?',
+        options: ['Not confident at all', 'Somewhat confident', 'Confident', 'Very Confident'],
+      },
+      {
+        id: 'openEnded',
+        text: 'How do you see AI tools changing the way you work in the future? If you already use AI, what specific tasks or processes do you currently use it for?',
+        options: ['open text'],
+      },
     ],
   },
   s3: {
     label: 'Survey 3', period: 'March 2026',
     questions: [
-      { id: 'sentiment',   text: 'How do you feel about AI in your work right now?',                                 options: ['Positive', 'Mixed', 'Unsure', 'Negative'] },
-      { id: 'familiarity', text: 'How familiar are you with AI tools and capabilities? (1 = Unfamiliar → 5 = Expert)', options: ['1 – Unfamiliar', '2 – Heard of it', '3 – Know a bit', '4 – Experimented', '5 – Expert'] },
-      { id: 'confidence',  text: 'How confident are you using AI in your daily work?',                               options: ['Somewhat confident', 'Confident', 'Very Confident', 'Extremely Confident'] },
-      { id: 'importance',  text: 'How important is AI to your current role? (1 = Not at all → 5 = Essential)',       options: ['1', '2', '3', '4', '5'] },
-      { id: 'frequency',   text: 'How often do you use AI tools?',                                                   options: ['Daily', 'Weekly', 'Monthly', 'Rarely', 'Never'] },
-      { id: 'stage',       text: 'Where are you on your personal AI adoption journey?',                              options: ['Curiosity', 'Understanding', 'Experimentation', 'Integration', 'Transformation'] },
-      { id: 'barriers',    text: 'What are the biggest barriers preventing you from using AI more?',                 options: ['select all that apply'] },
-      { id: 'tools',       text: 'Which AI tools have you used in the past 30 days?',                               options: ['select all that apply'] },
-      { id: 'benefits',    text: 'What benefits have you experienced from using AI in your work?',                   options: ['select all that apply'] },
-      { id: 'ownPocket',   text: 'Are you paying out of pocket for AI tools not provided by Baptist Health?',        options: ['Yes', 'No'] },
-      { id: 'momentum',    text: 'How would you describe AI adoption momentum in MarCom right now?',                 options: ['single choice'] },
+      {
+        id: 'sentiment',
+        text: 'How would you describe your current feelings about Artificial Intelligence (AI)?',
+        options: ['Positive', 'Negative', 'I have both positive and negative feelings about AI', "I'm not sure how I feel about it"],
+      },
+      {
+        id: 'stage',
+        text: 'Which stage best describes your current progress on the AI journey?',
+        options: ['Currently – exploring AI, haven\'t developed much literacy yet', 'Understanding – learning the fundamentals, seeing relevance to my work', 'Experimentation – actively trying AI tools to improve efficiency or creativity', 'Integration – embedding AI into my workflows and processes', 'Transformation – reimagining how I work, AI as a core thought partner'],
+      },
+      {
+        id: 'momentum',
+        text: 'Which statement best describes the current momentum of AI adoption within Marketing & Communications?',
+        options: ['Not started – we have not begun adopting AI', 'Stalled – started but progress has slowed or stopped', 'Steady – others adopt at similar rates, no cohesive department direction', 'Steady – making moderate, clear progress on specific projects', 'Accelerating – expanding to new use cases and workflows'],
+      },
+      {
+        id: 'familiarity',
+        text: 'How would you best describe your familiarity with AI tools and their applications in communications?',
+        options: ["I'm unfamiliar with AI and its applications in this space", "I've heard of them but don't know much", "I know a bit about them but haven't used them", 'I understand AI tools well and have experimented with them', 'I am highly knowledgeable and use AI regularly'],
+      },
+      {
+        id: 'frequency',
+        text: 'How often do you currently use AI tools in your work? Choose the option that most closely reflects your usage.',
+        options: ['Never (less than once per month)', 'At least once per month', 'At least once or twice per week', 'Daily', 'Other'],
+      },
+      {
+        id: 'benefits',
+        text: 'When you use AI at work, which benefits are you experiencing? (Select your top 3)',
+        options: ['select all that apply'],
+      },
+      {
+        id: 'tools',
+        text: 'Besides the AI tools the company officially endorses with a paid subscription (ChatGPT, Copilot, Adobe Firefly, etc.), what other AI tools do you most often use for work?',
+        options: ['Gemini (Google)', 'Claude (Anthropic)', 'Eleven Labs', 'Grok (xAI)', 'Midjourney', 'Perplexity AI', 'NotebookLM', 'Gamma', 'YouClip', 'Wispr', 'VSPR Flow', 'Other'],
+      },
+      {
+        id: 'ownPocket',
+        text: 'Are you currently paying out of your own pocket for any AI tools you use for work?',
+        options: ['Yes', 'No'],
+      },
+      {
+        id: 'barriers',
+        text: 'What do you think are the biggest barriers to using AI effectively in your role? (Select 1–3 options)',
+        options: ['select all that apply'],
+      },
+      {
+        id: 'importance',
+        text: 'How important is AI to the success of your individual or team work over the next 12 months?',
+        options: ['1 – Not important at all', '2', '3', '4', '5 – Critically important'],
+      },
+      {
+        id: 'confidence',
+        text: 'How confident are you today in your ability to use AI tools effectively in your role?',
+        options: ['Not confident at all', 'Somewhat confident', 'Confident', 'Very Confident', 'Extremely Confident'],
+      },
+      {
+        id: 'openStruggle',
+        text: "What's your biggest struggle with AI right now, if at all?",
+        options: ['open text'],
+      },
+      {
+        id: 'openExcited',
+        text: 'What are you most excited about when it comes to AI?',
+        options: ['open text'],
+      },
+      {
+        id: 'role',
+        text: 'What is your role?',
+        options: ['Specialist', 'Manager', 'Director', 'AVP', 'VP', 'Other'],
+      },
+      {
+        id: 'function',
+        text: 'What is your function?',
+        options: ['Patient Services', 'Strategy & Research', 'Strategic Communications', 'Internal Communication', 'Medical Staff Communications', 'Content Marketing', 'Social Media & Reputation Management', 'Creative Services', 'Event Management', 'Claims Partnerships', 'Event Marketing', 'Paid Media & Precision Marketing', 'Web & Technology', 'Marketing Operations', 'Other'],
+      },
     ],
   },
 };
@@ -173,6 +300,7 @@ function DonutChart({ distribution, label, question }) {
   const data = distribution.map((d, i) => ({
     name: d.label,
     value: d.pct,
+    count: d.count,
     color: rampColor(i, distribution.length),
   }));
   const topItem = data[0];
@@ -200,7 +328,8 @@ function DonutChart({ distribution, label, question }) {
               ))}
             </Pie>
             <ReTooltip
-              formatter={(v, name) => [`${v}%`, name]}
+              wrapperStyle={{ zIndex: 20 }}
+              formatter={(v, name, props) => [`${v}% · ${props.payload.count} respondents`, name]}
               contentStyle={{
                 background: 'var(--surface-green)',
                 border: '1px solid var(--border)',
@@ -211,7 +340,7 @@ function DonutChart({ distribution, label, question }) {
             />
           </PieChart>
           {/* Center label */}
-          <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
+          <div style={{ position: 'absolute', inset: 0, zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
             <span style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: 22, fontWeight: 900, color: topItem.color, lineHeight: 1 }}>{topItem.value}%</span>
             <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 9, color: 'var(--text-support)', marginTop: 2, textAlign: 'center', maxWidth: 52, lineHeight: 1.3 }}>{topItem.name}</span>
           </div>
@@ -223,6 +352,7 @@ function DonutChart({ distribution, label, question }) {
               <div style={{ width: 10, height: 10, borderRadius: 3, background: d.color, flexShrink: 0 }} />
               <span style={{ flex: 1, fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: 'var(--text-medium)', fontWeight: 500 }}>{d.name}</span>
               <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, fontWeight: 700, color: d.color }}>{d.value}%</span>
+              <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: 'var(--text-support)', marginLeft: 2 }}>({d.count})</span>
             </div>
           ))}
         </div>
@@ -234,6 +364,7 @@ function DonutChart({ distribution, label, question }) {
 // ─── Visual 4: Importance — horizontal color-coded bars ───────────────────────
 // One bar per score level, color-coded green→red, label on left
 function ImportanceBars({ distribution, label, question }) {
+  const [hovered, setHovered] = useState(null);
   if (!distribution?.length) return null;
   const maxPct = Math.max(...distribution.map(d => d.pct), 1);
   return (
@@ -241,10 +372,17 @@ function ImportanceBars({ distribution, label, question }) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {distribution.map((d, i) => {
           const color = rampColor(i, distribution.length);
+          const rowLabel = d.label || `Score ${d.score}`;
+          const isHov = hovered === rowLabel;
           return (
-            <div key={d.label || d.score} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ width: 60, flexShrink: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 600, color: 'var(--text-support)', textAlign: 'right' }}>
-                {d.label || `Score ${d.score}`}
+            <div
+              key={rowLabel}
+              style={{ display: 'flex', alignItems: 'center', gap: 10, position: 'relative' }}
+              onMouseEnter={() => setHovered(rowLabel)}
+              onMouseLeave={() => setHovered(null)}
+            >
+              <span style={{ width: 76, flexShrink: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 600, color: 'var(--text-support)', textAlign: 'right' }}>
+                {rowLabel}
               </span>
               <div style={{ flex: 1, height: 22, background: 'rgba(125,230,155,0.06)', borderRadius: 5, overflow: 'hidden' }}>
                 <motion.div
@@ -264,6 +402,18 @@ function ImportanceBars({ distribution, label, question }) {
               {(d.pct / maxPct) <= 0.2 && (
                 <span style={{ width: 28, flexShrink: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 700, color }}>{d.pct}%</span>
               )}
+              {isHov && d.count != null && (
+                <div style={{
+                  position: 'absolute', left: 88, bottom: '100%', marginBottom: 4,
+                  background: 'var(--tooltip-bg)', border: `1px solid ${color}50`,
+                  borderRadius: 6, padding: '5px 10px', zIndex: 10, whiteSpace: 'nowrap',
+                  fontFamily: 'DM Sans, sans-serif', fontSize: 12, pointerEvents: 'none',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+                }}>
+                  <span style={{ fontWeight: 700, color }}>{d.pct}%</span>
+                  <span style={{ color: 'var(--text-medium)', marginLeft: 6 }}>{d.count} respondents</span>
+                </div>
+              )}
             </div>
           );
         })}
@@ -272,46 +422,63 @@ function ImportanceBars({ distribution, label, question }) {
   );
 }
 
-// ─── Visual 5: Frequency area/line chart ─────────────────────────────────────
-// Daily → Weekly → Monthly → Rarely → Never as a continuous curve
-const FREQ_ORDER = ['Daily', 'Weekly', 'Monthly', 'Rarely', 'Never'];
-
-function FrequencyArea({ distribution, label, question }) {
-  const theme = useTheme();
-  const isLight = theme === 'light';
+// ─── Visual 5: Frequency — horizontal color-coded bars ───────────────────────
+// Daily → Weekly → Monthly → Rarely → Never, green → red
+function FrequencyBars({ distribution, label, question }) {
+  const [hovered, setHovered] = useState(null);
   if (!distribution?.length) return null;
-
-  const data = FREQ_ORDER
-    .map(f => ({ name: f, pct: distribution.find(d => d.label === f)?.pct ?? 0 }))
-    .filter((_, i, arr) => {
-      // Drop trailing zeros
-      const lastNonZero = arr.reduceRight((acc, d, idx) => (d.pct > 0 && acc === -1 ? idx : acc), -1);
-      return i <= lastNonZero;
-    });
-
-  const axisStyle = { fill: isLight ? '#555a60' : '#797D80', fontSize: 11, fontFamily: 'DM Sans, sans-serif' };
-
+  const maxPct = Math.max(...distribution.map(d => d.pct), 1);
   return (
     <QB label={label} question={question}>
-      <ResponsiveContainer width="100%" height={140}>
-        <AreaChart data={data} margin={{ top: 6, right: 16, bottom: 0, left: -20 }}>
-          <defs>
-            <linearGradient id="freqGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%"  stopColor={C.teal} stopOpacity={0.4} />
-              <stop offset="95%" stopColor={C.teal} stopOpacity={0.04} />
-            </linearGradient>
-          </defs>
-          <CartesianGrid stroke={isLight ? 'rgba(46,168,74,0.08)' : 'rgba(125,230,155,0.07)'} strokeDasharray="3 3" vertical={false} />
-          <XAxis dataKey="name" tick={axisStyle} tickLine={false} axisLine={false} />
-          <YAxis tick={axisStyle} tickLine={false} axisLine={false} tickFormatter={v => `${v}%`} />
-          <ReTooltip
-            formatter={v => [`${v}%`, 'Respondents']}
-            contentStyle={{ background: 'var(--surface-green)', border: '1px solid var(--border)', borderRadius: 8, fontFamily: 'DM Sans, sans-serif', fontSize: 12 }}
-          />
-          <Area type="monotone" dataKey="pct" stroke={C.teal} strokeWidth={2.5} fill="url(#freqGrad)"
-            dot={{ r: 4, fill: C.teal, strokeWidth: 0 }} activeDot={{ r: 6 }} />
-        </AreaChart>
-      </ResponsiveContainer>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {distribution.map((d, i) => {
+          const color = rampColor(i, distribution.length);
+          const isHov = hovered === d.label;
+          return (
+            <div
+              key={d.label}
+              style={{ display: 'flex', alignItems: 'center', gap: 10, position: 'relative' }}
+              onMouseEnter={() => setHovered(d.label)}
+              onMouseLeave={() => setHovered(null)}
+            >
+              <span style={{ width: 72, flexShrink: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 600, color: 'var(--text-support)', textAlign: 'right' }}>
+                {d.label}
+              </span>
+              <div style={{ flex: 1, height: 22, background: 'rgba(125,230,155,0.06)', borderRadius: 5, overflow: 'hidden' }}>
+                <motion.div
+                  initial={{ width: 0 }}
+                  whileInView={{ width: `${(d.pct / maxPct) * 100}%` }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.44, delay: i * 0.06, ease: 'easeOut' }}
+                  style={{ height: '100%', background: color, opacity: 0.85, borderRadius: 5,
+                    display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: 7 }}
+                >
+                  {(d.pct / maxPct) > 0.2 && (
+                    <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 800, color: '#fff', textShadow: '0 1px 2px rgba(0,0,0,0.35)' }}>
+                      {d.pct}%
+                    </span>
+                  )}
+                </motion.div>
+              </div>
+              {(d.pct / maxPct) <= 0.2 && (
+                <span style={{ width: 30, flexShrink: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 700, color }}>{d.pct}%</span>
+              )}
+              {isHov && (
+                <div style={{
+                  position: 'absolute', left: 84, bottom: '100%', marginBottom: 4,
+                  background: 'var(--tooltip-bg)', border: `1px solid ${color}50`,
+                  borderRadius: 6, padding: '5px 10px', zIndex: 10, whiteSpace: 'nowrap',
+                  fontFamily: 'DM Sans, sans-serif', fontSize: 12, pointerEvents: 'none',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+                }}>
+                  <span style={{ fontWeight: 700, color }}>{d.pct}%</span>
+                  <span style={{ color: 'var(--text-medium)', marginLeft: 6 }}>{d.count} respondents</span>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </QB>
   );
 }
@@ -412,9 +579,11 @@ function BinaryCard({ yes, no, total, yesPct, noPct, label, question }) {
 }
 
 // ─── Collapsible survey instrument ───────────────────────────────────────────
-function SurveyArtifact({ wave }) {
+function SurveyArtifact({ wave, vaultUnlocked = false }) {
   const [open, setOpen] = useState(false);
   const meta = SURVEY_META[wave];
+  const VAULT_ONLY = ['role', 'function'];
+  const questions = meta.questions.filter(q => vaultUnlocked || !VAULT_ONLY.includes(q.id));
   return (
     <div style={{ border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden', marginBottom: 24 }}>
       <button onClick={() => setOpen(v => !v)} style={{ width: '100%', background: 'var(--surface-green)', border: 'none', padding: '12px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}>
@@ -427,7 +596,7 @@ function SurveyArtifact({ wave }) {
       {open && (
         <div style={{ background: 'var(--card-bg-dark)', padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
           <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: 'var(--text-support)' }}>{meta.label} · {meta.period}</p>
-          {meta.questions.map((q, i) => (
+          {questions.map((q, i) => (
             <div key={q.id} style={{ display: 'flex', gap: 12 }}>
               <span style={{ fontSize: 10, fontWeight: 800, color: 'var(--accent-mint)', fontFamily: 'DM Sans, sans-serif', minWidth: 18, paddingTop: 2, flexShrink: 0 }}>
                 {String(i + 1).padStart(2, '0')}
@@ -455,7 +624,7 @@ function SurveyArtifact({ wave }) {
 }
 
 // ─── Main export ──────────────────────────────────────────────────────────────
-export default function SurveySnapshot({ wave, transforms }) {
+export default function SurveySnapshot({ wave, transforms, vaultUnlocked = false }) {
   const {
     sentimentTrend, familiarityTrend, confidenceTrend, importanceTrend,
     frequencyTrend, barriersTrend, stageTrend,
@@ -470,7 +639,8 @@ export default function SurveySnapshot({ wave, transforms }) {
   const sentimentDist   = (sentimentTrend ?? []).map(e => ({ label: e.sentiment, ...e[wKey] })).filter(d => d.count > 0);
   const familiarityDist = familiarityTrend?.[wIdx]?.distribution ?? [];
   const confidenceDist  = confidenceTrend?.[wIdx]?.distribution ?? [];
-  const importanceDist  = importanceTrend?.[wIdx]?.distribution?.map(d => ({ label: `Score ${d.score}`, ...d })) ?? [];
+  const IMPORTANCE_LABELS = { 5: 'Critical', 4: 'Important', 3: 'Moderate', 2: 'Low', 1: 'Not at all' };
+  const importanceDist  = importanceTrend?.[wIdx]?.distribution?.map(d => ({ label: IMPORTANCE_LABELS[d.score] ?? `Score ${d.score}`, ...d })) ?? [];
   const frequencyDist   = frequencyTrend?.[wIdx]?.distribution ?? [];
 
   const barriersDist = (barriersTrend ?? [])
@@ -503,7 +673,7 @@ export default function SurveySnapshot({ wave, transforms }) {
         </p>
       </div>
 
-      <SurveyArtifact wave={wave} />
+      <SurveyArtifact wave={wave} vaultUnlocked={vaultUnlocked} />
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 14 }}>
 
@@ -519,8 +689,14 @@ export default function SurveySnapshot({ wave, transforms }) {
         {/* Importance — horizontal color bars */}
         {importanceDist.length > 0 && <ImportanceBars distribution={importanceDist} label="Importance to Role (1–5)" question="How important is AI to your current role?" />}
 
-        {/* Frequency — area/line chart */}
-        {frequencyDist.length > 0 && <FrequencyArea distribution={frequencyDist} label="Usage Frequency" question="How often do you use AI tools?" />}
+        {/* Frequency — horizontal color bars */}
+        {frequencyDist.length > 0 && (
+          <FrequencyBars
+            distribution={frequencyDist}
+            label="Usage Frequency"
+            question={meta.questions.find(q => q.id === 'frequency')?.text ?? 'How often do you currently use AI tools in your work?'}
+          />
+        )}
 
         {/* Stage — step display, red→green (S2 + S3) */}
         {stageDist.length > 0 && <StageSteps distribution={stageDist} label="AI Journey Stage" question="Where are you on your personal AI adoption journey?" />}
@@ -535,7 +711,7 @@ export default function SurveySnapshot({ wave, transforms }) {
         {/* Tools — full-width, mint */}
         {toolsDist.length > 0 && (
           <div style={{ gridColumn: '1 / -1' }}>
-            <RankedBar distribution={toolsDist} label="Tools Used" question="Which AI tools have you used in the past 30 days? (select all that apply)" color={C.mint} maxItems={14} fullWidth />
+            <RankedBar distribution={toolsDist} label="Tools Beyond the Official Stack" question="Besides ChatGPT, Copilot, Jasper & Firefly — what other AI tools are you using? (S3 personal & non-endorsed tools only)" color={C.mint} maxItems={14} fullWidth />
           </div>
         )}
 

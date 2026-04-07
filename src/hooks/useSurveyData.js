@@ -14,6 +14,8 @@ import { buildTransforms } from '../data/transforms';
  *   surveys.all      — 292 combined rows
  *   transforms       — aggregated stats for every chart (see transforms.js)
  */
+const POLL_INTERVAL_MS = 60 * 60 * 1000; // 1 hour — re-fetch when a new survey is live
+
 export function useSurveyData() {
   const [state, setState] = useState({
     surveys: null,
@@ -23,15 +25,29 @@ export function useSurveyData() {
   });
 
   useEffect(() => {
-    parseAllSurveys()
-      .then(surveys => {
-        const transforms = buildTransforms(surveys);
-        setState({ surveys, transforms, loading: false, error: null });
-      })
-      .catch(error => {
-        console.error('[useSurveyData] Failed to load survey CSVs:', error);
-        setState({ surveys: null, transforms: null, loading: false, error });
-      });
+    let cancelled = false;
+
+    function fetchData() {
+      parseAllSurveys()
+        .then(surveys => {
+          if (cancelled) return;
+          const transforms = buildTransforms(surveys);
+          setState({ surveys, transforms, loading: false, error: null });
+        })
+        .catch(error => {
+          if (cancelled) return;
+          console.error('[useSurveyData] Failed to load survey CSVs:', error);
+          setState(prev =>
+            prev.surveys
+              ? { ...prev, error: null }  // silent — keep existing data on retry failure
+              : { surveys: null, transforms: null, loading: false, error }
+          );
+        });
+    }
+
+    fetchData();
+    const timer = setInterval(fetchData, POLL_INTERVAL_MS);
+    return () => { cancelled = true; clearInterval(timer); };
   }, []);
 
   return state;

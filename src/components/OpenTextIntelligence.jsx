@@ -386,25 +386,30 @@ Do not add markdown. Do not wrap in code fences. Return raw JSON only.`,
         transition={{ duration: 0.5 }}
         style={{ marginBottom: 56, textAlign: 'center' }}
       >
-        <span style={{
+        <div style={{
           display: 'inline-block',
+          padding: '4px 12px',
+          borderRadius: 20,
+          background: 'var(--accent-mint-bg)',
+          border: '1px solid rgba(125,230,155,0.25)',
+          color: 'var(--accent-mint)',
           fontSize: 11,
           fontWeight: 700,
-          letterSpacing: '0.13em',
-          color: 'var(--accent-mint)',
+          letterSpacing: '0.1em',
           textTransform: 'uppercase',
-          marginBottom: 12,
+          marginBottom: 16,
+          fontFamily: 'DM Sans, sans-serif',
         }}>
           Open Text Intelligence
-        </span>
+        </div>
         <h2 style={{
-          margin: '0 0 16px',
-          fontSize: 'clamp(28px, 4vw, 42px)',
-          fontWeight: 800,
-          color: '#f0f2f4',
-          lineHeight: 1.1,
-          letterSpacing: '-0.025em',
-          fontFamily: "'Plus Jakarta Sans', sans-serif",
+          margin: '0 0 12px',
+          fontSize: 'clamp(28px, 4vw, 40px)',
+          fontWeight: 900,
+          color: 'var(--text-primary)',
+          lineHeight: 1.15,
+          letterSpacing: '-0.02em',
+          fontFamily: 'DM Sans, sans-serif',
         }}>
           What They're Actually Saying
         </h2>
@@ -412,9 +417,10 @@ Do not add markdown. Do not wrap in code fences. Return raw JSON only.`,
           margin: 0,
           fontSize: 15,
           color: 'var(--text-support)',
-          maxWidth: 560,
+          maxWidth: 520,
           marginInline: 'auto',
           lineHeight: 1.7,
+          fontFamily: 'DM Sans, sans-serif',
         }}>
           Patterns only visible when you cross-reference what people write with what they actually do.
           Claude analyzed the open-text responses against every respondent's behavioral data.

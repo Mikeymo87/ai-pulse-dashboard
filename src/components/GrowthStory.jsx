@@ -366,32 +366,39 @@ export default function GrowthStory({ transforms, presentationWave }) {
       {(presentationWave === undefined || presentationWave === null) && (
         <div style={{ textAlign: 'center', marginBottom: 72 }}>
           <div style={{
-            fontFamily: 'DM Sans, sans-serif',
-            fontSize: 'var(--text-xs)',
-            fontWeight: 700,
+            display: 'inline-block',
+            padding: '4px 12px',
+            borderRadius: 20,
+            background: 'var(--accent-mint-bg)',
+            border: '1px solid rgba(125,230,155,0.25)',
             color: 'var(--accent-mint)',
-            letterSpacing: '0.13em',
+            fontSize: 11,
+            fontWeight: 700,
+            letterSpacing: '0.1em',
             textTransform: 'uppercase',
-            marginBottom: 12,
+            marginBottom: 16,
+            fontFamily: 'DM Sans, sans-serif',
           }}>
             The Journey
           </div>
           <h2 style={{
-            fontSize: 'clamp(30px, 4vw, 44px)',
-            fontWeight: 800,
+            fontSize: 'clamp(28px, 4vw, 40px)',
+            fontWeight: 900,
             color: 'var(--text-primary)',
-            letterSpacing: '-0.025em',
-            lineHeight: 1.1,
-            margin: '0 0 16px',
-            fontFamily: "'Plus Jakarta Sans', sans-serif",
+            letterSpacing: '-0.02em',
+            lineHeight: 1.15,
+            margin: '0 0 12px',
+            fontFamily: 'DM Sans, sans-serif',
           }}>
             Three Waves, One Story
           </h2>
           <p style={{
             color: 'var(--text-support)',
-            fontSize: 'var(--text-md)',
-            lineHeight: 1.65,
+            fontSize: 15,
+            lineHeight: 1.7,
             margin: 0,
+            maxWidth: 520,
+            marginInline: 'auto',
             fontFamily: 'DM Sans, sans-serif',
           }}>
             How AI adoption evolved across Baptist Health MarCom — January 2025 to March 2026

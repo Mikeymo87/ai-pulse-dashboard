@@ -62,8 +62,8 @@ function gaussianPath(mu, sigma, H, baseline, xMin, xMax, steps = 300) {
 // SIGMA=90 means tails reach ~0 within the viewport for all three wave mus
 // (S1 mu≈318, S2 mu≈256, S3 mu≈226 — all ≥2.5σ from both edges).
 const SIGMA   = 90;
-const H       = 218;   // max height in px
-const BASE_Y  = 272;   // baseline y
+const H       = 164;   // max height in px (scaled ×0.75 from 218)
+const BASE_Y  = 204;   // baseline y (scaled ×0.75 from 272)
 const X_MIN   = -50;   // extend path past left edge for clean clip
 const X_MAX   = 650;   // extend path past right edge for clean clip
 
@@ -202,28 +202,6 @@ export default function AdoptionCurve({ familiarityTrend, compact = false }) {
   return (
     <div ref={containerRef} style={compact ? { height: '100%', display: 'flex', flexDirection: 'column' } : {}}>
 
-      {/* ── Section header ─────────────────────────────────────────────────── */}
-      {!compact && (
-        <div style={{ textAlign: 'center', marginBottom: 20 }}>
-          <p style={{
-            color: 'var(--accent-mint)', fontSize: 11, fontWeight: 700,
-            letterSpacing: '0.12em', textTransform: 'uppercase',
-            margin: '0 0 8px', fontFamily: FONT,
-          }}>
-            The Technology Adoption Curve
-          </p>
-          <h3 style={{
-            color: 'var(--text-medium)', fontSize: 'clamp(16px, 2.5vw, 20px)',
-            fontWeight: 800, margin: 0, fontFamily: FONT, lineHeight: 1.2,
-          }}>
-            We're Beating the Curve
-          </h3>
-          <p style={{ color: 'var(--text-support)', fontSize: 13, margin: '6px 0 0', fontFamily: FONT }}>
-            Baptist Health MarCom AI adoption — shifting left across 14 months
-          </p>
-        </div>
-      )}
-
       {/* ── Wave buttons ───────────────────────────────────────────────────── */}
       <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginBottom: compact ? 12 : 20, flexWrap: 'wrap', flexShrink: 0 }}>
         {WAVE_META.map((m, i) => (
@@ -237,7 +215,7 @@ export default function AdoptionCurve({ familiarityTrend, compact = false }) {
       {/* ── Bell curve SVG ─────────────────────────────────────────────────── */}
       <div style={{ position: 'relative', width: '100%', overflow: 'hidden', ...(compact ? { flex: 1, minHeight: 0 } : {}) }}>
         <svg
-          viewBox="0 0 600 300"
+          viewBox="0 0 600 225"
           width="100%"
           height={compact ? '100%' : undefined}
           style={{ display: 'block', overflow: 'hidden' }}
@@ -263,21 +241,21 @@ export default function AdoptionCurve({ familiarityTrend, compact = false }) {
             {/* ── Clip regions — boundaries animate with the wave ── */}
             <clipPath id="ac-clip-inn">
               <motion.rect
-                x={0} y={0} height={300}
+                x={0} y={0} height={225}
                 animate={{ width: cfg.div1X }}
                 transition={{ duration: 0.75, ease: 'easeInOut' }}
               />
             </clipPath>
             <clipPath id="ac-clip-prag">
               <motion.rect
-                y={0} height={300}
+                y={0} height={225}
                 animate={{ x: cfg.div1X, width: cfg.div2X - cfg.div1X }}
                 transition={{ duration: 0.75, ease: 'easeInOut' }}
               />
             </clipPath>
             <clipPath id="ac-clip-lag">
               <motion.rect
-                y={0} height={300} width={600}
+                y={0} height={225} width={600}
                 animate={{ x: cfg.div2X }}
                 transition={{ duration: 0.75, ease: 'easeInOut' }}
               />
@@ -305,13 +283,13 @@ export default function AdoptionCurve({ familiarityTrend, compact = false }) {
 
           {/* ── Divider lines ─────────────────────────────────────────────── */}
           <motion.line
-            x1={cfg.div1X} x2={cfg.div1X} y1={50} y2={BASE_Y}
+            x1={cfg.div1X} x2={cfg.div1X} y1={38} y2={BASE_Y}
             stroke={dividerColor} strokeWidth={1.5} strokeDasharray="4 3"
             animate={{ x1: cfg.div1X, x2: cfg.div1X }}
             transition={{ duration: 0.75, ease: 'easeInOut' }}
           />
           <motion.line
-            x1={cfg.div2X} x2={cfg.div2X} y1={50} y2={BASE_Y}
+            x1={cfg.div2X} x2={cfg.div2X} y1={38} y2={BASE_Y}
             stroke={dividerColor} strokeWidth={1.5} strokeDasharray="4 3"
             animate={{ x1: cfg.div2X, x2: cfg.div2X }}
             transition={{ duration: 0.75, ease: 'easeInOut' }}
@@ -326,34 +304,39 @@ export default function AdoptionCurve({ familiarityTrend, compact = false }) {
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                 transition={{ duration: 0.3 }}
               >
-                <rect x={-55} y={innovW > 100 ? 140 : innovW > 60 ? 143 : 158}
-                  width={110}
-                  height={innovW > 100 ? 65 : innovW > 60 ? 38 : 24}
+                {/* rect height: full=65 (cat+num+sub), mid=42 (cat+num), narrow=24 (num only) */}
+                <rect x={-60} y={innovW > 100 ? 97 : innovW > 60 ? 100 : 112}
+                  width={120}
+                  height={innovW > 100 ? 65 : innovW > 60 ? 42 : 24}
                   rx={9} fill={pillBg} />
+                {/* Category label — top row */}
                 {innovW > 60 && (
-                  <text x={0} y={152} textAnchor="middle"
+                  <text x={0} y={109} textAnchor="middle"
                     fill={segmentTextFill(SEGMENTS[0].color)} fontSize={8} fontWeight={800} fontFamily={FONT}
-                    letterSpacing="0.1em">
+                    letterSpacing="0.09em">
                     {SEGMENTS[0].label}
                   </text>
                 )}
-                <text x={0} y={172} textAnchor="middle"
-                  fill={svgTextFill} fontSize={24} fontWeight={900} fontFamily={FONT}>
+                {/* Big % — clear gap below label */}
+                <text x={innovW > 60 ? -7 : 0} y={innovW > 60 ? 134 : 129} textAnchor="middle"
+                  fill={svgTextFill} fontSize={22} fontWeight={900} fontFamily={FONT}>
                   {data.Innovators}%
                 </text>
-                {deltas && (
-                  <text x={22} y={163} textAnchor="start"
-                    fill={deltaColor(deltas.Innovators, false)} fontSize={9.5} fontWeight={800} fontFamily={FONT}>
+                {/* Delta badge — upper-right of the big number */}
+                {deltas && innovW > 60 && (
+                  <text x={28} y={124} textAnchor="start"
+                    fill={deltaColor(deltas.Innovators, false)} fontSize={9} fontWeight={800} fontFamily={FONT}>
                     {deltaBadge(deltas.Innovators, false)}
                   </text>
                 )}
+                {/* Sub-text — bottom rows (only when region is wide) */}
                 {innovW > 100 && (
                   <>
-                    <text x={0} y={186} textAnchor="middle"
+                    <text x={0} y={147} textAnchor="middle"
                       fill={svgSubFill} fontSize={7.5} fontFamily={FONT}>
                       {SEGMENTS[0].sub[0]}
                     </text>
-                    <text x={0} y={197} textAnchor="middle"
+                    <text x={0} y={156} textAnchor="middle"
                       fill={svgSubFill} fontSize={7.5} fontFamily={FONT}>
                       {SEGMENTS[0].sub[1]}
                     </text>
@@ -370,27 +353,27 @@ export default function AdoptionCurve({ familiarityTrend, compact = false }) {
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                 transition={{ duration: 0.3 }}
               >
-                <rect x={-55} y={140} width={110} height={65} rx={9} fill={pillBg} />
-                <text x={0} y={152} textAnchor="middle"
+                <rect x={-60} y={97} width={120} height={65} rx={9} fill={pillBg} />
+                <text x={0} y={109} textAnchor="middle"
                   fill={segmentTextFill(SEGMENTS[1].color)} fontSize={8} fontWeight={800} fontFamily={FONT}
-                  letterSpacing="0.1em">
+                  letterSpacing="0.09em">
                   {SEGMENTS[1].label}
                 </text>
-                <text x={0} y={172} textAnchor="middle"
-                  fill={svgTextFill} fontSize={24} fontWeight={900} fontFamily={FONT}>
+                <text x={-7} y={134} textAnchor="middle"
+                  fill={svgTextFill} fontSize={22} fontWeight={900} fontFamily={FONT}>
                   {data.Pragmatists}%
                 </text>
                 {deltas && (
-                  <text x={22} y={163} textAnchor="start"
-                    fill={deltaColor(deltas.Pragmatists, false)} fontSize={9.5} fontWeight={800} fontFamily={FONT}>
+                  <text x={28} y={124} textAnchor="start"
+                    fill={deltaColor(deltas.Pragmatists, false)} fontSize={9} fontWeight={800} fontFamily={FONT}>
                     {deltaBadge(deltas.Pragmatists, false)}
                   </text>
                 )}
-                <text x={0} y={186} textAnchor="middle"
+                <text x={0} y={147} textAnchor="middle"
                   fill={svgSubFill} fontSize={7.5} fontFamily={FONT}>
                   {SEGMENTS[1].sub[0]}
                 </text>
-                <text x={0} y={197} textAnchor="middle"
+                <text x={0} y={156} textAnchor="middle"
                   fill={svgSubFill} fontSize={7.5} fontFamily={FONT}>
                   {SEGMENTS[1].sub[1]}
                 </text>
@@ -405,34 +388,34 @@ export default function AdoptionCurve({ familiarityTrend, compact = false }) {
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                 transition={{ duration: 0.3 }}
               >
-                <rect x={-55} y={lagW > 100 ? 140 : lagW > 60 ? 143 : 158}
-                  width={110}
-                  height={lagW > 100 ? 65 : lagW > 60 ? 38 : 24}
+                <rect x={-60} y={lagW > 100 ? 97 : lagW > 60 ? 100 : 112}
+                  width={120}
+                  height={lagW > 100 ? 65 : lagW > 60 ? 42 : 24}
                   rx={9} fill={pillBg} />
                 {lagW > 60 && (
-                  <text x={0} y={152} textAnchor="middle"
+                  <text x={0} y={109} textAnchor="middle"
                     fill={segmentTextFill(SEGMENTS[2].color)} fontSize={8} fontWeight={800} fontFamily={FONT}
-                    letterSpacing="0.1em">
+                    letterSpacing="0.09em">
                     {SEGMENTS[2].label}
                   </text>
                 )}
-                <text x={0} y={172} textAnchor="middle"
-                  fill={svgTextFill} fontSize={24} fontWeight={900} fontFamily={FONT}>
+                <text x={lagW > 60 ? -7 : 0} y={lagW > 60 ? 134 : 129} textAnchor="middle"
+                  fill={svgTextFill} fontSize={22} fontWeight={900} fontFamily={FONT}>
                   {data.Laggards}%
                 </text>
-                {deltas && (
-                  <text x={22} y={163} textAnchor="start"
-                    fill={deltaColor(deltas.Laggards, true)} fontSize={9.5} fontWeight={800} fontFamily={FONT}>
+                {deltas && lagW > 60 && (
+                  <text x={28} y={124} textAnchor="start"
+                    fill={deltaColor(deltas.Laggards, true)} fontSize={9} fontWeight={800} fontFamily={FONT}>
                     {deltaBadge(deltas.Laggards, true)}
                   </text>
                 )}
                 {lagW > 100 && (
                   <>
-                    <text x={0} y={186} textAnchor="middle"
+                    <text x={0} y={147} textAnchor="middle"
                       fill={svgSubFill} fontSize={7.5} fontFamily={FONT}>
                       {SEGMENTS[2].sub[0]}
                     </text>
-                    <text x={0} y={197} textAnchor="middle"
+                    <text x={0} y={156} textAnchor="middle"
                       fill={svgSubFill} fontSize={7.5} fontFamily={FONT}>
                       {SEGMENTS[2].sub[1]}
                     </text>
@@ -443,10 +426,10 @@ export default function AdoptionCurve({ familiarityTrend, compact = false }) {
           </motion.g>
 
           {/* ── X-axis labels ──────────────────────────────────────────────── */}
-          <text x={30}  y={290} fill="var(--chart-subtext)" fontSize={9.5} fontFamily={FONT} fontWeight={600}>
+          <text x={30}  y={218} fill="var(--chart-subtext)" fontSize={9.5} fontFamily={FONT} fontWeight={600}>
             ← More Innovative
           </text>
-          <text x={570} y={290} textAnchor="end" fill="var(--chart-subtext)" fontSize={9.5} fontFamily={FONT} fontWeight={600}>
+          <text x={570} y={218} textAnchor="end" fill="var(--chart-subtext)" fontSize={9.5} fontFamily={FONT} fontWeight={600}>
             Less Innovative →
           </text>
         </svg>

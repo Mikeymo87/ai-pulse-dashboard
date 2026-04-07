@@ -438,35 +438,41 @@ Rules:
         transition={{ duration: 0.5 }}
         style={{ marginBottom: 56, textAlign: 'center' }}
       >
-        <span style={{
+        <div style={{
           display: 'inline-block',
+          padding: '4px 12px',
+          borderRadius: 20,
+          background: 'var(--accent-mint-bg)',
+          border: '1px solid rgba(125,230,155,0.25)',
+          color: 'var(--accent-mint)',
           fontSize: 11,
           fontWeight: 700,
-          letterSpacing: '0.13em',
-          color: 'var(--accent-mint)',
+          letterSpacing: '0.1em',
           textTransform: 'uppercase',
-          marginBottom: 12,
+          marginBottom: 16,
+          fontFamily: 'DM Sans, sans-serif',
         }}>
           AI-Powered Insights
-        </span>
+        </div>
         <h2 style={{
-          margin: '0 0 16px',
-          fontSize: 'clamp(30px, 4vw, 44px)',
-          fontWeight: 800,
+          margin: '0 0 12px',
+          fontSize: 'clamp(28px, 4vw, 40px)',
+          fontWeight: 900,
           color: 'var(--text-primary)',
-          lineHeight: 1.1,
-          letterSpacing: '-0.025em',
-          fontFamily: "'Plus Jakarta Sans', sans-serif",
+          lineHeight: 1.15,
+          letterSpacing: '-0.02em',
+          fontFamily: 'DM Sans, sans-serif',
         }}>
           Where the Opportunity Lives
         </h2>
         <p style={{
           margin: 0,
-          fontSize: 16,
+          fontSize: 15,
           color: 'var(--text-support)',
-          maxWidth: 560,
+          maxWidth: 520,
           marginInline: 'auto',
-          lineHeight: 1.65,
+          lineHeight: 1.7,
+          fontFamily: 'DM Sans, sans-serif',
         }}>
           Claude analyzed 14 months of survey data to surface the patterns that matter most.
         </p>

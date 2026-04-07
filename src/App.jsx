@@ -18,6 +18,7 @@ import ParticipationStory from './components/ParticipationStory';
 import NumbersSubNav from './components/NumbersSubNav';
 import SurveySnapshot from './components/SurveySnapshot';
 import HowWeDidIt from './components/HowWeDidIt';
+import ToolEcosystem from './components/ToolEcosystem';
 
 export default function App() {
   const { surveys, transforms, loading, error } = useSurveyData();
@@ -65,20 +66,25 @@ export default function App() {
         alignItems: 'center',
         justifyContent: 'center',
         flexDirection: 'column',
-        gap: 12,
+        gap: 16,
         fontFamily: 'DM Sans, sans-serif',
       }}
     >
-      <div
-        style={{
-          width: 10,
-          height: 10,
-          borderRadius: '50%',
-          background: '#7DE69B',
-          boxShadow: '0 0 20px rgba(125,230,155,0.7)',
+      <motion.img
+        src="/bh-pineapple.svg"
+        alt="Baptist Health"
+        animate={{
+          scale: [1, 1.08, 1],
+          filter: [
+            'drop-shadow(0 0 6px rgba(46,168,74,0.4))',
+            'drop-shadow(0 0 16px rgba(46,168,74,0.85))',
+            'drop-shadow(0 0 6px rgba(46,168,74,0.4))',
+          ],
         }}
+        transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
+        style={{ width: 52, height: 52 }}
       />
-      <p style={{ color: 'var(--text-support)', fontSize: 13 }}>Loading survey data…</p>
+      <p style={{ color: 'var(--text-support)', fontSize: 13, letterSpacing: '0.03em' }}>Loading survey data…</p>
     </div>
   );
 
@@ -132,15 +138,16 @@ export default function App() {
                 <NumbersSubNav active={numbersSubTab} onChange={setNumbersSubTab} />
               </div>
               {numbersSubTab === 'overview' && <TrendCharts transforms={transforms} />}
-              {numbersSubTab === 's1' && <SurveySnapshot wave="s1" transforms={transforms} />}
-              {numbersSubTab === 's2' && <SurveySnapshot wave="s2" transforms={transforms} />}
-              {numbersSubTab === 's3' && <SurveySnapshot wave="s3" transforms={transforms} />}
+              {numbersSubTab === 's1' && <SurveySnapshot wave="s1" transforms={transforms} vaultUnlocked={vaultUnlocked} />}
+              {numbersSubTab === 's2' && <SurveySnapshot wave="s2" transforms={transforms} vaultUnlocked={vaultUnlocked} />}
+              {numbersSubTab === 's3' && <SurveySnapshot wave="s3" transforms={transforms} vaultUnlocked={vaultUnlocked} />}
             </>
           )}
           {activeTab === 'team' && (
             <>
               <ParticipationStory transforms={transforms} />
               <Archetypes transforms={transforms} />
+              <ToolEcosystem transforms={transforms} />
 
               {/* Leadership Vault — password-protected */}
               <div style={{ padding: '0 32px 64px', maxWidth: 1360, margin: '0 auto' }}>

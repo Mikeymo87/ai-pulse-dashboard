@@ -68,7 +68,7 @@ function buildSystemPrompt(transforms, vaultUnlocked = false) {
 You have access to results from 3 AI adoption pulse surveys conducted over 14 months:
 - Survey 1: Jan–Feb 2025 (97 responses, anonymous)
 - Survey 2: Aug–Sep 2025 (106 responses, anonymous)
-- Survey 3: Mar 2026 (89 responses, includes role + function data)
+- Survey 3: Mar 2026 (101 responses, includes role + function data)
 
 STRICT RULES:
 1. Only cite numbers from the data below — never invent or estimate figures not provided
@@ -144,7 +144,232 @@ ${topRoles || 'No role data'}
 FULL FUNCTION BREAKDOWN:
 ${topFunctions || 'No function data'}
 --- END VAULT DATA ---` : ''}
---- END DATA ---`;
+--- END DATA ---
+
+BRIEF MODE — When the user asks for a brief, report, summary doc, or anything to download/export, respond ONLY with a JSON object wrapped in <BRIEF> tags. No other text outside the tags. Use exactly this structure:
+
+<BRIEF>
+{"title":"[Short title]","subtitle":"[Descriptor]","date":"March 2026","org":"Baptist Health Marketing & Communications","type":"Leadership Brief","sections":[{"heading":"SECTION HEADING","eyebrow":"CATEGORY LABEL","narrative":"Optional 1-2 sentence framing paragraph.","table":{"headers":["Column 1","Column 2"],"rows":[["Row value","Row value"]]},"bullets":["Key insight or stat sentence.","Another insight."]}],"bottomLine":"One or two executive sentences summarizing the so-what.","footnote":"Based on 101 responses | Survey 3, March 2026 | Baptist Health M&C AI Pulse Series"}
+</BRIEF>
+
+BRIEF RULES:
+- Only include numbers from the data above — never fabricate
+- 2–4 sections max; each section may have a table, bullets, or both
+- narrative is optional but useful for framing; keep to 1–2 sentences
+- eyebrow is a short ALL-CAPS category label (e.g. "BARRIERS", "MOMENTUM", "TOOLS")
+- bottomLine is the executive takeaway — plain language, no jargon
+- If a section has no table, omit the table key entirely
+- If a section has no bullets, omit the bullets key entirely`;
+}
+
+// ─── Brief helpers ────────────────────────────────────────────────────────────
+function parseBrief(content) {
+  const match = content.match(/<BRIEF>([\s\S]*?)<\/BRIEF>/);
+  if (!match) return null;
+  try { return JSON.parse(match[1].trim()); } catch { return null; }
+}
+
+function generateBriefHTML(brief) {
+  const sections = (brief.sections ?? []).map(s => {
+    const tableHTML = s.table ? `
+      <table>
+        <thead><tr>${s.table.headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>
+        <tbody>${s.table.rows.map((row, i) => `
+          <tr class="${i % 2 === 0 ? 'even' : 'odd'}">${row.map(cell => `<td>${cell}</td>`).join('')}</tr>`).join('')}
+        </tbody>
+      </table>` : '';
+    const bulletsHTML = (s.bullets ?? []).length ? `
+      <ul>${s.bullets.map(b => `<li>${b}</li>`).join('')}</ul>` : '';
+    const narrativeHTML = s.narrative ? `<p class="narrative">${s.narrative}</p>` : '';
+    return `
+      <div class="section">
+        ${s.eyebrow ? `<div class="eyebrow">${s.eyebrow}</div>` : ''}
+        <h2>${s.heading}</h2>
+        ${narrativeHTML}
+        ${tableHTML}
+        ${bulletsHTML}
+      </div>`;
+  }).join('');
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${brief.title} — ${brief.subtitle}</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', Arial, sans-serif; background: #f5f6f7; color: #1a1d1e; }
+  .page { max-width: 820px; margin: 40px auto; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 24px rgba(0,0,0,0.10); }
+  .header { background: #1a1d1e; padding: 36px 48px 32px; }
+  .header-top { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
+  .bh-mark { background: #2EA84A; color: #fff; font-weight: 800; font-size: 13px; letter-spacing: 0.06em; padding: 5px 10px; border-radius: 6px; }
+  .org-name { color: #7DE69B; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+  .brief-type { color: rgba(255,255,255,0.35); font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; margin-left: auto; }
+  .header h1 { color: #fff; font-size: 28px; font-weight: 800; line-height: 1.2; margin-bottom: 6px; }
+  .header .subtitle { color: #7DE69B; font-size: 15px; font-weight: 500; margin-bottom: 4px; }
+  .header .meta { color: rgba(255,255,255,0.45); font-size: 12px; }
+  .divider { height: 3px; background: linear-gradient(90deg, #2EA84A 0%, #7DE69B 50%, transparent 100%); }
+  .body { padding: 40px 48px 48px; }
+  .section { margin-bottom: 40px; padding-bottom: 36px; border-bottom: 1px solid #e8eaec; }
+  .section:last-of-type { border-bottom: none; }
+  .eyebrow { font-size: 10px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: #2EA84A; margin-bottom: 6px; }
+  .section h2 { font-size: 18px; font-weight: 800; color: #1a1d1e; margin-bottom: 14px; line-height: 1.3; }
+  .narrative { font-size: 14px; color: #444; line-height: 1.7; margin-bottom: 16px; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 13px; }
+  thead tr { background: #1a1d1e; }
+  thead th { color: #7DE69B; font-weight: 700; font-size: 11px; letter-spacing: 0.07em; text-transform: uppercase; padding: 10px 14px; text-align: left; }
+  tbody tr.even { background: #f9fafb; }
+  tbody tr.odd { background: #fff; }
+  tbody td { padding: 10px 14px; color: #25282A; border-bottom: 1px solid #eef0f2; }
+  tbody td:last-child { font-weight: 700; color: #2EA84A; }
+  ul { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-bottom: 0; }
+  ul li { font-size: 13px; color: #444; line-height: 1.6; padding-left: 18px; position: relative; }
+  ul li::before { content: "›"; position: absolute; left: 0; color: #2EA84A; font-weight: 700; font-size: 15px; line-height: 1.4; }
+  .bottom-line { background: #f0faf3; border: 1.5px solid #2EA84A; border-radius: 10px; padding: 20px 24px; margin-top: 8px; margin-bottom: 32px; }
+  .bottom-line .bl-label { font-size: 10px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: #2EA84A; margin-bottom: 6px; }
+  .bottom-line p { font-size: 14px; font-weight: 600; color: #1a1d1e; line-height: 1.65; }
+  footer { text-align: center; font-size: 11px; color: #aab0b7; padding: 0 48px 32px; }
+  @media print {
+    body { background: #fff; }
+    .page { box-shadow: none; border-radius: 0; margin: 0; max-width: 100%; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="header">
+    <div class="header-top">
+      <span class="bh-mark">BH</span>
+      <span class="org-name">${brief.org ?? 'Baptist Health M&C'}</span>
+      <span class="brief-type">${brief.type ?? 'Leadership Brief'}</span>
+    </div>
+    <h1>${brief.title}</h1>
+    <p class="subtitle">${brief.subtitle ?? ''}</p>
+    <p class="meta">${brief.date ?? ''}</p>
+  </div>
+  <div class="divider"></div>
+  <div class="body">
+    ${sections}
+    <div class="bottom-line">
+      <div class="bl-label">Bottom Line</div>
+      <p>${brief.bottomLine ?? ''}</p>
+    </div>
+  </div>
+  <footer>${brief.footnote ?? ''}</footer>
+</div>
+</body>
+</html>`;
+}
+
+function downloadBrief(brief) {
+  const html = generateBriefHTML(brief);
+  const blob = new Blob([html], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const slug = (brief.title ?? 'brief').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+  a.href = url;
+  a.download = `BH-AI-Pulse-${slug}.html`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ─── Brief card (rendered in chat when Claude returns a <BRIEF>) ──────────────
+function BriefCard({ brief }) {
+  return (
+    <div style={{
+      background: 'var(--card-bg)',
+      border: '1px solid rgba(46,168,74,0.3)',
+      borderRadius: 14,
+      overflow: 'hidden',
+      fontFamily: 'DM Sans, sans-serif',
+    }}>
+      {/* Mini header */}
+      <div style={{ background: '#1a1d1e', padding: '14px 18px 12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+          <span style={{ background: '#2EA84A', color: '#fff', fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 4, letterSpacing: '0.06em' }}>BH</span>
+          <span style={{ color: '#7DE69B', fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Baptist Health M&C</span>
+        </div>
+        <p style={{ margin: '0 0 2px', fontSize: 15, fontWeight: 800, color: '#fff', lineHeight: 1.25 }}>{brief.title}</p>
+        {brief.subtitle && <p style={{ margin: 0, fontSize: 12, color: '#7DE69B' }}>{brief.subtitle}</p>}
+      </div>
+
+      {/* Sections preview */}
+      <div style={{ padding: '14px 18px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+        {(brief.sections ?? []).map((s, i) => (
+          <div key={i} style={{ borderLeft: '2px solid rgba(46,168,74,0.4)', paddingLeft: 12 }}>
+            {s.eyebrow && <p style={{ margin: '0 0 2px', fontSize: 9, fontWeight: 800, color: '#2EA84A', letterSpacing: '0.12em', textTransform: 'uppercase' }}>{s.eyebrow}</p>}
+            <p style={{ margin: '0 0 6px', fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>{s.heading}</p>
+            {s.table && (
+              <div style={{ marginBottom: 6 }}>
+                {s.table.rows.slice(0, 3).map((row, j) => (
+                  <div key={j} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--text-muted)', padding: '3px 0', borderBottom: j < 2 ? '1px solid var(--border)' : 'none' }}>
+                    <span>{row[0]}</span>
+                    <span style={{ fontWeight: 700, color: '#2EA84A' }}>{row[1]}</span>
+                  </div>
+                ))}
+                {s.table.rows.length > 3 && <p style={{ margin: '4px 0 0', fontSize: 10, color: 'var(--text-support)' }}>+{s.table.rows.length - 3} more rows in download</p>}
+              </div>
+            )}
+            {(s.bullets ?? []).slice(0, 2).map((b, j) => (
+              <p key={j} style={{ margin: '3px 0', fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.5 }}>› {b}</p>
+            ))}
+          </div>
+        ))}
+        {brief.bottomLine && (
+          <div style={{ background: 'rgba(46,168,74,0.08)', border: '1px solid rgba(46,168,74,0.2)', borderRadius: 8, padding: '10px 12px' }}>
+            <p style={{ margin: '0 0 3px', fontSize: 9, fontWeight: 800, color: '#2EA84A', letterSpacing: '0.10em', textTransform: 'uppercase' }}>Bottom Line</p>
+            <p style={{ margin: 0, fontSize: 12, color: 'var(--text-primary)', lineHeight: 1.55 }}>{brief.bottomLine}</p>
+          </div>
+        )}
+      </div>
+
+      {/* Download button */}
+      <div style={{ padding: '0 18px 16px', display: 'flex', gap: 8 }}>
+        <button
+          onClick={() => downloadBrief(brief)}
+          style={{
+            flex: 1,
+            background: 'rgba(46,168,74,0.9)',
+            border: 'none',
+            borderRadius: 9,
+            padding: '9px 14px',
+            cursor: 'pointer',
+            color: '#fff',
+            fontFamily: 'DM Sans, sans-serif',
+            fontSize: 12,
+            fontWeight: 700,
+            letterSpacing: '0.04em',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 7,
+          }}
+        >
+          ↓ Download Brief
+        </button>
+        <button
+          onClick={() => { const w = window.open('', '_blank'); w.document.write(generateBriefHTML(brief)); w.document.close(); }}
+          style={{
+            background: 'rgba(125,230,155,0.1)',
+            border: '1px solid rgba(125,230,155,0.25)',
+            borderRadius: 9,
+            padding: '9px 14px',
+            cursor: 'pointer',
+            color: 'var(--accent-mint)',
+            fontFamily: 'DM Sans, sans-serif',
+            fontSize: 12,
+            fontWeight: 600,
+          }}
+        >
+          Preview
+        </button>
+      </div>
+    </div>
+  );
 }
 
 // ─── Markdown renderer ────────────────────────────────────────────────────────
@@ -259,6 +484,24 @@ function TypingIndicator() {
 // ─── Message bubble ───────────────────────────────────────────────────────────
 function Message({ msg }) {
   const isUser = msg.role === 'user';
+
+  // Brief detection — if assistant message contains <BRIEF> JSON, render BriefCard
+  if (!isUser) {
+    const brief = parseBrief(msg.content);
+    if (brief) {
+      return (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25 }}
+          style={{ marginBottom: 10 }}
+        >
+          <BriefCard brief={brief} />
+        </motion.div>
+      );
+    }
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -325,7 +568,7 @@ export default function ChatPanel({ transforms, open, setOpen, vaultUnlocked = f
         },
         body: JSON.stringify({
           model: 'claude-sonnet-4-6',
-          max_tokens: 1024,
+          max_tokens: 2048,
           system: buildSystemPrompt(transforms, vaultUnlocked),
           messages: newMessages.map(m => ({ role: m.role, content: m.content })),
         }),
