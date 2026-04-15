@@ -43,7 +43,7 @@ export default function SlideW3Daily({ transforms }) {
 
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} style={{ flexShrink: 0, marginBottom: 16 }}>
-        <div style={{ fontFamily: MONO, fontSize: 10, color: 'rgba(125,230,155,0.6)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 6 }}>
+        <div style={{ fontFamily: MONO, fontSize: 10, color: 'var(--text-support)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 6 }}>
           Usage Frequency · Three Waves
         </div>
         <h1 style={{ fontFamily: SANS, fontSize: 'clamp(26px, 3vw, 38px)', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.025em', lineHeight: 1.1, margin: 0 }}>
@@ -63,7 +63,7 @@ export default function SlideW3Daily({ transforms }) {
           initial={{ opacity: 0, x: -12 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.12 }}
-          style={{ flex: '0 0 56%', display: 'flex', flexDirection: 'column', gap: 10, overflow: 'hidden' }}
+          style={{ flex: '0 0 56%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', overflow: 'hidden' }}
         >
           <div style={{ fontFamily: MONO, fontSize: 12, color: 'var(--text-medium)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Usage frequency by wave</div>
           <div style={{ flex: 1, minHeight: 0 }}>
@@ -91,7 +91,7 @@ export default function SlideW3Daily({ transforms }) {
           <div style={{ display: 'flex', gap: 14, flexShrink: 0 }}>
             {Object.entries(FREQ_COLORS).map(([label, color]) => (
               <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                <div style={{ width: 8, height: 8, borderRadius: 2, background: color }} />
+                <div style={{ width: 11, height: 11, borderRadius: 3, background: color }} />
                 <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: 'var(--text-support)' }}>{label}</span>
               </div>
             ))}
@@ -99,8 +99,8 @@ export default function SlideW3Daily({ transforms }) {
 
           {/* The shift to watch */}
           <div style={{ background: 'rgba(125,230,155,0.04)', border: '1px solid rgba(125,230,155,0.12)', borderRadius: 10, padding: '10px 14px', flexShrink: 0 }}>
-            <span style={{ fontFamily: SANS, fontSize: 15, fontWeight: 800, color: 'var(--text-medium)' }}>The shift to watch  </span>
-            <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 15, color: 'var(--text-bridge)', lineHeight: 1.55 }}>
+            <span style={{ fontFamily: SANS, fontSize: 18, fontWeight: 800, color: 'var(--text-medium)' }}>The shift to watch  </span>
+            <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 17, color: 'var(--text-bridge)', lineHeight: 1.55 }}>
               Daily use doubled between Wave 1 and Wave 2, then climbed again to 90% in Wave 3. At this point, usage volume is no longer the most useful success metric.
             </span>
           </div>
@@ -111,30 +111,30 @@ export default function SlideW3Daily({ transforms }) {
           initial={{ opacity: 0, x: 12 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 14 }}
+          style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}
         >
           {/* 2 big stats */}
           <div style={{ display: 'flex', gap: 10, flexShrink: 0 }}>
             <div style={{ flex: 1, background: 'var(--card-bg)', border: '1px solid rgba(26,74,94,0.5)', borderLeft: '4px solid #1a4a5e', borderRadius: 12, padding: '16px 14px' }}>
-              <div style={{ fontFamily: SANS, fontSize: 'clamp(34px, 4vw, 52px)', fontWeight: 900, color: '#59BEC9', lineHeight: 1 }}>{dailyPct}%</div>
+              <div style={{ fontFamily: SANS, fontSize: 'clamp(44px, 5vw, 64px)', fontWeight: 900, color: '#59BEC9', lineHeight: 1 }}>{dailyPct}%</div>
               <div style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 15, color: 'var(--text-support)', marginTop: 4 }}>Wave 3 daily use</div>
             </div>
             <div style={{ flex: 1, background: 'var(--card-bg)', border: '1px solid rgba(89,190,201,0.2)', borderLeft: '4px solid #59BEC9', borderRadius: 12, padding: '16px 14px' }}>
-              <div style={{ fontFamily: SANS, fontSize: 'clamp(34px, 4vw, 52px)', fontWeight: 900, color: '#FFCD00', lineHeight: 1 }}>42%</div>
+              <div style={{ fontFamily: SANS, fontSize: 'clamp(44px, 5vw, 64px)', fontWeight: 900, color: '#FFCD00', lineHeight: 1 }}>42%</div>
               <div style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 15, color: 'var(--text-support)', marginTop: 4 }}>Slack 2025: desk workers using AI at least weekly</div>
             </div>
           </div>
 
           {/* Benchmark context */}
-          <div style={{ background: 'rgba(125,230,155,0.04)', border: '1px solid rgba(125,230,155,0.14)', borderRadius: 10, padding: '12px 14px' }}>
-            <div style={{ fontFamily: SANS, fontSize: 15, fontWeight: 800, color: 'var(--text-medium)', marginBottom: 7 }}>Benchmark context</div>
-            <ul style={{ margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div style={{ background: 'rgba(125,230,155,0.04)', border: '1px solid rgba(125,230,155,0.14)', borderRadius: 10, padding: '14px 16px', flexShrink: 0 }}>
+            <div style={{ fontFamily: SANS, fontSize: 18, fontWeight: 800, color: 'var(--text-medium)', marginBottom: 9 }}>Benchmark context</div>
+            <ul style={{ margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
               {[
                 { color: '#2EA84A', txt: 'Microsoft 2024: 75% of global knowledge workers use AI at work.' },
                 { color: '#59BEC9', txt: 'Slack 2025: 60% of desk workers use AI, and 42% use it at least weekly.' },
                 { color: '#7DE69B', txt: 'This department appears well ahead on regular use.' },
               ].map((b, i) => (
-                <li key={i} style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 15, color: 'var(--text-bridge)', lineHeight: 1.55, listStyle: 'none' }}>
+                <li key={i} style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 18, color: 'var(--text-bridge)', lineHeight: 1.55, listStyle: 'none' }}>
                   <span style={{ color: b.color, marginRight: 6 }}>●</span>{b.txt}
                 </li>
               ))}

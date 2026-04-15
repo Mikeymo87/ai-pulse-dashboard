@@ -146,7 +146,7 @@ export default function App() {
           {activeTab === 'team' && (
             <>
               <ParticipationStory transforms={transforms} />
-              <Archetypes transforms={transforms} />
+              <Archetypes transforms={transforms} vaultUnlocked={vaultUnlocked} />
               <ToolEcosystem transforms={transforms} />
 
               {/* Leadership Vault — password-protected */}

@@ -44,7 +44,7 @@ export default function SlideW3Tools({ transforms }) {
 
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} style={{ flexShrink: 0, marginBottom: 16 }}>
-        <div style={{ fontFamily: MONO, fontSize: 10, color: 'rgba(125,230,155,0.6)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 6 }}>
+        <div style={{ fontFamily: MONO, fontSize: 10, color: 'var(--text-support)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 6 }}>
           Tool Ecosystem · Wave 3
         </div>
         <h1 style={{ fontFamily: SANS, fontSize: 'clamp(26px, 3vw, 38px)', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.025em', lineHeight: 1.1, margin: 0 }}>
@@ -94,30 +94,30 @@ export default function SlideW3Tools({ transforms }) {
           initial={{ opacity: 0, x: 12 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 14 }}
+          style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}
         >
           {/* 2 big stats */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, flexShrink: 0 }}>
             <div style={{ background: 'var(--card-bg)', border: '1px solid rgba(229,85,79,0.2)', borderLeft: '4px solid #E5554F', borderRadius: 12, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 14 }}>
-              <div style={{ fontFamily: SANS, fontSize: 'clamp(32px, 3.8vw, 48px)', fontWeight: 900, color: '#E5554F', lineHeight: 1, minWidth: 64 }}>77%</div>
+              <div style={{ fontFamily: SANS, fontSize: 'clamp(44px, 5vw, 64px)', fontWeight: 900, color: '#E5554F', lineHeight: 1, minWidth: 72 }}>77%</div>
               <div style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 15, color: 'var(--text-support)', lineHeight: 1.4 }}>use tools beyond the official stack</div>
             </div>
             <div style={{ background: 'var(--card-bg)', border: '1px solid rgba(255,205,0,0.2)', borderLeft: '4px solid #FFCD00', borderRadius: 12, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 14 }}>
-              <div style={{ fontFamily: SANS, fontSize: 'clamp(32px, 3.8vw, 48px)', fontWeight: 900, color: '#FFCD00', lineHeight: 1, minWidth: 64 }}>{ownPocketPct}%</div>
+              <div style={{ fontFamily: SANS, fontSize: 'clamp(44px, 5vw, 64px)', fontWeight: 900, color: '#FFCD00', lineHeight: 1, minWidth: 72 }}>{ownPocketPct}%</div>
               <div style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 15, color: 'var(--text-support)', lineHeight: 1.4 }}>pay out of pocket for AI tools used at work</div>
             </div>
           </div>
 
           {/* Why this matters */}
-          <div style={{ background: 'rgba(125,230,155,0.04)', border: '1px solid rgba(125,230,155,0.14)', borderRadius: 10, padding: '12px 14px' }}>
-            <div style={{ fontFamily: SANS, fontSize: 15, fontWeight: 800, color: 'var(--text-medium)', marginBottom: 7 }}>Why this matters</div>
-            <ul style={{ margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div style={{ background: 'rgba(125,230,155,0.04)', border: '1px solid rgba(125,230,155,0.14)', borderRadius: 10, padding: '14px 16px', flexShrink: 0 }}>
+            <div style={{ fontFamily: SANS, fontSize: 16, fontWeight: 800, color: 'var(--text-medium)', marginBottom: 9 }}>Why this matters</div>
+            <ul style={{ margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
               {[
                 'People are trying to solve real work problems.',
                 'The risk is tool sprawl, unclear standards, and uneven access.',
                 'Leaders need a clearer core stack and faster decisions on justified exceptions.',
               ].map((txt, i) => (
-                <li key={i} style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 15, color: 'var(--text-bridge)', lineHeight: 1.55, listStyle: 'none' }}>
+                <li key={i} style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 18, color: 'var(--text-bridge)', lineHeight: 1.55, listStyle: 'none' }}>
                   <span style={{ color: '#7DE69B', marginRight: 6 }}>●</span>{txt}
                 </li>
               ))}

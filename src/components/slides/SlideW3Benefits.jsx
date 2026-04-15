@@ -41,7 +41,7 @@ export default function SlideW3Benefits({ transforms }) {
 
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} style={{ flexShrink: 0, marginBottom: 16 }}>
-        <div style={{ fontFamily: MONO, fontSize: 10, color: 'rgba(125,230,155,0.6)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 6 }}>
+        <div style={{ fontFamily: MONO, fontSize: 10, color: 'var(--text-support)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 6 }}>
           Top Benefits · Wave 3
         </div>
         <h1 style={{ fontFamily: SANS, fontSize: 'clamp(26px, 3vw, 38px)', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.025em', lineHeight: 1.1, margin: 0 }}>
@@ -90,30 +90,30 @@ export default function SlideW3Benefits({ transforms }) {
           initial={{ opacity: 0, x: 12 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 14 }}
+          style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}
         >
-          <div style={{ fontFamily: SANS, fontSize: 'clamp(17px, 2vw, 22px)', fontWeight: 900, color: '#2EA84A', lineHeight: 1.2, letterSpacing: '-0.01em' }}>
+          <div style={{ fontFamily: SANS, fontSize: 'clamp(20px, 2.4vw, 28px)', fontWeight: 900, color: '#2EA84A', lineHeight: 1.2, letterSpacing: '-0.01em', flexShrink: 0 }}>
             This is no longer just a speed story
           </div>
 
-          <div style={{ background: 'rgba(125,230,155,0.04)', border: '1px solid rgba(125,230,155,0.14)', borderRadius: 10, padding: '12px 14px' }}>
-            <div style={{ fontFamily: SANS, fontSize: 15, fontWeight: 800, color: 'var(--text-medium)', marginBottom: 7 }}>What stands out</div>
-            <ul style={{ margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div style={{ background: 'rgba(125,230,155,0.04)', border: '1px solid rgba(125,230,155,0.14)', borderRadius: 10, padding: '14px 16px', flexShrink: 0 }}>
+            <div style={{ fontFamily: SANS, fontSize: 18, fontWeight: 800, color: 'var(--text-medium)', marginBottom: 9 }}>What stands out</div>
+            <ul style={{ margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
               {[
                 'Quality / polish edges out time savings.',
                 'Strategic thought partnership is already a top-three benefit.',
                 'Communication clarity and idea generation are strong secondary gains.',
               ].map((txt, i) => (
-                <li key={i} style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 15, color: 'var(--text-bridge)', lineHeight: 1.55, listStyle: 'none' }}>
+                <li key={i} style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 19, color: 'var(--text-bridge)', lineHeight: 1.55, listStyle: 'none' }}>
                   <span style={{ color: '#7DE69B', marginRight: 6 }}>●</span>{txt}
                 </li>
               ))}
             </ul>
           </div>
 
-          <div style={{ background: 'rgba(255,205,0,0.05)', border: '1px solid rgba(255,205,0,0.22)', borderRadius: 10, padding: '12px 14px' }}>
-            <span style={{ fontFamily: SANS, fontSize: 15, fontWeight: 800, color: '#FFCD00' }}>Leadership implication  </span>
-            <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 15, color: 'var(--text-bridge)', lineHeight: 1.55 }}>
+          <div style={{ background: 'rgba(255,205,0,0.05)', border: '1px solid rgba(255,205,0,0.22)', borderRadius: 10, padding: '14px 16px', flexShrink: 0 }}>
+            <span style={{ fontFamily: SANS, fontSize: 18, fontWeight: 800, color: '#FFCD00' }}>Leadership implication  </span>
+            <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 18, color: 'var(--text-bridge)', lineHeight: 1.55 }}>
               The next move is to capture and spread the highest-value use cases, not just the fastest ones.
             </span>
           </div>

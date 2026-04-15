@@ -13,8 +13,10 @@ function getChartData(sentimentTrend) {
   return waves.map(({ name, key }) => {
     const pos = sentimentTrend?.find(e => e.sentiment === 'Positive')?.[key]?.pct ?? 0;
     const mix = sentimentTrend?.find(e => e.sentiment === 'Mixed')?.[key]?.pct ?? 0;
-    const neg = sentimentTrend?.find(e => e.sentiment === 'Negative')?.[key]?.pct ?? 0;
-    return { name, Positive: Math.round(pos), Mixed: Math.round(mix), Negative: Math.round(neg) };
+    const rPos = Math.round(pos);
+    const rMix = Math.round(mix);
+    const rNeg = Math.max(0, 100 - rPos - rMix); // ensures bars always fill to 100%
+    return { name, Positive: rPos, Mixed: rMix, Negative: rNeg };
   });
 }
 
@@ -45,7 +47,7 @@ export default function SlideW3Feelings({ transforms }) {
 
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} style={{ flexShrink: 0, marginBottom: 16 }}>
-        <div style={{ fontFamily: MONO, fontSize: 10, color: 'rgba(125,230,155,0.6)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 6 }}>
+        <div style={{ fontFamily: MONO, fontSize: 10, color: 'var(--text-support)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 6 }}>
           Sentiment &amp; Importance
         </div>
         <h1 style={{ fontFamily: SANS, fontSize: 'clamp(26px, 3vw, 38px)', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.025em', lineHeight: 1.1, margin: 0 }}>
@@ -65,7 +67,7 @@ export default function SlideW3Feelings({ transforms }) {
           initial={{ opacity: 0, x: -12 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.12 }}
-          style={{ flex: '0 0 54%', display: 'flex', flexDirection: 'column', gap: 10, overflow: 'hidden' }}
+          style={{ flex: '0 0 54%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', overflow: 'hidden' }}
         >
           <div style={{ fontFamily: MONO, fontSize: 12, color: 'var(--text-medium)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Feelings about AI</div>
           <div style={{ flex: 1, minHeight: 0 }}>
@@ -98,7 +100,7 @@ export default function SlideW3Feelings({ transforms }) {
           <div style={{ display: 'flex', gap: 16, flexShrink: 0 }}>
             {[['#2EA84A','Positive'],['#FFCD00','Mixed'],['#E5554F','Negative / unsure']].map(([c,l]) => (
               <div key={l} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                <div style={{ width: 8, height: 8, borderRadius: 2, background: c }} />
+                <div style={{ width: 11, height: 11, borderRadius: 3, background: c }} />
                 <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: 'var(--text-support)' }}>{l}</span>
               </div>
             ))}
@@ -112,8 +114,8 @@ export default function SlideW3Feelings({ transforms }) {
             padding: '10px 14px',
             flexShrink: 0,
           }}>
-            <span style={{ fontFamily: SANS, fontSize: 15, fontWeight: 800, color: 'var(--text-medium)' }}>Read on the chart  </span>
-            <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 15, color: 'var(--text-bridge)', lineHeight: 1.55 }}>
+            <span style={{ fontFamily: SANS, fontSize: 18, fontWeight: 800, color: 'var(--text-medium)' }}>Read on the chart  </span>
+            <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 17, color: 'var(--text-bridge)', lineHeight: 1.55 }}>
               Positive sentiment rose from 49% in Wave 1 to 69% in Wave 3. Mixed feelings remain, but outright negativity is minimal.
             </span>
           </div>
@@ -124,19 +126,20 @@ export default function SlideW3Feelings({ transforms }) {
           initial={{ opacity: 0, x: 12 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12, overflow: 'hidden' }}
+          style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', overflow: 'hidden' }}
         >
           <div style={{ fontFamily: MONO, fontSize: 12, color: 'var(--text-medium)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>AI rated 4 or 5 in importance</div>
 
           {/* 3 stat boxes */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flexShrink: 0 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: '1 1 0', justifyContent: 'space-between' }}>
             {impVals.map((s, i) => (
               <div key={i} style={{
                 background: 'var(--card-bg)', border: `1px solid rgba(125,230,155,0.1)`,
                 borderLeft: `4px solid ${s.color}`, borderRadius: 10,
-                padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 14,
+                padding: '14px 14px', display: 'flex', alignItems: 'center', gap: 14,
+                minHeight: 80,
               }}>
-                <div style={{ fontFamily: SANS, fontSize: 'clamp(28px, 3.2vw, 40px)', fontWeight: 900, color: s.color, lineHeight: 1, minWidth: 64 }}>
+                <div style={{ fontFamily: SANS, fontSize: 'clamp(36px, 4vw, 52px)', fontWeight: 900, color: s.color, lineHeight: 1, minWidth: 72 }}>
                   {s.pct}%
                 </div>
                 <div style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 15, color: 'var(--text-support)' }}>{s.label}</div>
@@ -155,7 +158,7 @@ export default function SlideW3Feelings({ transforms }) {
                 'Pew 2025: 52% of workers say they feel worried about future AI use in the workplace.',
                 'This department looks more engaged and more positive than that broader picture.',
               ].map((txt, i) => (
-                <li key={i} style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: 'var(--text-bridge)', lineHeight: 1.5, listStyle: 'none', paddingLeft: 0 }}>
+                <li key={i} style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 17, color: 'var(--text-bridge)', lineHeight: 1.5, listStyle: 'none', paddingLeft: 0 }}>
                   <span style={{ color: '#7DE69B', marginRight: 6 }}>●</span>{txt}
                 </li>
               ))}
@@ -167,8 +170,8 @@ export default function SlideW3Feelings({ transforms }) {
             background: 'rgba(255,205,0,0.05)', border: '1px solid rgba(255,205,0,0.22)',
             borderRadius: 10, padding: '10px 14px',
           }}>
-            <span style={{ fontFamily: SANS, fontSize: 15, fontWeight: 800, color: '#FFCD00' }}>Why it matters  </span>
-            <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 15, color: 'var(--text-bridge)', lineHeight: 1.55 }}>
+            <span style={{ fontFamily: SANS, fontSize: 18, fontWeight: 800, color: '#FFCD00' }}>Why it matters  </span>
+            <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 17, color: 'var(--text-bridge)', lineHeight: 1.55 }}>
               AI is moving into core capability territory here, not optional side experimentation.
             </span>
           </div>

@@ -2,6 +2,11 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useIsMobile } from '../hooks/useIsMobile';
 import {
+  BarChart, Bar, LineChart, Line,
+  XAxis, YAxis, CartesianGrid, Tooltip as RCTooltip,
+  ResponsiveContainer, PieChart, Pie, Cell,
+} from 'recharts';
+import {
   Document, Paragraph, TextRun, Table, TableRow, TableCell,
   Packer, HeadingLevel, AlignmentType, BorderStyle, WidthType,
   ShadingType, convertInchesToTwip,
@@ -79,9 +84,17 @@ You have access to results from 3 AI adoption pulse surveys conducted over 14 mo
 STRICT RULES:
 1. Only cite numbers from the data below — never invent or estimate figures not provided
 2. If a question can't be answered from the data, say so honestly
-3. Keep answers concise — 2–4 sentences unless a list is clearly needed
-4. Tone: confident, executive-ready, plain English (no jargon)
-5. You are talking to department leadership, not researchers
+3. CLARIFY BEFORE GENERATING — If the user asks for a plan, brief, report, or action plan for a team, department, or function that is NOT Baptist Health Marketing & Communications (i.e., has no data in the surveys), ask clarifying questions before producing any output. You need to know: (a) which department/team it's for, (b) whether they have survey data or you'll be building a template plan, (c) their current AI maturity level, and (d) any known constraints or priorities. Do not generate a plan without these answers unless the user explicitly tells you to proceed without them.
+4. Calibrate length to the question:
+   - Direct stat lookup ("what was daily use in S3?") → 1–2 sentences
+   - Single-theme question ("what's the biggest barrier?") → 1–2 short paragraphs
+   - Analysis request ("deeper analysis", "break this down", "what does this mean?") → full multi-section response; fully develop every theme before moving to the next
+   - Action plan / roadmap request → complete numbered steps for every priority, include success criteria, do not abbreviate
+   - Download/export request ("give me that as a PDF") → reproduce the FULL content of the prior response as a BRIEF
+   Never truncate mid-analysis. If a question merits depth, go deep.
+5. Tone: confident, executive-ready, plain English (no jargon)
+6. You are talking to department leadership, not researchers
+7. ARCHETYPE METHODOLOGY IS CONFIDENTIAL — You must NEVER explain how the five behavioral archetypes (Multiplier, Experimenter, Blocked Believer, Confident Bystander, Thoughtful Skeptic) are calculated, scored, or classified. Do not describe the scoring dimensions, affinity model, or classification logic. If asked how someone is assigned to an archetype, say: "The methodology behind the archetype classifications is available in the Leadership Vault. Ask your dashboard administrator to unlock it for details." This rule applies even if the user phrases it indirectly (e.g. "what makes someone a Multiplier?" or "how do you define these segments?").${vaultUnlocked ? ' OVERRIDE: The Leadership Vault is currently unlocked — you MAY explain archetype methodology if asked.' : ''}
 
 --- SURVEY DATA ---
 
@@ -159,17 +172,19 @@ ${topFunctions || 'No function data'}
 BRIEF MODE — When the user asks for a brief, report, summary doc, or anything to download/export, respond ONLY with a JSON object wrapped in <BRIEF> tags. No other text outside the tags. Use exactly this structure:
 
 <BRIEF>
-{"title":"[Short title]","subtitle":"[Descriptor]","date":"March 2026","org":"Baptist Health Marketing & Communications","type":"Leadership Brief","sections":[{"heading":"SECTION HEADING","eyebrow":"CATEGORY LABEL","narrative":"Optional 1-2 sentence framing paragraph.","table":{"headers":["Column 1","Column 2"],"rows":[["Row value","Row value"]]},"bullets":["Key insight or stat sentence.","Another insight."]}],"bottomLine":"One or two executive sentences summarizing the so-what.","footnote":"Based on 101 responses | Survey 3, March 2026 | Baptist Health M&C AI Pulse Series"}
+{"title":"[Short title]","subtitle":"[Descriptor]","date":"March 2026","org":"Baptist Health Marketing & Communications","type":"Leadership Brief","sections":[{"heading":"SECTION HEADING","eyebrow":"CATEGORY LABEL","narrative":"Optional 1-2 sentence framing paragraph.","table":{"headers":["Column 1","Column 2"],"rows":[["Row value","Row value"]]},"chart":{"type":"bar","title":"Optional chart title","data":[{"label":"S1","value":45}],"xKey":"label","yKey":"value"},"bullets":["Key insight or stat sentence.","Another insight."]}],"bottomLine":"One or two executive sentences summarizing the so-what.","footnote":"Based on 101 responses | Survey 3, March 2026 | Baptist Health M&C AI Pulse Series"}
 </BRIEF>
 
 BRIEF RULES:
 - Only include numbers from the data above — never fabricate
-- 2–4 sections max; each section may have a table, bullets, or both
-- narrative is optional but useful for framing; keep to 1–2 sentences
+- Default to 2–4 sections; if the user requests a longer or more detailed brief, add as many sections as needed — no hard cap
+- If the user says "download that", "give me that as a PDF/Word", or refers to a response just generated in this conversation, reproduce the COMPLETE content of that response as BRIEF sections — do not re-summarize or condense it; match section count to what was already written
+- narrative is optional but useful for framing; keep to 1–2 sentences per section
 - eyebrow is a short ALL-CAPS category label (e.g. "BARRIERS", "MOMENTUM", "TOOLS")
 - bottomLine is the executive takeaway — plain language, no jargon
 - If a section has no table, omit the table key entirely
 - If a section has no bullets, omit the bullets key entirely
+- chart key is optional; use it when a section would benefit from a visual (trend data, comparisons); type must be "bar", "line", or "pie"; chart.data is an array of objects; xKey and yKey name the fields to plot
 
 ---
 
@@ -182,6 +197,7 @@ Write like a research analyst presenting findings to leadership:
 - Use 2–3 verbatim-style evidence bullets per theme (describe the pattern if exact quotes not available)
 - Close major sections with "**What it means:** [plain English so-what]"
 - Tone: precise, unsparing, evidence-first. No cheerleading.
+- Do not abbreviate. Every theme gets full development: theme name + count/% + interpretation + evidence bullets + "What it means" close. If there are 6 themes, develop all 6.
 
 ADOPTION ADVISOR MODE — Use when the question asks what to do, next steps, action plans, strategy, recommendations, or references the playbook or priorities.
 Write like a prescriptive consultant giving a roadmap:
@@ -191,6 +207,7 @@ Write like a prescriptive consultant giving a roadmap:
 - Tie each recommendation to a specific data point
 - End with the leading indicator to watch
 - Tone: direct, executive-ready, roadmap energy. No hedging.
+- For a full action plan or roadmap: include every priority and every numbered step. Write each step in full — do not summarize. Always close with a Phase Success Criteria table.
 
 BEHAVIORAL ANALYST MODE — Use when the question is about why people behave a certain way, resistance, psychology, motivation, fear, culture, or mindset.
 Write like an organizational psychologist:
@@ -199,8 +216,9 @@ Write like an organizational psychologist:
 - Connect it to the specific data (cite numbers)
 - End with the change lever — what actually moves the needle behaviorally
 - Tone: clinical but accessible, names dynamics without jargon.
+- Fully develop the narrative. Name the dynamic → explain it → connect to specific numbers → end with the concrete change lever. Do not compress into a single paragraph.
 
-DEFAULT MODE — For direct data lookups, trend comparisons, stat questions: concise, 2–4 sentences, cite numbers.
+DEFAULT MODE — For direct stat lookups: concise, 1–3 sentences, cite numbers. For anything that asks for analysis, patterns, or explanations: switch to the appropriate agent mode above and write at full depth.
 
 ---
 
@@ -218,7 +236,26 @@ TABLE RULES:
 - Use commas ONLY as column delimiters; avoid commas inside cell values
 - Always use TABLE when comparing 3+ items side by side — never describe tabular data in plain text when a table works better
 - TABLE and BRIEF are mutually exclusive — TABLE for inline data views, BRIEF for full export documents
-- After a TABLE block, continue your response as normal markdown text outside the tags`;
+- After a TABLE block, continue your response as normal markdown text outside the tags
+
+---
+
+CHART FORMAT — When trend data, comparisons, or distributions would be clearer as a visual, wrap a JSON spec in CHART tags:
+
+<CHART>
+{"type":"bar","title":"Daily AI Use by Survey","data":[{"wave":"S1","pct":45},{"wave":"S2","pct":68},{"wave":"S3","pct":90}],"xKey":"wave","yKey":"pct","color":"#7DE69B"}
+</CHART>
+
+CHART RULES:
+- type: "bar" (grouped bars), "line" (trend line), or "pie" (distribution)
+- title: optional short label shown above the chart
+- data: array of plain objects — all values must be numbers or short strings
+- xKey: field name for the X-axis / category labels
+- yKey: field name for the value (bar height / line value) — for multi-series use yKeys as an array of field names
+- color: optional hex; defaults to mint green #7DE69B
+- CHART and BRIEF are mutually exclusive for full exports — use CHART for inline visuals alongside conversational responses
+- CHART can appear before or after a TABLE block in the same response
+- After a CHART block, continue your response as normal markdown text outside the tags`;
 }
 
 // ─── Brief helpers ────────────────────────────────────────────────────────────
@@ -709,17 +746,89 @@ function TableCard({ raw }) {
   );
 }
 
-// Split a message that may contain <TABLE> blocks into ordered content blocks
+// ─── Chart card (rendered in chat when Claude returns a <CHART>) ───────────────
+const CHART_COLORS = ['#7DE69B', '#59BEC9', '#2EA84A', '#FFCD00', '#E5554F', '#a5b4fc'];
+
+function ChartCard({ raw }) {
+  let spec;
+  try { spec = JSON.parse(raw); } catch { return null; }
+  if (!spec?.data?.length) return null;
+
+  const { type = 'bar', title, data, xKey = 'label', yKey = 'value', yKeys, color } = spec;
+  const barColor = color || '#7DE69B';
+
+  const labelStyle = { fontFamily: 'DM Sans, sans-serif', fontSize: 11, fill: 'var(--text-support)' };
+
+  const tooltipStyle = {
+    contentStyle: {
+      background: '#1a1d1e',
+      border: '1px solid rgba(125,230,155,0.2)',
+      borderRadius: 8,
+      fontFamily: 'DM Sans, sans-serif',
+      fontSize: 12,
+    },
+  };
+
+  return (
+    <div style={{
+      background: 'var(--card-bg)',
+      border: '1px solid var(--border)',
+      borderRadius: 12,
+      padding: '14px 16px 10px',
+      width: '100%',
+    }}>
+      {title && (
+        <p style={{ margin: '0 0 10px', fontFamily: 'DM Sans, sans-serif', fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>
+          {title}
+        </p>
+      )}
+      <ResponsiveContainer width="100%" height={200}>
+        {type === 'line' ? (
+          <LineChart data={data} margin={{ top: 4, right: 12, bottom: 4, left: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(125,230,155,0.1)" />
+            <XAxis dataKey={xKey} tick={labelStyle} axisLine={false} tickLine={false} />
+            <YAxis tick={labelStyle} axisLine={false} tickLine={false} width={36} />
+            <RCTooltip {...tooltipStyle} />
+            {(yKeys ?? [yKey]).map((k, i) => (
+              <Line key={k} type="monotone" dataKey={k} stroke={CHART_COLORS[i % CHART_COLORS.length]} strokeWidth={2} dot={{ r: 3 }} />
+            ))}
+          </LineChart>
+        ) : type === 'pie' ? (
+          <PieChart>
+            <Pie data={data} dataKey={yKey} nameKey={xKey} cx="50%" cy="50%" outerRadius={80}
+              label={entry => `${entry[xKey]}: ${entry[yKey]}%`} labelLine={false}>
+              {data.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
+            </Pie>
+            <RCTooltip {...tooltipStyle} />
+          </PieChart>
+        ) : (
+          <BarChart data={data} margin={{ top: 4, right: 12, bottom: 4, left: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(125,230,155,0.1)" vertical={false} />
+            <XAxis dataKey={xKey} tick={labelStyle} axisLine={false} tickLine={false} />
+            <YAxis tick={labelStyle} axisLine={false} tickLine={false} width={36} />
+            <RCTooltip {...tooltipStyle} />
+            {(yKeys ?? [yKey]).map((k, i) => (
+              <Bar key={k} dataKey={k} fill={i === 0 ? barColor : CHART_COLORS[(i + 1) % CHART_COLORS.length]} radius={[4, 4, 0, 0]} maxBarSize={48} />
+            ))}
+          </BarChart>
+        )}
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+// Split a message that may contain <TABLE> or <CHART> blocks into ordered content blocks
 function parseContentBlocks(content) {
   const blocks = [];
-  const regex = /<TABLE>([\s\S]*?)<\/TABLE>/g;
+  const regex = /<(TABLE|CHART)>([\s\S]*?)<\/\1>/g;
   let lastIndex = 0;
   let match;
   while ((match = regex.exec(content)) !== null) {
     if (match.index > lastIndex) {
       blocks.push({ type: 'text', content: content.slice(lastIndex, match.index) });
     }
-    blocks.push({ type: 'table', content: match[1].trim() });
+    const tagType = match[1].toLowerCase(); // 'table' or 'chart'
+    blocks.push({ type: tagType, content: match[2].trim() });
     lastIndex = match.index + match[0].length;
   }
   if (lastIndex < content.length) {
@@ -982,9 +1091,9 @@ function Message({ msg }) {
     }
   }
 
-  // For assistant messages, split into text/table blocks
+  // For assistant messages, split into text/table/chart blocks
   const blocks = !isUser ? parseContentBlocks(msg.content) : null;
-  const hasTables = blocks && blocks.some(b => b.type === 'table');
+  const hasBlocks = blocks && blocks.some(b => b.type === 'table' || b.type === 'chart');
 
   return (
     <motion.div
@@ -1008,26 +1117,25 @@ function Message({ msg }) {
         }}>
           <p style={{ margin: 0, fontSize: 13, lineHeight: 1.55, color: 'var(--text-primary)' }}>{msg.content}</p>
         </div>
-      ) : hasTables ? (
+      ) : hasBlocks ? (
         // Mixed content — render each block in order, full width
         <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {blocks.map((block, i) => block.type === 'table'
-            ? <TableCard key={i} raw={block.content} />
-            : block.content.trim()
-              ? (
-                <div key={i} style={{
-                  maxWidth: '86%',
-                  padding: '10px 14px',
-                  borderRadius: '14px 14px 14px 4px',
-                  background: 'var(--surface-green)',
-                  border: '1px solid var(--border)',
-                  fontFamily: 'DM Sans, sans-serif',
-                }}>
-                  {renderMarkdown(block.content)}
-                </div>
-              )
-              : null
-          )}
+          {blocks.map((block, i) => {
+            if (block.type === 'table') return <TableCard key={i} raw={block.content} />;
+            if (block.type === 'chart') return <ChartCard key={i} raw={block.content} />;
+            return block.content.trim() ? (
+              <div key={i} style={{
+                maxWidth: '86%',
+                padding: '10px 14px',
+                borderRadius: '14px 14px 14px 4px',
+                background: 'var(--surface-green)',
+                border: '1px solid var(--border)',
+                fontFamily: 'DM Sans, sans-serif',
+              }}>
+                {renderMarkdown(block.content)}
+              </div>
+            ) : null;
+          })}
         </div>
       ) : (
         <div style={{
@@ -1099,8 +1207,8 @@ export default function ChatPanel({ transforms, open, setOpen, vaultUnlocked = f
           'content-type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-6',
-          max_tokens: 2048,
+          model: vaultUnlocked ? 'claude-sonnet-4-6' : 'claude-haiku-4-5-20251001',
+          max_tokens: 4096,
           system: buildSystemPrompt(transforms, vaultUnlocked),
           messages: newMessages.map(m => ({ role: m.role, content: m.content })),
         }),
@@ -1205,7 +1313,7 @@ export default function ChatPanel({ transforms, open, setOpen, vaultUnlocked = f
                 background: 'var(--accent-mint)',
                 boxShadow: '0 0 8px rgba(125,230,155,0.7)',
               }} />
-              <div>
+              <div style={{ flex: 1 }}>
                 <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'DM Sans, sans-serif' }}>
                   Ask the Data
                 </p>
@@ -1213,6 +1321,29 @@ export default function ChatPanel({ transforms, open, setOpen, vaultUnlocked = f
                   Answers grounded in survey data only
                 </p>
               </div>
+              {messages.length > 0 && (
+                <button
+                  onClick={() => setMessages([])}
+                  title="Clear conversation"
+                  style={{
+                    background: 'none',
+                    border: '1px solid rgba(125,230,155,0.15)',
+                    borderRadius: 6,
+                    padding: '4px 8px',
+                    cursor: 'pointer',
+                    fontFamily: 'DM Sans, sans-serif',
+                    fontSize: 10,
+                    fontWeight: 600,
+                    color: 'var(--text-support)',
+                    letterSpacing: '0.04em',
+                    transition: 'all 0.15s',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.color = '#E5554F'; e.currentTarget.style.borderColor = 'rgba(229,85,79,0.3)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-support)'; e.currentTarget.style.borderColor = 'rgba(125,230,155,0.15)'; }}
+                >
+                  Clear
+                </button>
+              )}
             </div>
 
             {/* Messages */}

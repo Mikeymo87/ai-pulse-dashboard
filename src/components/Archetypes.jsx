@@ -18,16 +18,16 @@ const ARC_CONFIG = [
 
 // ─── Oracle readings (live count + pct injected) ──────────────────────────────
 const ORACLE_LINES = {
-  'confident-bystander': (n, pct) =>
-    `${n} teammates — ${pct}% of your team — have the confidence but haven't yet had a moment that made it real. No barriers in their way. No friction to remove. All they need is the right first experience to turn potential into momentum.`,
-  'thoughtful-skeptic': (n, pct) =>
-    `${n} teammates (${pct}%) ask the hardest questions in the room — and they deserve real answers, not enthusiasm. Earn their trust with transparency and rigor, and the rest of the department will follow their lead.`,
-  'blocked-believer': (n, pct) =>
-    `${n} teammates (${pct}%) want to go further than the system allows. The will is there. The barrier is institutional — access, policy, tooling. One well-placed decision unlocks this entire group at once.`,
-  'experimenter': (n, pct) =>
-    `${n} teammates (${pct}%) are already in motion — trying tools, building habits, figuring out what works. They are the highest-ROI training investment in the department. The right support converts them into Multipliers.`,
-  'multiplier': (n, pct) =>
-    `${n} teammates — ${pct}% of your team — are already building with AI, not just using it. They pay out of pocket, work at the frontier, and pull the rest of the department forward. Protect their time and amplify their reach.`,
+  'thoughtful-skeptic': (n, pct, stats) =>
+    `${n} teammates (${pct}%) aren't buying what everyone else is selling — and they have receipts. They've watched AI hallucinate facts, seen tools overpromise, and sat through enough demos to know the difference between a party trick and a real workflow. ${stats?.dailyPct ?? 0}% still use it daily. They just refuse to pretend it's ready for everything.${stats?.topBarrier ? ` Their top friction: ${stats.topBarrier}.` : ''} Ignore them and you build on blind spots. Listen to them and you build something that actually holds up.`,
+  'confident-bystander': (n, pct, stats) =>
+    `${n} teammates — ${pct}% of your team — would tell you they're comfortable with AI. Their usage says otherwise. Only ${stats?.dailyPct ?? 0}% use it daily. No tools of their own. No friction they can point to. They're not opposed — they're waiting for someone to show them it matters for their job, not just the department's strategy deck. The distance between 'I could' and 'I do' is one meaningful use case. Nobody's handed them one yet.`,
+  'experimenter': (n, pct, stats) =>
+    `${n} teammates (${pct}%) are figuring it out in real time — averaging ${stats?.toolCount ?? 0} tools each, rewriting the same prompt four different ways, asking coworkers what works. ${stats?.dailyPct ?? 0}% already use AI daily. Nobody told them to. They're doing it because something clicked.${stats?.topBarrier ? ` Their biggest wall right now: ${stats.topBarrier}.` : ''} They're not experts yet and they know it — but they're closer than anyone thinks, and they'll remember who helped them get there.`,
+  'blocked-believer': (n, pct, stats) =>
+    `${n} teammates (${pct}%) are ready to run and the organization is holding the leash. ${stats?.positivePct ?? 0}% feel positive about AI. ${stats?.ownPocketPct ?? 0}% pay for tools out of their own pocket.${stats?.topBarrier ? ` But ${stats.topBarrier} keeps them stuck.` : ''} This group doesn't need inspiration or training — they need one door opened. Remove the barrier and they move overnight.`,
+  'multiplier': (n, pct, stats) =>
+    `${n} teammates — ${pct}% of your team — stopped waiting for the green light a long time ago. ${stats?.dailyPct ?? 0}% use AI every single day. ${stats?.ownPocketPct ?? 0}% pay out of their own pocket. They build workflows, design agents, and think in systems — not prompts. They are the reason the department's adoption numbers look as good as they do. Lose their momentum and the whole curve flattens. Invest in them and they pull everyone else forward.`,
 };
 
 // ─── Archetype static definitions — AI Competency Rubric order I→V ───────────
@@ -370,7 +370,7 @@ function CardFront({ def, data, revealed, onPortraitClick }) {
                 WebkitBoxOrient: 'vertical', overflow: 'hidden',
               }}
             >
-              {ORACLE_LINES[def.key]?.(data.count, data.pct)}
+              {ORACLE_LINES[def.key]?.(data.count, data.pct, data.stats)}
             </motion.p>
           )}
         </AnimatePresence>
@@ -406,7 +406,7 @@ function CardFront({ def, data, revealed, onPortraitClick }) {
 }
 
 // ─── Full-screen portrait modal ───────────────────────────────────────────────
-function FullScreenPortrait({ def, data, dynamicPills, onClose }) {
+function FullScreenPortrait({ def, data, onClose }) {
   useEffect(() => {
     const fn = e => e.key === 'Escape' && onClose();
     window.addEventListener('keydown', fn);
@@ -506,7 +506,7 @@ function FullScreenPortrait({ def, data, dynamicPills, onClose }) {
               margin: '8px 0 0', fontSize: 12, fontStyle: 'italic',
               color: '#b0b8c0', lineHeight: 1.6, fontFamily: 'DM Sans, sans-serif',
             }}>
-              {ORACLE_LINES[def.key]?.(data.count, data.pct)}
+              {ORACLE_LINES[def.key]?.(data.count, data.pct, data.stats)}
             </p>
           </div>
 
@@ -532,11 +532,6 @@ function FullScreenPortrait({ def, data, dynamicPills, onClose }) {
             <p style={{ margin: '3px 0 0', fontSize: 13, color: '#dde4e8', fontStyle: 'italic', fontFamily: 'DM Sans, sans-serif' }}>
               {def.tension}
             </p>
-          </div>
-
-          {/* Pills */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-            {dynamicPills.map((p, i) => <Pill key={i} label={p.label} type={p.type} />)}
           </div>
 
           {/* Representative quote */}
@@ -691,7 +686,7 @@ function ArchetypeCard({ def, data, index, revealed, onReveal, onFocus, isMobile
 }
 
 // ─── Main Archetypes section ──────────────────────────────────────────────────
-export default function Archetypes({ transforms }) {
+export default function Archetypes({ transforms, vaultUnlocked }) {
   const { archetypes } = transforms || {};
   const [revealedCards, setRevealedCards] = useState(new Set());
   const [revealing, setRevealing]         = useState(false);
@@ -827,15 +822,17 @@ export default function Archetypes({ transforms }) {
         </motion.div>
       </div>
 
-      {/* ── Footer note ── */}
-      <p style={{
-        textAlign: 'center', fontSize: 12, color: '#3a4048',
-        maxWidth: 1360, margin: '0 auto', padding: '0 32px', lineHeight: 1.6,
-        fontFamily: 'DM Sans, sans-serif',
-      }}>
-        Each respondent scores 0–100 across all five archetypes via 16-dimension affinity scoring.
-        Highest score wins. Near-ties promote to the more advanced adoption stage.
-      </p>
+      {/* ── Footer note (vault-gated) ── */}
+      {vaultUnlocked && (
+        <p style={{
+          textAlign: 'center', fontSize: 12, color: '#3a4048',
+          maxWidth: 1360, margin: '0 auto', padding: '0 32px', lineHeight: 1.6,
+          fontFamily: 'DM Sans, sans-serif',
+        }}>
+          Each respondent scores 0–100 across all five archetypes via 16-dimension affinity scoring.
+          Highest score wins. Near-ties promote to the more advanced adoption stage.
+        </p>
+      )}
 
       {/* ── Full-screen portrait modal ── */}
       <AnimatePresence>
@@ -843,7 +840,6 @@ export default function Archetypes({ transforms }) {
           <FullScreenPortrait
             def={focusedDef}
             data={focusedData}
-            dynamicPills={buildDynamicPills(focusedKey, focusedData)}
             onClose={() => setFocusedKey(null)}
           />
         )}

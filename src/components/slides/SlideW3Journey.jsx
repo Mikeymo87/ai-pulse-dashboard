@@ -60,7 +60,7 @@ export default function SlideW3Journey({ transforms }) {
 
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} style={{ flexShrink: 0, marginBottom: 16 }}>
-        <div style={{ fontFamily: MONO, fontSize: 10, color: 'rgba(125,230,155,0.6)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 6 }}>
+        <div style={{ fontFamily: MONO, fontSize: 10, color: 'var(--text-support)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 6 }}>
           AI Maturity · Department Journey
         </div>
         <h1 style={{ fontFamily: SANS, fontSize: 'clamp(26px, 3vw, 38px)', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.025em', lineHeight: 1.1, margin: 0 }}>
@@ -79,7 +79,7 @@ export default function SlideW3Journey({ transforms }) {
           initial={{ opacity: 0, x: -12 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.12 }}
-          style={{ flex: '0 0 55%', display: 'flex', flexDirection: 'column', gap: 10, overflow: 'hidden' }}
+          style={{ flex: '0 0 55%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', overflow: 'hidden' }}
         >
           <div style={{ fontFamily: MONO, fontSize: 12, color: 'var(--text-medium)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Stage of AI maturity</div>
           <div style={{ flex: 1, minHeight: 0 }}>
@@ -107,8 +107,8 @@ export default function SlideW3Journey({ transforms }) {
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', flexShrink: 0 }}>
             {Object.entries(STAGE_COLORS).map(([stage, color]) => (
               <div key={stage} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                <div style={{ width: 8, height: 8, borderRadius: 2, background: color }} />
-                <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: 'var(--text-support)' }}>{stage}</span>
+                <div style={{ width: 11, height: 11, borderRadius: 3, background: color }} />
+                <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 15, color: 'var(--text-support)' }}>{stage}</span>
               </div>
             ))}
           </div>
@@ -132,8 +132,8 @@ export default function SlideW3Journey({ transforms }) {
 
           {/* What changed callout */}
           <div style={{ background: 'rgba(125,230,155,0.04)', border: '1px solid rgba(125,230,155,0.12)', borderRadius: 10, padding: '10px 14px', flexShrink: 0 }}>
-            <span style={{ fontFamily: SANS, fontSize: 15, fontWeight: 800, color: 'var(--text-medium)' }}>What changed  </span>
-            <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 15, color: 'var(--text-bridge)', lineHeight: 1.55 }}>
+            <span style={{ fontFamily: SANS, fontSize: 18, fontWeight: 800, color: 'var(--text-medium)' }}>What changed  </span>
+            <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 17, color: 'var(--text-bridge)', lineHeight: 1.55 }}>
               Staff are moving up the maturity curve. The biggest gain is in integration and transformation.
             </span>
           </div>
@@ -144,8 +144,9 @@ export default function SlideW3Journey({ transforms }) {
           initial={{ opacity: 0, x: 12 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12 }}
+          style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}
         >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, flex: 1, justifyContent: 'space-between' }}>
           <div style={{ fontFamily: MONO, fontSize: 12, color: 'var(--text-medium)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
             How Wave 3 describes department momentum
           </div>
@@ -159,26 +160,27 @@ export default function SlideW3Journey({ transforms }) {
               style={{
                 background: 'var(--card-bg)', border: `1px solid rgba(125,230,155,0.1)`,
                 borderLeft: `4px solid ${m.color}`, borderRadius: 10,
-                padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 14,
+                padding: '16px 16px', display: 'flex', alignItems: 'center', gap: 14,
               }}
             >
-              <div style={{ fontFamily: SANS, fontSize: 'clamp(28px, 3vw, 38px)', fontWeight: 900, color: m.color, lineHeight: 1, minWidth: 64 }}>
+              <div style={{ fontFamily: SANS, fontSize: 'clamp(34px, 4vw, 48px)', fontWeight: 900, color: m.color, lineHeight: 1, minWidth: 72 }}>
                 {m.val}%
               </div>
               <div style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 14, color: 'var(--text-medium)', fontWeight: 600 }}>{m.label}</div>
             </motion.div>
           ))}
+          </div>
 
           {/* Plainspoken takeaway */}
           <div style={{ background: 'rgba(125,230,155,0.04)', border: '1px solid rgba(125,230,155,0.14)', borderRadius: 10, padding: '12px 14px', marginTop: 4 }}>
-            <div style={{ fontFamily: SANS, fontSize: 15, fontWeight: 800, color: 'var(--text-medium)', marginBottom: 6 }}>Plainspoken takeaway</div>
-            <ul style={{ margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 5 }}>
+            <div style={{ fontFamily: SANS, fontSize: 18, fontWeight: 800, color: 'var(--text-medium)', marginBottom: 8 }}>Plainspoken takeaway</div>
+            <ul style={{ margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 7 }}>
               {[
                 'The department has momentum.',
                 'But one in four still experiences AI as inconsistent or siloed.',
                 'That is the gap between individual wins and team-level operating change.',
               ].map((txt, i) => (
-                <li key={i} style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: 'var(--text-bridge)', lineHeight: 1.5, listStyle: 'none' }}>
+                <li key={i} style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 18, color: 'var(--text-bridge)', lineHeight: 1.5, listStyle: 'none' }}>
                   <span style={{ color: '#7DE69B', marginRight: 6 }}>●</span>{txt}
                 </li>
               ))}

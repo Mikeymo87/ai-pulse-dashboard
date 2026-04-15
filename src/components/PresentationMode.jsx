@@ -23,6 +23,7 @@ import SlideW3Support         from './slides/SlideW3Support';
 import SlideW3Priorities      from './slides/SlideW3Priorities';
 import SlideW3Scorecard       from './slides/SlideW3Scorecard';
 import SlideW3Closing         from './slides/SlideW3Closing';
+import SlideThankYou          from './slides/SlideThankYou';
 
 // ── All available slides ───────────────────────────────────────────────────────
 const SLIDES_ALL = [
@@ -55,12 +56,32 @@ const SLIDES_ALL = [
   { id: 'w3-priorities',    label: '6 Leadership Priorities' },
   { id: 'w3-scorecard',     label: 'Wave 4 Scorecard' },
   { id: 'w3-closing',       label: 'The Next Milestone — Better Work' },
+  { id: 'w3-thankyou',     label: 'Thank You' },
 ];
 
 // ── Lens-specific sequences (IDs reference SLIDES_ALL) ────────────────────────
 const SLIDE_SETS = {
-  // 'team' slide excluded from all lenses — scatter/role data lives in Leadership Vault only
-  council: SLIDES_ALL.filter(s => s.id !== 'team').map(s => s.id),
+  // council: Wave 3 AI Council narrative — matches the deck sequence
+  council: [
+    'cover',
+    'w3-one-liner',
+    'w3-big-picture',
+    'bell-curve',
+    'w3-feelings',
+    'w3-journey',
+    'w3-famconf',
+    'w3-daily',
+    'w3-benefits',
+    'w3-tools',
+    'w3-barriers',
+    'w3-struggling',
+    'w3-excited',
+    'w3-support',
+    'w3-priorities',
+    'w3-scorecard',
+    'w3-closing',
+    'w3-thankyou',
+  ],
   exec: [
     'cover',        // Cinematic opening
     'overview',     // Participation story + transformation in one slide
@@ -97,9 +118,9 @@ const LENSES = [
     key: 'council',
     title: 'AI Council',
     subtitle: 'Full deep dive',
-    duration: '~30 min',
+    duration: '~25 min',
     slides: SLIDE_SETS.council.length,
-    description: 'Every chart, every data point. The full adoption arc, personas, friction map, and strategic recommendations.',
+    description: 'Wave 3 full narrative — feelings, journey, confidence, tools, barriers, open text, priorities, and what success looks like next.',
     accent: '#59BEC9',
     icon: '◈',
   },
@@ -395,6 +416,7 @@ export default function PresentationMode({ transforms, surveys, vaultUnlocked, o
     if (id === 'w3-priorities')  return <SlideW3Priorities />;
     if (id === 'w3-scorecard')   return <SlideW3Scorecard   transforms={transforms} />;
     if (id === 'w3-closing')     return <SlideW3Closing />;
+    if (id === 'w3-thankyou')    return <SlideThankYou />;
   }
 
   // ── Pre-flight screen ──────────────────────────────────────────────────────

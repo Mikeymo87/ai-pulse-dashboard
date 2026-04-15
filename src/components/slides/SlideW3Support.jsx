@@ -46,7 +46,7 @@ function LockedState() {
         <div style={{
           background: 'rgba(125,230,155,0.06)', border: '1px solid rgba(125,230,155,0.18)',
           borderRadius: 8, padding: '10px 14px',
-          fontFamily: MONO, fontSize: 10, color: 'rgba(125,230,155,0.6)', letterSpacing: '0.1em',
+          fontFamily: MONO, fontSize: 10, color: 'var(--text-support)', letterSpacing: '0.1em',
         }}>
           Exit presentation → unlock vault from dashboard header
         </div>
@@ -76,7 +76,7 @@ export default function SlideW3Support({ vaultUnlocked }) {
 
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} style={{ flexShrink: 0, marginBottom: 16 }}>
-        <div style={{ fontFamily: MONO, fontSize: 10, color: 'rgba(125,230,155,0.6)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 6 }}>
+        <div style={{ fontFamily: MONO, fontSize: 10, color: 'var(--text-support)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 6 }}>
           Leadership Vault · Role &amp; Function Breakdown
         </div>
         <h1 style={{ fontFamily: SANS, fontSize: 'clamp(26px, 3vw, 38px)', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.025em', lineHeight: 1.1, margin: 0 }}>

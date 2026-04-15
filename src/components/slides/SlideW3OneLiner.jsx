@@ -53,7 +53,7 @@ export default function SlideW3OneLiner({ transforms }) {
       height: '100%',
       display: 'flex',
       flexDirection: 'column',
-      padding: '32px 56px 28px',
+      padding: '24px 56px 20px',
       boxSizing: 'border-box',
       overflow: 'hidden',
       position: 'relative',
@@ -70,7 +70,7 @@ export default function SlideW3OneLiner({ transforms }) {
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        style={{ fontFamily: MONO, fontSize: 10, color: 'rgba(125,230,155,0.6)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 14, flexShrink: 0 }}
+        style={{ fontFamily: MONO, fontSize: 10, color: 'var(--text-support)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 8, flexShrink: 0 }}
       >
         AI Engagement Pulse · Wave 3 · Baptist Health MarCom
       </motion.div>
@@ -83,7 +83,7 @@ export default function SlideW3OneLiner({ transforms }) {
         style={{
           fontFamily: SANS, fontSize: 'clamp(24px, 2.8vw, 36px)', fontWeight: 900,
           color: 'var(--text-primary)', letterSpacing: '-0.025em', lineHeight: 1.2,
-          margin: '0 0 28px', flexShrink: 0,
+          margin: '0 0 16px', flexShrink: 0,
         }}
       >
         The story in one line: adoption is strong, but the next phase requires{' '}
@@ -115,13 +115,14 @@ export default function SlideW3OneLiner({ transforms }) {
                   border: `1px solid rgba(125,230,155,0.1)`,
                   borderLeft: `4px solid ${card.color}`,
                   borderRadius: 12,
-                  padding: '24px 20px 20px',
+                  padding: '16px 20px 16px',
                   display: 'flex',
                   flexDirection: 'column',
                   gap: 8,
+                  flex: 1,
                 }}
               >
-                <div style={{ fontFamily: SANS, fontSize: 'clamp(40px, 4.5vw, 60px)', fontWeight: 900, color: card.color, lineHeight: 1, letterSpacing: '-0.03em' }}>
+                <div style={{ fontFamily: SANS, fontSize: 'clamp(44px, 5vw, 64px)', fontWeight: 900, color: card.color, lineHeight: 1, letterSpacing: '-0.03em' }}>
                   {val}
                 </div>
                 <div style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 16, color: 'var(--text-medium)', fontWeight: 600, lineHeight: 1.3 }}>
@@ -155,7 +156,7 @@ export default function SlideW3OneLiner({ transforms }) {
             What this means
           </div>
           <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 16, color: 'var(--text-bridge)', lineHeight: 1.65, margin: 0 }}>
-            This department has crossed the adoption threshold. The next leadership job is to reduce friction and help teams redesign work so AI creates better outcomes, not just more activity.
+            This department has crossed the adoption threshold. The next leadership job is to reduce friction and help teams redesign work.
           </p>
         </motion.div>
 

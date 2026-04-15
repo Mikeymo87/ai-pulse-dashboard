@@ -49,8 +49,8 @@ export default function SlideBellCurve({ transforms }) {
           lineHeight: 1.0,
           margin: '0 0 8px',
         }}>
-          The bell curve didn't just shift right —{' '}
-          <span style={{ color: '#7DE69B' }}>it collapsed left.</span>
+          The bell curve didn't just shift left —{' '}
+          <span style={{ color: '#7DE69B' }}>it collapsed.</span>
         </h1>
         <p style={{
           fontFamily: 'DM Sans, sans-serif',

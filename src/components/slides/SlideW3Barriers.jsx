@@ -103,7 +103,7 @@ export default function SlideW3Barriers({ transforms }) {
 
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} style={{ flexShrink: 0, marginBottom: 16 }}>
-        <div style={{ fontFamily: MONO, fontSize: 10, color: 'rgba(125,230,155,0.6)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 6 }}>
+        <div style={{ fontFamily: MONO, fontSize: 10, color: 'var(--text-support)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 6 }}>
           Barriers to AI Use · Wave 1 vs. Wave 3
         </div>
         <h1 style={{ fontFamily: SANS, fontSize: 'clamp(26px, 3vw, 38px)', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.025em', lineHeight: 1.1, margin: 0 }}>
@@ -127,7 +127,7 @@ export default function SlideW3Barriers({ transforms }) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, delay: 0.5 }}
         style={{
-          marginTop: 14,
+          marginTop: 10,
           background: 'rgba(125,230,155,0.04)',
           border: '1px solid rgba(125,230,155,0.14)',
           borderRadius: 10,
@@ -135,8 +135,8 @@ export default function SlideW3Barriers({ transforms }) {
           flexShrink: 0,
         }}
       >
-        <span style={{ fontFamily: SANS, fontSize: 15, fontWeight: 800, color: 'var(--text-medium)' }}>What changed  </span>
-        <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 15, color: 'var(--text-bridge)', lineHeight: 1.6 }}>
+        <span style={{ fontFamily: SANS, fontSize: 20, fontWeight: 800, color: 'var(--text-medium)' }}>What changed  </span>
+        <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 18, color: 'var(--text-bridge)', lineHeight: 1.6 }}>
           Earlier barriers were more about learning and access. Now the largest blocker is time, followed by reliability questions and too many tools. That is a sign of adoption maturing faster than the operating environment.
         </span>
       </motion.div>
