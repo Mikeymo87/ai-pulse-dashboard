@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>How BH MarCom Stacks Up - AI Pulse vs. SmarterX 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  @page { size: letter; margin: 0.45in; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, Helvetica, Arial, sans-serif;
+    color: #1a1a1a;
+    background: #fff;
+    font-size: 8.5pt;
+    line-height: 1.55;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: #25282A;
+    border-radius: 10px;
+    padding: 22px 26px 18px;
+    margin-bottom: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: "";
+    position: absolute;
+    top: -50px; right: -50px;
+    width: 240px; height: 240px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(46,168,74,0.15) 0%, transparent 70%);
+  }
+  .hero::after {
+    content: "";
+    position: absolute;
+    bottom: -30px; left: 30%;
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(89,190,201,0.08) 0%, transparent 70%);
+  }
+  .hero-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    position: relative; z-index: 1;
+  }
+  .hero-left { flex: 1; }
+  .hero-badge {
+    font-size: 6.5pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #2EA84A;
+    margin-bottom: 5px;
+  }
+  .hero h1 {
+    font-size: 20pt;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.12;
+    letter-spacing: -0.4px;
+    margin-bottom: 3px;
+  }
+  .hero h1 span { color: #2EA84A; }
+  .hero-sub {
+    font-size: 8pt;
+    color: #999;
+    font-weight: 400;
+    margin-top: 2px;
+  }
+  .hero-right {
+    text-align: right;
+    position: relative; z-index: 1;
+    min-width: 160px;
+  }
+  .hero-dept {
+    font-size: 7pt;
+    color: #59BEC9;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  .hero-date {
+    font-size: 7pt;
+    color: #666;
+    margin-top: 2px;
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 0;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    position: relative; z-index: 1;
+  }
+  .hero-stat-group {
+    flex: 1;
+    display: flex;
+    gap: 16px;
+    padding: 0 16px;
+  }
+  .hero-stat-group:first-child { padding-left: 0; }
+  .hero-stat-group:last-child { padding-right: 0; }
+  .hero-stat-group + .hero-stat-group {
+    border-left: 1px solid rgba(255,255,255,0.08);
+  }
+  .hero-stat-group-label {
+    font-size: 6pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: #2EA84A;
+    margin-bottom: 6px;
+  }
+  .hero-stat-group-label.industry { color: #3A7CA5; }
+  .hm { display: flex; flex-direction: column; gap: 1px; }
+  .hml { font-size: 6pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #555; }
+  .hmv { font-size: 8.5pt; font-weight: 600; color: #fff; }
+
+  /* ── SECTION HEADINGS ── */
+  .section-num {
+    display: inline-block;
+    font-size: 6.5pt;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #2EA84A;
+    margin-bottom: 2px;
+  }
+  h2 {
+    font-size: 11pt;
+    font-weight: 800;
+    color: #25282A;
+    margin: 14px 0 6px;
+    padding-bottom: 4px;
+    border-bottom: 2px solid #2EA84A;
+    letter-spacing: -0.2px;
+    page-break-after: avoid;
+  }
+  h3 {
+    font-size: 9pt;
+    font-weight: 700;
+    color: #25282A;
+    margin: 8px 0 4px;
+    page-break-after: avoid;
+  }
+
+  /* ── TABLES ── */
+  table { width: 100%; border-collapse: collapse; font-size: 7.5pt; margin: 4px 0 10px; page-break-inside: avoid; }
+  th {
+    background: #25282A; color: #fff; font-weight: 700;
+    text-align: left; padding: 5px 8px; font-size: 6.5pt;
+    text-transform: uppercase; letter-spacing: 0.6px;
+  }
+  th:first-child { border-radius: 4px 0 0 0; }
+  th:last-child { border-radius: 0 4px 0 0; }
+  td { padding: 4px 8px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; line-height: 1.4; }
+  tr:nth-child(even) td { background: #fafafa; }
+  td.metric-name { font-weight: 600; color: #25282A; }
+
+  /* ── TAGS ── */
+  .tag { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 6.5pt; font-weight: 700; white-space: nowrap; }
+  .tag-green { background: #e6f7ea; color: #1a7a32; }
+  .tag-red { background: #ffeaea; color: #b51a1a; }
+  .tag-amber { background: #fff3e0; color: #b5651a; }
+  .tag-blue { background: #e8f2f8; color: #1a5a7a; }
+  .tag-mint { background: #e8fbef; color: #1a7a4a; }
+
+  /* ── TWO COLUMN ── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 6px 0;
+  }
+  .three-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin: 6px 0;
+  }
+
+  /* ── COMPARISON BARS ── */
+  .comp-group { margin: 5px 0; page-break-inside: avoid; }
+  .comp-label {
+    font-size: 7pt;
+    font-weight: 600;
+    color: #25282A;
+    margin-bottom: 3px;
+  }
+  .comp-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 2px 0;
+  }
+  .comp-bar-label {
+    font-size: 6.5pt;
+    font-weight: 600;
+    color: #666;
+    width: 56px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .comp-bar-track {
+    flex: 1;
+    height: 16px;
+    background: #f2f2f2;
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+  }
+  .comp-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    padding-left: 6px;
+    font-size: 6.5pt;
+    font-weight: 700;
+    color: #fff;
+    transition: width 0.3s;
+  }
+  .comp-bar-fill.bh { background: #2EA84A; }
+  .comp-bar-fill.ind { background: #3A7CA5; }
+  .comp-bar-fill.bh-light { background: #7DE69B; color: #25282A; }
+  .comp-bar-fill.ind-light { background: #8bbdd9; color: #25282A; }
+
+  /* ── STACKED BARS ── */
+  .stacked-bar {
+    display: flex;
+    border-radius: 5px;
+    overflow: hidden;
+    height: 26px;
+    margin: 4px 0;
+  }
+  .stacked-seg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 6.5pt;
+    font-weight: 700;
+    color: #fff;
+    position: relative;
+    min-width: 2px;
+  }
+  .stacked-seg .seg-label {
+    font-size: 5.5pt;
+    font-weight: 400;
+    opacity: 0.85;
+    margin-left: 3px;
+  }
+  .stacked-legend {
+    display: flex;
+    gap: 10px;
+    margin: 3px 0 6px;
+    font-size: 6.5pt;
+    flex-wrap: wrap;
+  }
+  .stacked-legend span { display: flex; align-items: center; gap: 3px; color: #666; }
+  .leg-dot { width: 7px; height: 7px; border-radius: 2px; display: inline-block; flex-shrink: 0; }
+
+  /* ── INSIGHT BOX ── */
+  .insight {
+    background: #f8faf9;
+    border-left: 3px solid #59BEC9;
+    border-radius: 0 5px 5px 0;
+    padding: 7px 10px;
+    margin: 6px 0 10px;
+    font-size: 7.5pt;
+    line-height: 1.55;
+    color: #333;
+    page-break-inside: avoid;
+  }
+  .insight strong { color: #25282A; }
+  .insight em { font-style: normal; color: #2EA84A; font-weight: 600; }
+
+  /* ── CALLOUT BOXES ── */
+  .callout {
+    background: #25282A;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin: 6px 0;
+    page-break-inside: avoid;
+  }
+  .callout-label {
+    font-size: 6.5pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin-bottom: 5px;
+  }
+  .callout-label.green { color: #2EA84A; }
+  .callout-label.amber { color: #FFCD00; }
+  .callout-label.turquoise { color: #59BEC9; }
+  .callout-label.red { color: #E5554F; }
+  .callout p {
+    font-size: 8pt;
+    color: rgba(255,255,255,0.85);
+    line-height: 1.6;
+  }
+  .callout strong { color: #fff; }
+
+  /* ── DONUT COMPARISON ── */
+  .donut-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 4px 0;
+    page-break-inside: avoid;
+  }
+  .donut-wrap {
+    position: relative;
+    width: 72px;
+    height: 72px;
+    flex-shrink: 0;
+  }
+  .donut-wrap svg { width: 72px; height: 72px; }
+  .donut-center {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 13pt;
+    font-weight: 800;
+    color: #25282A;
+  }
+  .donut-detail { flex: 1; }
+  .donut-detail-label {
+    font-size: 8pt;
+    font-weight: 700;
+    color: #25282A;
+    margin-bottom: 2px;
+  }
+  .donut-detail-sub {
+    font-size: 7pt;
+    color: #666;
+    line-height: 1.4;
+  }
+
+  /* ── SIDE PANEL CARD ── */
+  .panel {
+    background: #f8f9fa;
+    border: 1px solid #eee;
+    border-radius: 6px;
+    padding: 8px 10px;
+    page-break-inside: avoid;
+  }
+  .panel-title {
+    font-size: 7.5pt;
+    font-weight: 700;
+    color: #25282A;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .panel-title .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+  .panel-title .dot.bh { background: #2EA84A; }
+  .panel-title .dot.ind { background: #3A7CA5; }
+
+  /* ── TOOL LIST ── */
+  .tool-list { list-style: none; padding: 0; margin: 3px 0; }
+  .tool-list li {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2.5px 0;
+    font-size: 7.5pt;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .tool-list li:last-child { border-bottom: none; }
+  .tool-pct {
+    font-weight: 700;
+    min-width: 32px;
+    text-align: right;
+    font-size: 7.5pt;
+  }
+  .tool-pct.bh { color: #2EA84A; }
+  .tool-pct.ind { color: #3A7CA5; }
+  .tool-bar-mini {
+    width: 60px;
+    height: 5px;
+    background: #f0f0f0;
+    border-radius: 3px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .tool-bar-mini-fill { height: 100%; border-radius: 3px; }
+  .tool-name { color: #333; flex: 1; }
+
+  /* ── STATUS CHIP ── */
+  .status-chip {
+    display: inline-block;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 6pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  .status-doing { background: #e6f7ea; color: #1a7a32; }
+  .status-building { background: #e0f5fa; color: #1a6a7a; }
+  .status-mature { background: #2EA84A; color: #fff; }
+  .status-partial { background: #fff3e0; color: #b5651a; }
+  .status-gap { background: #ffeaea; color: #b51a1a; }
+  .status-complete { background: #e6f7ea; color: #1a7a32; }
+
+  /* ── GOVERNANCE TABLE ── */
+  .gov-table td:last-child { font-size: 7pt; }
+
+  /* ── FOOTER ── */
+  .foot {
+    margin-top: 10px;
+    padding-top: 5px;
+    border-top: 1px solid #eee;
+    font-size: 6pt;
+    color: #bbb;
+    display: flex;
+    justify-content: space-between;
+  }
+  .foot-sources {
+    font-size: 6pt;
+    color: #bbb;
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+
+  /* ── LEGEND BAR ── */
+  .legend-bar {
+    display: flex;
+    gap: 14px;
+    margin: 4px 0 8px;
+    font-size: 7pt;
+    color: #666;
+    align-items: center;
+  }
+  .legend-bar .lb-item { display: flex; align-items: center; gap: 4px; }
+  .lb-swatch { width: 12px; height: 6px; border-radius: 2px; display: inline-block; }
+
+  /* Page groups: each is a direct child of body with hard break */
+  .pg { page-break-before: always; }
+
+  /* ── PRINT ── */
+  @media print {
+    .callout, .insight, .panel, table, .comp-group, .donut-row, .exec-summary, .section-head { page-break-inside: avoid; break-inside: avoid; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     HERO BAR
+     ══════════════════════════════════════════════════════════════════ -->
+<div class="hero">
+  <div class="hero-top">
+    <div class="hero-left">
+      <div class="hero-badge">AI Adoption Benchmark</div>
+      <h1>How BH MarCom <span>Stacks Up</span></h1>
+      <div class="hero-sub">AI Pulse Survey vs. 2026 State of AI for Business (SmarterX)</div>
+    </div>
+    <div class="hero-right">
+      <div class="hero-dept">Baptist Health Marketing Technology</div>
+      <div class="hero-date">May 2026</div>
+    </div>
+  </div>
+  <div class="hero-stats">
+    <div class="hero-stat-group">
+      <div>
+        <div class="hero-stat-group-label">BH MarCom (AI Pulse)</div>
+        <div style="display:flex; gap:14px;">
+          <div class="hm"><span class="hml">Respondents (S3)</span><span class="hmv" style="color:#2EA84A;">100</span></div>
+          <div class="hm"><span class="hml">Waves</span><span class="hmv">3</span></div>
+          <div class="hm"><span class="hml">Period</span><span class="hmv">Jan 2025 - Mar 2026</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-stat-group">
+      <div>
+        <div class="hero-stat-group-label industry">Industry (SmarterX 2026)</div>
+        <div style="display:flex; gap:14px;">
+          <div class="hm"><span class="hml">Respondents</span><span class="hmv" style="color:#3A7CA5;">2,109</span></div>
+          <div class="hm"><span class="hml">Period</span><span class="hmv">Feb - Apr 2026</span></div>
+          <div class="hm"><span class="hml">Scope</span><span class="hmv">Cross-industry</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     EXECUTIVE SUMMARY
+     ══════════════════════════════════════════════════════════════════ -->
+<div class="exec-summary" style="background:#25282A; border-radius:8px; padding:16px 20px 28px; margin-bottom:14px; page-break-inside:avoid;">
+  <div style="font-size:7pt; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:#2EA84A; margin-bottom:8px;">Executive Summary</div>
+  <div style="font-size:9.5pt; font-weight:700; color:#fff; line-height:1.45; margin-bottom:10px;">
+    BH MarCom is not just ahead of the industry average. The department outperforms the most advanced segment in the entire SmarterX dataset: CEOs and Founders.
+  </div>
+  <div style="font-size:8pt; color:rgba(255,255,255,0.75); line-height:1.6; margin-bottom:10px;">
+    The 2026 State of AI for Business Report surveyed 2,109 professionals across roles, industries, and company sizes. It found that CEOs and Founders are the most advanced personal AI adopters, the most confident evaluators, and the most positive about AI's trajectory. They are the top of the distribution. BH MarCom, as an entire department, beats that cohort on three of four core metrics:
+  </div>
+  <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:12px;">
+    <div style="background:rgba(46,168,74,0.12); border-radius:6px; padding:8px 10px; text-align:center;">
+      <div style="font-size:14pt; font-weight:800; color:#2EA84A;">74%</div>
+      <div style="font-size:6pt; color:#888; text-transform:uppercase; letter-spacing:0.8px;">Integration + Transform</div>
+      <div style="font-size:6.5pt; color:#2EA84A; font-weight:600; margin-top:2px;">CEO cohort: 65%</div>
+    </div>
+    <div style="background:rgba(46,168,74,0.12); border-radius:6px; padding:8px 10px; text-align:center;">
+      <div style="font-size:14pt; font-weight:800; color:#2EA84A;">69%</div>
+      <div style="font-size:6pt; color:#888; text-transform:uppercase; letter-spacing:0.8px;">Positive Sentiment</div>
+      <div style="font-size:6.5pt; color:#2EA84A; font-weight:600; margin-top:2px;">CEO cohort: 59%</div>
+    </div>
+    <div style="background:rgba(46,168,74,0.12); border-radius:6px; padding:8px 10px; text-align:center;">
+      <div style="font-size:14pt; font-weight:800; color:#2EA84A;">67%</div>
+      <div style="font-size:6pt; color:#888; text-transform:uppercase; letter-spacing:0.8px;">High Confidence</div>
+      <div style="font-size:6.5pt; color:#2EA84A; font-weight:600; margin-top:2px;">CEO cohort: 63%</div>
+    </div>
+    <div style="background:rgba(46,168,74,0.12); border-radius:6px; padding:8px 10px; text-align:center;">
+      <div style="font-size:14pt; font-weight:800; color:#fff;">90%</div>
+      <div style="font-size:6pt; color:#888; text-transform:uppercase; letter-spacing:0.8px;">Daily AI Use</div>
+      <div style="font-size:6.5pt; color:#59BEC9; font-weight:600; margin-top:2px;">No industry comp this high</div>
+    </div>
+  </div>
+  <div style="font-size:8pt; color:rgba(255,255,255,0.75); line-height:1.6; margin-bottom:10px;">
+    The SmarterX report identifies four governance foundations required to scale AI responsibly: an AI council, an AI roadmap, generative AI policies, and an AI ethics policy. Only 13% of organizations have all four. BH MarCom has all four. But 13% still understates the department's position, because most of that 13% doesn't have the adoption numbers to match. Among organizations with all four governance foundations, 50% report accelerating momentum. Among those, few would also show 90% daily use, 74% in Integration/Transformation, and 69% positive sentiment simultaneously.
+  </div>
+  <div style="background:rgba(46,168,74,0.15); border-radius:6px; padding:10px 14px; border-left:3px solid #2EA84A;">
+    <div style="font-size:8.5pt; font-weight:700; color:#fff; line-height:1.5;">
+      Our assessment: BH MarCom's combined profile - adoption maturity, sentiment, confidence, daily use, tool ecosystem, governance foundations, and 14-month trajectory - places this department in the top 5% of the 2,109 professionals and organizations represented in this report. The department doesn't just compare favorably to the average. It outperforms the ceiling.
+    </div>
+  </div>
+
+  <div style="margin-top:14px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.08);">
+    <div style="font-size:7pt; font-weight:700; text-transform:uppercase; letter-spacing:1.2px; color:#59BEC9; margin-bottom:8px;">What This Report Covers</div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px 16px;">
+      <div style="font-size:7.5pt; color:rgba(255,255,255,0.6); line-height:1.5; padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+        <span style="color:#fff; font-weight:600;">1. Executive Scorecard</span> - 9 metrics at a glance
+      </div>
+      <div style="font-size:7.5pt; color:rgba(255,255,255,0.6); line-height:1.5; padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+        <span style="color:#fff; font-weight:600;">6. Momentum</span> - How teams describe their trajectory
+      </div>
+      <div style="font-size:7.5pt; color:rgba(255,255,255,0.6); line-height:1.5; padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+        <span style="color:#fff; font-weight:600;">2. Adoption Stage</span> - Where individuals are on the AI journey
+      </div>
+      <div style="font-size:7.5pt; color:rgba(255,255,255,0.6); line-height:1.5; padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+        <span style="color:#fff; font-weight:600;">7. Tools & Platforms</span> - What's endorsed vs. self-adopted
+      </div>
+      <div style="font-size:7.5pt; color:rgba(255,255,255,0.6); line-height:1.5; padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+        <span style="color:#fff; font-weight:600;">3. Sentiment</span> - How people feel about AI's impact
+      </div>
+      <div style="font-size:7.5pt; color:rgba(255,255,255,0.6); line-height:1.5; padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+        <span style="color:#fff; font-weight:600;">8. Governance</span> - Council, roadmap, policies, ethics
+      </div>
+      <div style="font-size:7.5pt; color:rgba(255,255,255,0.6); line-height:1.5; padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+        <span style="color:#fff; font-weight:600;">4. Confidence</span> - Self-rated ability to use AI effectively
+      </div>
+      <div style="font-size:7.5pt; color:rgba(255,255,255,0.6); line-height:1.5; padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+        <span style="color:#fff; font-weight:600;">9. Training Gap</span> - What industry wants vs. what BH builds
+      </div>
+      <div style="font-size:7.5pt; color:rgba(255,255,255,0.6); line-height:1.5; padding:4px 0;">
+        <span style="color:#fff; font-weight:600;">5. Barriers</span> - What's slowing adoption down
+      </div>
+      <div style="font-size:7.5pt; color:rgba(255,255,255,0.6); line-height:1.5; padding:4px 0;">
+        <span style="color:#fff; font-weight:600;">10. Key Takeaways</span> - Where we lead, watch, and go next
+      </div>
+    </div>
+  </div>
+
+  <div style="font-size:7pt; color:rgba(255,255,255,0.35); margin-top:12px; line-height:1.5;">
+    Methodology: BH MarCom Wave 3 (n=100, Mar 2026) compared against SmarterX 2026 State of AI for Business (n=2,109, Feb-Apr 2026). Same time window. BH data is a single department within a healthcare organization; SmarterX data is cross-industry, cross-function, with 48% senior leaders. The CEO/Founder cohort referenced above represents 28% of SmarterX respondents (n=578).
+  </div>
+</div>
+
+<div class="pg">
+<!-- ══════════════════════════════════════════════════════════════════
+     SECTION 1: EXECUTIVE SCORECARD
+     ══════════════════════════════════════════════════════════════════ -->
+<div class="section-num">Section 1</div>
+<h2>Executive Scorecard</h2>
+
+<div class="legend-bar">
+  <div class="lb-item"><span class="lb-swatch" style="background:#2EA84A;"></span> BH MarCom</div>
+  <div class="lb-item"><span class="lb-swatch" style="background:#3A7CA5;"></span> Industry (SmarterX)</div>
+  <div class="lb-item"><span class="tag tag-green" style="font-size:6pt;">AHEAD</span> &nbsp;<span class="tag tag-amber" style="font-size:6pt;">CLOSE</span> &nbsp;<span class="tag tag-red" style="font-size:6pt;">BEHIND</span></div>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th style="width:34%;">Metric</th>
+      <th style="width:18%; text-align:center;">BH MarCom (S3)</th>
+      <th style="width:18%; text-align:center;">Industry</th>
+      <th style="width:14%; text-align:center;">Gap</th>
+      <th style="width:16%; text-align:center;">Verdict</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="metric-name">Individual Adoption (Integration + Transformation)</td>
+      <td style="text-align:center; font-weight:700; color:#2EA84A;">74%</td>
+      <td style="text-align:center; font-weight:700; color:#3A7CA5;">53%</td>
+      <td style="text-align:center; font-weight:700;">+21pp</td>
+      <td style="text-align:center;"><span class="tag tag-green">AHEAD</span></td>
+    </tr>
+    <tr>
+      <td class="metric-name">Positive Sentiment</td>
+      <td style="text-align:center; font-weight:700; color:#2EA84A;">69%</td>
+      <td style="text-align:center; font-weight:700; color:#3A7CA5;">52%</td>
+      <td style="text-align:center; font-weight:700;">+17pp</td>
+      <td style="text-align:center;"><span class="tag tag-green">AHEAD</span></td>
+    </tr>
+    <tr>
+      <td class="metric-name">High Confidence (Very/Extremely)</td>
+      <td style="text-align:center; font-weight:700; color:#2EA84A;">67%</td>
+      <td style="text-align:center; font-weight:700; color:#3A7CA5;">49%</td>
+      <td style="text-align:center; font-weight:700;">+18pp</td>
+      <td style="text-align:center;"><span class="tag tag-green">AHEAD</span></td>
+    </tr>
+    <tr>
+      <td class="metric-name">AI Rated Critical / Very Important</td>
+      <td style="text-align:center; font-weight:700; color:#2EA84A;">87%</td>
+      <td style="text-align:center; font-weight:700; color:#3A7CA5;">74%</td>
+      <td style="text-align:center; font-weight:700;">+13pp</td>
+      <td style="text-align:center;"><span class="tag tag-green">AHEAD</span></td>
+    </tr>
+    <tr>
+      <td class="metric-name">Daily AI Use</td>
+      <td style="text-align:center; font-weight:700; color:#2EA84A;">90%</td>
+      <td style="text-align:center; color:#999; font-size:6.5pt;">N/A</td>
+      <td style="text-align:center; font-weight:700;">--</td>
+      <td style="text-align:center;"><span class="tag tag-green">LEADING</span></td>
+    </tr>
+    <tr>
+      <td class="metric-name">Momentum: Accelerating</td>
+      <td style="text-align:center; font-weight:700; color:#2EA84A;">34%</td>
+      <td style="text-align:center; font-weight:700; color:#3A7CA5;">28%</td>
+      <td style="text-align:center; font-weight:700;">+6pp</td>
+      <td style="text-align:center;"><span class="tag tag-green">AHEAD</span></td>
+    </tr>
+    <tr>
+      <td class="metric-name">Momentum: Inconsistent / Siloed</td>
+      <td style="text-align:center; font-weight:700; color:#2EA84A;">25%</td>
+      <td style="text-align:center; font-weight:700; color:#3A7CA5;">41%</td>
+      <td style="text-align:center; font-weight:700;">-16pp</td>
+      <td style="text-align:center;"><span class="tag tag-green">BETTER</span></td>
+    </tr>
+    <tr>
+      <td class="metric-name">No Barriers Reported</td>
+      <td style="text-align:center; font-weight:700; color:#2EA84A;">30%</td>
+      <td style="text-align:center; color:#999; font-size:6.5pt;">N/A</td>
+      <td style="text-align:center; font-weight:700;">--</td>
+      <td style="text-align:center;"><span class="tag tag-mint">MATURITY SIGNAL</span></td>
+    </tr>
+    <tr>
+      <td class="metric-name">All 4 Governance Foundations</td>
+      <td style="text-align:center; font-weight:700; color:#2EA84A;">Yes (4/4)</td>
+      <td style="text-align:center; font-weight:700; color:#3A7CA5;">13%</td>
+      <td style="text-align:center; font-weight:700;">Top 13%</td>
+      <td style="text-align:center;"><span class="tag tag-green">AHEAD</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     SECTION 2: INDIVIDUAL ADOPTION STAGE
+     ══════════════════════════════════════════════════════════════════ -->
+<div class="section-num">Section 2</div>
+<h2>Individual Adoption Stage</h2>
+
+<div class="two-col">
+  <div class="panel">
+    <div class="panel-title"><span class="dot bh"></span> BH MarCom (Survey 3)</div>
+    <div class="stacked-bar">
+      <div class="stacked-seg" style="width:2%; background:#c4c4c4; font-size:0;"></div>
+      <div class="stacked-seg" style="width:24%; background:#7DE69B; color:#25282A;">24%</div>
+      <div class="stacked-seg" style="width:50%; background:#2EA84A;">50%</div>
+      <div class="stacked-seg" style="width:24%; background:#1a7a32;">24%</div>
+    </div>
+    <div class="stacked-legend">
+      <span><span class="leg-dot" style="background:#c4c4c4;"></span> Understanding 2%</span>
+      <span><span class="leg-dot" style="background:#7DE69B;"></span> Experimentation 24%</span>
+      <span><span class="leg-dot" style="background:#2EA84A;"></span> Integration 50%</span>
+      <span><span class="leg-dot" style="background:#1a7a32;"></span> Transformation 24%</span>
+    </div>
+    <div style="text-align:center; margin-top:2px;">
+      <span class="tag tag-green" style="font-size:7pt;">Integration + Transformation: 74%</span>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-title"><span class="dot ind"></span> Industry (SmarterX 2026)</div>
+    <div class="stacked-bar">
+      <div class="stacked-seg" style="width:2%; background:#b0b0b0; font-size:0;"></div>
+      <div class="stacked-seg" style="width:10%; background:#8bbdd9; color:#25282A; font-size:5.5pt;">10%</div>
+      <div class="stacked-seg" style="width:35%; background:#5da0c4; color:#fff;">35%</div>
+      <div class="stacked-seg" style="width:27%; background:#3A7CA5;">27%</div>
+      <div class="stacked-seg" style="width:26%; background:#1d5070;">26%</div>
+    </div>
+    <div class="stacked-legend">
+      <span><span class="leg-dot" style="background:#b0b0b0;"></span> Curiosity 2%</span>
+      <span><span class="leg-dot" style="background:#8bbdd9;"></span> Understanding 10%</span>
+      <span><span class="leg-dot" style="background:#5da0c4;"></span> Experimentation 35%</span>
+      <span><span class="leg-dot" style="background:#3A7CA5;"></span> Integration 27%</span>
+      <span><span class="leg-dot" style="background:#1d5070;"></span> Transformation 26%</span>
+    </div>
+    <div style="text-align:center; margin-top:2px;">
+      <span class="tag tag-blue" style="font-size:7pt;">Integration + Transformation: 53%</span>
+    </div>
+  </div>
+</div>
+
+<div class="insight">
+  <strong>BH MarCom has 21 percentage points more of its team in the Integration or Transformation stages than the industry average (74% vs 53%).</strong> The department moved through the experimentation phase faster - in 14 months - than most organizations achieve in 18-24. The industry's largest cohort is still in Experimentation (35%), while BH's largest cohort has already moved to Integration (50%). Half the department is actively embedding AI into workflows.
+</div>
+
+</div><div class="pg">
+<!-- ══════════════════════════════════════════════════════════════════
+     SECTION 3: SENTIMENT
+     ══════════════════════════════════════════════════════════════════ -->
+<div class="section-num">Section 3</div>
+<h2>Sentiment Comparison</h2>
+
+<div class="two-col">
+  <div class="panel">
+    <div class="panel-title"><span class="dot bh"></span> BH MarCom (S3)</div>
+    <div class="donut-row">
+      <div class="donut-wrap">
+        <svg viewBox="0 0 36 36">
+          <circle cx="18" cy="18" r="14" fill="none" stroke="#e8e8e8" stroke-width="4"/>
+          <circle cx="18" cy="18" r="14" fill="none" stroke="#2EA84A" stroke-width="4"
+            stroke-dasharray="64 36" stroke-dashoffset="25" stroke-linecap="round"/>
+        </svg>
+        <div class="donut-center" style="font-size:12pt; color:#2EA84A;">69%</div>
+      </div>
+      <div class="donut-detail">
+        <div class="donut-detail-label">Positive</div>
+        <div class="donut-detail-sub">36% mixed or negative</div>
+        <div style="margin-top:4px;">
+          <div class="stacked-bar" style="height:10px; border-radius:3px;">
+            <div class="stacked-seg" style="width:69%; background:#2EA84A; font-size:0;"></div>
+            <div class="stacked-seg" style="width:36%; background:#ddd; font-size:0;"></div>
+          </div>
+        </div>
+        <div class="donut-detail-sub" style="margin-top:3px; color:#2EA84A; font-weight:600;">Wave trend: 49% -> 67% -> 69%</div>
+      </div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-title"><span class="dot ind"></span> Industry (SmarterX)</div>
+    <div class="donut-row">
+      <div class="donut-wrap">
+        <svg viewBox="0 0 36 36">
+          <circle cx="18" cy="18" r="14" fill="none" stroke="#e8e8e8" stroke-width="4"/>
+          <circle cx="18" cy="18" r="14" fill="none" stroke="#3A7CA5" stroke-width="4"
+            stroke-dasharray="52 48" stroke-dashoffset="25" stroke-linecap="round"/>
+        </svg>
+        <div class="donut-center" style="font-size:12pt; color:#3A7CA5;">52%</div>
+      </div>
+      <div class="donut-detail">
+        <div class="donut-detail-label">Positive</div>
+        <div class="donut-detail-sub">19% neutral, 11% negative, 18% unsure</div>
+        <div style="margin-top:4px;">
+          <div class="stacked-bar" style="height:10px; border-radius:3px;">
+            <div class="stacked-seg" style="width:52%; background:#3A7CA5; font-size:0;"></div>
+            <div class="stacked-seg" style="width:19%; background:#aaa; font-size:0;"></div>
+            <div class="stacked-seg" style="width:11%; background:#E5554F; font-size:0;"></div>
+            <div class="stacked-seg" style="width:18%; background:#ddd; font-size:0;"></div>
+          </div>
+          <div class="stacked-legend" style="margin-top:2px;">
+            <span><span class="leg-dot" style="background:#3A7CA5;"></span> Positive</span>
+            <span><span class="leg-dot" style="background:#aaa;"></span> Neutral</span>
+            <span><span class="leg-dot" style="background:#E5554F;"></span> Negative</span>
+            <span><span class="leg-dot" style="background:#ddd;"></span> Unsure</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="insight">
+  The industry report's most striking finding is that <strong>48% of respondents are NOT positive about AI.</strong> BH MarCom has already crossed the majority-positive threshold at 69% and pulled further ahead each wave (<em>49% -> 67% -> 69%</em> across three surveys). The department is 17 points ahead of the industry on sentiment.
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     SECTION 4: CONFIDENCE
+     ══════════════════════════════════════════════════════════════════ -->
+<div class="section-num">Section 4</div>
+<h2>Confidence Comparison</h2>
+
+<div class="two-col">
+  <div class="panel">
+    <div class="panel-title"><span class="dot bh"></span> BH MarCom (S3)</div>
+    <div class="stacked-bar">
+      <div class="stacked-seg" style="width:67%; background:#2EA84A;">67%</div>
+      <div class="stacked-seg" style="width:32%; background:#7DE69B; color:#25282A;">32%</div>
+      <div class="stacked-seg" style="width:7%; background:#ddd; color:#666; font-size:5.5pt;">7%</div>
+    </div>
+    <div class="stacked-legend">
+      <span><span class="leg-dot" style="background:#2EA84A;"></span> Very/Extremely Confident 67%</span>
+      <span><span class="leg-dot" style="background:#7DE69B;"></span> Somewhat 32%</span>
+      <span><span class="leg-dot" style="background:#ddd;"></span> Not Confident 7%</span>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-title"><span class="dot ind"></span> Industry (SmarterX)</div>
+    <div class="stacked-bar">
+      <div class="stacked-seg" style="width:49%; background:#3A7CA5;">49%</div>
+      <div class="stacked-seg" style="width:42%; background:#8bbdd9; color:#25282A;">42%</div>
+      <div class="stacked-seg" style="width:9%; background:#ddd; color:#666; font-size:5.5pt;">9%</div>
+    </div>
+    <div class="stacked-legend">
+      <span><span class="leg-dot" style="background:#3A7CA5;"></span> High/Very High 49%</span>
+      <span><span class="leg-dot" style="background:#8bbdd9;"></span> Medium 42%</span>
+      <span><span class="leg-dot" style="background:#ddd;"></span> Low/None 10%</span>
+    </div>
+  </div>
+</div>
+
+<div class="insight">
+  BH MarCom's confidence is <strong>18 points higher than industry (67% vs 49%).</strong> 93% of the department rates themselves Confident or above. The "not confident" group has been reduced to just 7%. The industry still has 51% at Medium or below. When people feel confident, they use the tools. When they use the tools, they get better. This is a flywheel, and BH MarCom is already spinning it.
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     SECTION 5: BARRIERS
+     ══════════════════════════════════════════════════════════════════ -->
+<div class="section-num">Section 5</div>
+<h2>Barriers Comparison</h2>
+
+<div class="two-col">
+  <div>
+    <div class="panel">
+      <div class="panel-title"><span class="dot ind"></span> Industry Top Barriers</div>
+      <div class="comp-group">
+        <div class="comp-bar-row">
+          <div class="comp-bar-label">Education</div>
+          <div class="comp-bar-track"><div class="comp-bar-fill ind" style="width:38%;">38%</div></div><!-- industry education barrier -->
+        </div>
+        <div class="comp-bar-row">
+          <div class="comp-bar-label">Awareness</div>
+          <div class="comp-bar-track"><div class="comp-bar-fill ind" style="width:35%;">35%</div></div>
+        </div>
+        <div class="comp-bar-row">
+          <div class="comp-bar-label">Lack of time</div>
+          <div class="comp-bar-track"><div class="comp-bar-fill ind" style="width:30%;">30%</div></div>
+        </div>
+        <div class="comp-bar-row">
+          <div class="comp-bar-label">Fear/mistrust</div>
+          <div class="comp-bar-track"><div class="comp-bar-fill ind" style="width:29%;">29%</div></div><!-- industry fear barrier -->
+        </div>
+        <div class="comp-bar-row">
+          <div class="comp-bar-label">No strategy</div>
+          <div class="comp-bar-track"><div class="comp-bar-fill ind" style="width:26%;">26%</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div>
+    <div class="panel">
+      <div class="panel-title"><span class="dot bh"></span> BH MarCom Top Barriers</div>
+      <div class="comp-group">
+        <div class="comp-bar-row">
+          <div class="comp-bar-label" style="width:72px;">Tool access</div>
+          <div class="comp-bar-track"><div class="comp-bar-fill bh" style="width:36%;">34-38%</div></div>
+        </div>
+        <div class="comp-bar-row">
+          <div class="comp-bar-label" style="width:72px;">Accuracy</div>
+          <div class="comp-bar-track"><div class="comp-bar-fill bh" style="width:32%;">28-35%</div></div>
+        </div>
+        <div class="comp-bar-row">
+          <div class="comp-bar-label" style="width:72px;">Training</div>
+          <div class="comp-bar-track"><div class="comp-bar-fill bh" style="width:25%;">22-28%</div></div>
+        </div>
+        <div class="comp-bar-row">
+          <div class="comp-bar-label" style="width:72px;">Fear of errors</div>
+          <div class="comp-bar-track"><div class="comp-bar-fill bh" style="width:15%;">12-18%</div></div>
+        </div>
+        <div class="comp-bar-row">
+          <div class="comp-bar-label" style="width:72px; color:#2EA84A; font-weight:700;">No barriers</div>
+          <div class="comp-bar-track"><div class="comp-bar-fill bh" style="width:32%; background:linear-gradient(90deg, #2EA84A, #59BEC9);">32%</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="insight">
+  The barrier profiles tell different stories. <strong>The industry is stuck on fundamentals - education and awareness.</strong> BH MarCom has moved past those. Their top barrier is now access to tools, which is an infrastructure problem, not a knowledge problem. And <em>30% of the department reports NO barriers at all</em> - a maturity signal the industry report doesn't even measure.
+</div>
+
+</div><div class="pg">
+<!-- ══════════════════════════════════════════════════════════════════
+     SECTION 6: ORGANIZATIONAL MOMENTUM
+     ══════════════════════════════════════════════════════════════════ -->
+<div class="section-num">Section 6</div>
+<h2>Organizational Momentum</h2>
+
+<div class="two-col">
+  <div class="panel">
+    <div class="panel-title"><span class="dot bh"></span> BH MarCom</div>
+    <div class="comp-group">
+      <div class="comp-bar-row">
+        <div class="comp-bar-label" style="width:68px;">Accelerating</div>
+        <div class="comp-bar-track"><div class="comp-bar-fill bh" style="width:34%;">34%</div></div>
+      </div>
+      <div class="comp-bar-row">
+        <div class="comp-bar-label" style="width:68px;">Steady</div>
+        <div class="comp-bar-track"><div class="comp-bar-fill bh-light" style="width:41%; background:#7DE69B;">41%</div></div>
+      </div>
+      <div class="comp-bar-row">
+        <div class="comp-bar-label" style="width:68px;">Inconsistent</div>
+        <div class="comp-bar-track"><div class="comp-bar-fill" style="width:25%; background:#ddd; color:#666;">25%</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-title"><span class="dot ind"></span> Industry (SmarterX)</div>
+    <div class="comp-group">
+      <div class="comp-bar-row">
+        <div class="comp-bar-label" style="width:68px;">Accelerating</div>
+        <div class="comp-bar-track"><div class="comp-bar-fill ind" style="width:28%;">28%</div></div>
+      </div>
+      <div class="comp-bar-row">
+        <div class="comp-bar-label" style="width:68px;">Steady</div>
+        <div class="comp-bar-track"><div class="comp-bar-fill ind-light" style="width:23%; background:#8bbdd9;">23%</div></div>
+      </div>
+      <div class="comp-bar-row">
+        <div class="comp-bar-label" style="width:68px;">Inconsistent</div>
+        <div class="comp-bar-track"><div class="comp-bar-fill" style="width:41%; background:#e0a060; color:#fff;">41%</div></div>
+      </div>
+      <div class="comp-bar-row">
+        <div class="comp-bar-label" style="width:68px;">Stalled</div>
+        <div class="comp-bar-track"><div class="comp-bar-fill" style="width:5%; background:#ccc; color:#666; font-size:5.5pt;">5%</div></div>
+      </div>
+      <div class="comp-bar-row">
+        <div class="comp-bar-label" style="width:68px;">Not started</div>
+        <div class="comp-bar-track"><div class="comp-bar-fill" style="width:3%; background:#e8e8e8; color:#999; font-size:0;"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="insight">
+  The industry's most common description of organizational AI momentum is <strong>"Inconsistent/Siloed" at 41%.</strong> BH MarCom's most common description is "Steady" at 41%, followed by "Accelerating" at 34%. Only 25% say inconsistent - 16 points lower than industry. The SmarterX report calls inconsistent momentum <em>"the defining pattern"</em> across organizations. BH MarCom has broken that pattern.
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     SECTION 7: TOOLS & PLATFORM ADOPTION
+     ══════════════════════════════════════════════════════════════════ -->
+<div class="section-num">Section 7</div>
+<h2>Tools &amp; Platform Adoption</h2>
+
+<div class="two-col">
+  <div class="panel">
+    <div class="panel-title"><span class="dot bh"></span> BH MarCom</div>
+    <div style="font-size:6.5pt; font-weight:700; color:#888; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:4px;">Endorsed (org-provided to all)</div>
+    <ul class="tool-list">
+      <li><span class="tool-pct bh">100%</span><div class="tool-bar-mini"><div class="tool-bar-mini-fill" style="width:100%; background:#25282A;"></div></div><span class="tool-name">ChatGPT</span></li>
+      <li><span class="tool-pct bh" style="color:#888;">--</span><div class="tool-bar-mini"><div class="tool-bar-mini-fill" style="width:100%; background:#555;"></div></div><span class="tool-name">Microsoft Copilot</span></li>
+      <li><span class="tool-pct bh" style="color:#888;">--</span><div class="tool-bar-mini"><div class="tool-bar-mini-fill" style="width:100%; background:#555;"></div></div><span class="tool-name">Adobe Firefly</span></li>
+    </ul>
+    <div style="font-size:6.5pt; font-weight:700; color:#888; text-transform:uppercase; letter-spacing:0.8px; margin:6px 0 4px;">Additional tools used (beyond endorsed)</div>
+    <ul class="tool-list">
+      <li><span class="tool-pct bh">43%</span><div class="tool-bar-mini"><div class="tool-bar-mini-fill" style="width:43%; background:#2EA84A;"></div></div><span class="tool-name">Gemini</span></li>
+      <li><span class="tool-pct bh">42%</span><div class="tool-bar-mini"><div class="tool-bar-mini-fill" style="width:42%; background:#2EA84A;"></div></div><span class="tool-name">NotebookLM</span></li>
+      <li><span class="tool-pct bh">27%</span><div class="tool-bar-mini"><div class="tool-bar-mini-fill" style="width:27%; background:#2EA84A;"></div></div><span class="tool-name">Claude</span></li>
+      <li><span class="tool-pct bh">17%</span><div class="tool-bar-mini"><div class="tool-bar-mini-fill" style="width:17%; background:#2EA84A;"></div></div><span class="tool-name">Otter.ai</span></li>
+      <li><span class="tool-pct bh">13%</span><div class="tool-bar-mini"><div class="tool-bar-mini-fill" style="width:13%; background:#2EA84A;"></div></div><span class="tool-name">WISPR Flow</span></li>
+      <li><span class="tool-pct bh">12%</span><div class="tool-bar-mini"><div class="tool-bar-mini-fill" style="width:12%; background:#2EA84A;"></div></div><span class="tool-name">Perplexity</span></li>
+      <li><span class="tool-pct bh">12%</span><div class="tool-bar-mini"><div class="tool-bar-mini-fill" style="width:12%; background:#2EA84A;"></div></div><span class="tool-name">Gamma</span></li>
+    </ul>
+    <div style="margin-top:4px; font-size:6.5pt; color:#888;">77% use tools beyond endorsed; 10+ platforms in active use</div>
+  </div>
+  <div class="panel">
+    <div class="panel-title"><span class="dot ind"></span> Industry (Org-Provided)</div>
+    <ul class="tool-list">
+      <li><span class="tool-pct ind">59%</span><div class="tool-bar-mini"><div class="tool-bar-mini-fill" style="width:59%; background:#3A7CA5;"></div></div><span class="tool-name">ChatGPT</span></li>
+      <li><span class="tool-pct ind">46%</span><div class="tool-bar-mini"><div class="tool-bar-mini-fill" style="width:46%; background:#3A7CA5;"></div></div><span class="tool-name">Microsoft Copilot</span></li>
+      <li><span class="tool-pct ind">42%</span><div class="tool-bar-mini"><div class="tool-bar-mini-fill" style="width:42%; background:#3A7CA5;"></div></div><span class="tool-name">Google Gemini</span></li>
+      <li><span class="tool-pct ind">37%</span><div class="tool-bar-mini"><div class="tool-bar-mini-fill" style="width:37%; background:#3A7CA5;"></div></div><span class="tool-name">Anthropic Claude</span></li>
+      <li><span class="tool-pct ind">8%</span><div class="tool-bar-mini"><div class="tool-bar-mini-fill" style="width:8%; background:#E5554F;"></div></div><span class="tool-name" style="color:#E5554F;">No licenses provided</span></li>
+    </ul>
+    <div style="margin-top:4px; font-size:6.5pt; color:#888;">4 org-provided platforms typical</div>
+    <div style="margin-top:10px; padding-top:8px; border-top:1px solid #eee;">
+      <div style="font-size:7pt; font-weight:700; color:#25282A; margin-bottom:4px;">Key Stat</div>
+      <div style="font-size:7pt; color:#666; line-height:1.5;">77% use AI tools beyond the officially endorsed ones. 31% pay out of their own pocket - a strong conviction signal the industry report highlights as a leading indicator.</div>
+    </div>
+  </div>
+</div>
+
+<div class="insight">
+  77% of the department uses AI tools beyond the officially endorsed platforms, and 31% pay out of their own pocket. The industry report notes this exact pattern: <strong>"Employees do not stop using AI. They use whatever works for them, on their own devices, on their own terms."</strong> BH MarCom isn't fighting this - the department has channeled it into a structured ecosystem of endorsed + personal tools.
+</div>
+
+</div><div class="pg">
+<!-- ══════════════════════════════════════════════════════════════════
+     SECTION 8: GOVERNANCE GAP
+     ══════════════════════════════════════════════════════════════════ -->
+<div class="section-num">Section 8</div>
+<h2>Governance Foundations</h2>
+
+<table class="gov-table">
+  <thead>
+    <tr>
+      <th style="width:28%;">Governance Element</th>
+      <th style="width:22%; text-align:center;">Industry Benchmark</th>
+      <th style="width:30%;">BH MarCom Status</th>
+      <th style="width:20%; text-align:center;">Assessment</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="metric-name">AI Council</td>
+      <td style="text-align:center; font-weight:700; color:#3A7CA5;">39% have one</td>
+      <td>Active AI Council in place</td>
+      <td style="text-align:center;"><span class="status-chip status-complete">IN PLACE</span></td>
+    </tr>
+    <tr>
+      <td class="metric-name">AI Roadmap / Playbook</td>
+      <td style="text-align:center; font-weight:700; color:#3A7CA5;">29% have one</td>
+      <td>Playbook documenting how the department got here; structured build process via AI intake</td>
+      <td style="text-align:center;"><span class="status-chip status-complete">IN PLACE</span></td>
+    </tr>
+    <tr>
+      <td class="metric-name">Generative AI Policies</td>
+      <td style="text-align:center; font-weight:700; color:#3A7CA5;">48% have them</td>
+      <td>AI policies established by the Council</td>
+      <td style="text-align:center;"><span class="status-chip status-complete">IN PLACE</span></td>
+    </tr>
+    <tr>
+      <td class="metric-name">AI Ethics Policy</td>
+      <td style="text-align:center; font-weight:700; color:#3A7CA5;">48% have them</td>
+      <td>One of the first things the Council created</td>
+      <td style="text-align:center;"><span class="status-chip status-complete">IN PLACE</span></td>
+    </tr>
+    <tr>
+      <td class="metric-name">All Four Foundations</td>
+      <td style="text-align:center; font-weight:700; color:#3A7CA5;">13% have all</td>
+      <td><strong>All four in place.</strong> BH MarCom is in the top 13% of organizations.</td>
+      <td style="text-align:center;"><span class="status-chip status-complete">ALL FOUR</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="insight" style="border-left-color:#2EA84A; background:#f4fbf6;">
+  BH MarCom has all four governance foundations in place - AI council, playbook/roadmap, generative AI policies, and AI ethics policy. <strong>Only 13% of organizations in the SmarterX report can say the same.</strong> The report's strongest finding is that organizations with all four foundations report 50% accelerating momentum vs 19% without. BH MarCom's 38% accelerating momentum tracks with this pattern. The AI Labs (office hours for team members on their AI journey) add a fifth layer most organizations don't have: structured, ongoing support for adoption.
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     SECTION 9: WHAT INDUSTRY WANTS vs BH IS DOING
+     ══════════════════════════════════════════════════════════════════ -->
+<div class="section-num">Section 9</div>
+<h2>What the Industry Wants to Learn vs. What BH MarCom is Already Doing</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th style="width:32%;">Industry Training Demand</th>
+      <th style="width:10%; text-align:center;">%</th>
+      <th style="width:38%;">BH MarCom Status</th>
+      <th style="width:20%; text-align:center;">Assessment</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="metric-name">Integrating AI into workflows</td>
+      <td style="text-align:center; font-weight:700; color:#3A7CA5;">58%</td>
+      <td>90% daily use, embedded in workflows</td>
+      <td style="text-align:center;"><span class="status-chip status-doing">ALREADY DOING</span></td>
+    </tr>
+    <tr>
+      <td class="metric-name">Using AI agents</td>
+      <td style="text-align:center; font-weight:700; color:#3A7CA5;">51%</td>
+      <td>Building: MRA, Brand Tracker Agent, FocusLab, multi-agent systems</td>
+      <td style="text-align:center;"><span class="status-chip status-building">BUILDING</span></td>
+    </tr>
+    <tr>
+      <td class="metric-name">Building no-code assistants (GPTs)</td>
+      <td style="text-align:center; font-weight:700; color:#3A7CA5;">45%</td>
+      <td>Marketing Plan GPT, Brand Tracker GPT, AI Reporter, Accessibility GPT</td>
+      <td style="text-align:center;"><span class="status-chip status-building">BUILDING</span></td>
+    </tr>
+    <tr>
+      <td class="metric-name">Identifying use cases</td>
+      <td style="text-align:center; font-weight:700; color:#3A7CA5;">36%</td>
+      <td>AI intake form via Workfront, structured build process</td>
+      <td style="text-align:center;"><span class="status-chip status-doing">COVERED</span></td>
+    </tr>
+    <tr>
+      <td class="metric-name">Evaluating tools</td>
+      <td style="text-align:center; font-weight:700; color:#3A7CA5;">21%</td>
+      <td>Active multi-platform (ChatGPT, Claude, Gemini, n8n, Firecrawl)</td>
+      <td style="text-align:center;"><span class="status-chip status-doing">ACTIVE</span></td>
+    </tr>
+    <tr>
+      <td class="metric-name">Prompting</td>
+      <td style="text-align:center; font-weight:700; color:#3A7CA5;">15%</td>
+      <td>Past basic prompting, into system prompt engineering</td>
+      <td style="text-align:center;"><span class="status-chip status-mature">MATURE</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="insight">
+  The industry's top three training demands - workflow integration, agents, and no-code assistants - are things <strong>BH MarCom is already building and shipping.</strong> The department isn't learning about agents; it's deploying them. This puts the team roughly <em>12-18 months ahead</em> of where most organizations are asking to be.
+</div>
+
+</div><div class="pg">
+<!-- ══════════════════════════════════════════════════════════════════
+     SECTION 10: KEY TAKEAWAYS
+     ══════════════════════════════════════════════════════════════════ -->
+<div class="section-num">Section 10</div>
+<h2>Key Takeaways</h2>
+
+<div class="three-col">
+  <div class="callout" style="border-top: 3px solid #2EA84A;">
+    <div class="callout-label green">Where BH MarCom Leads</div>
+    <p>The department is <strong>17-21 percentage points ahead</strong> of the industry average on adoption, confidence, and sentiment. It outperforms even the CEO/Founder cohort - the most advanced segment in the entire report. Daily use at 90%, 74% in Integration/Transformation, all four governance foundations in place. Combined profile places BH MarCom in the <strong>top 5% of the 2,109 professionals surveyed.</strong></p>
+  </div>
+  <div class="callout" style="border-top: 3px solid #FFCD00;">
+    <div class="callout-label amber">Where to Watch</div>
+    <p>The department's remaining challenges mirror what the SmarterX report identifies as the barriers that mature organizations face: <strong>lack of time</strong> (the #1 barrier at the Scaling stage, cited by 42%), tool access friction, and uneven adoption across functions. Some teams are in Transformation while others are still in Experimentation. The 25% who describe momentum as "inconsistent" need targeted support - the AI Labs office hours are designed for exactly this.</p>
+  </div>
+  <div class="callout" style="border-top: 3px solid #59BEC9;">
+    <div class="callout-label turquoise">The Opportunity</div>
+    <p>BH MarCom is doing what <strong>58% of the industry WANTS to learn how to do.</strong> The department has a credible case to lead AI adoption not just within Marketing, but as a model for the broader organization. The governance is built, the adoption is real, and the AI Labs provide the ongoing support structure. The next step is scaling what works here across the system.</p>
+  </div>
+</div>
+
+</div>
+<!-- ══════════════════════════════════════════════════════════════════
+     FOOTER
+     ══════════════════════════════════════════════════════════════════ -->
+<div class="foot-sources">
+  <strong>Sources:</strong> SmarterX 2026 State of AI for Business Report (n=2,109, Feb-Apr 2026) | BH MarCom AI Pulse Survey Wave 3 (n=100, Mar 2026; 303 total responses across 3 waves, Jan 2025-Mar 2026) | Baptist Health Marketing Technology | May 2026
+</div>
+
+<div class="foot">
+  <span>How BH MarCom Stacks Up - AI Adoption Benchmark</span>
+  <span>Baptist Health Marketing Technology | May 2026</span>
+</div>
+
+</body>
+</html>
