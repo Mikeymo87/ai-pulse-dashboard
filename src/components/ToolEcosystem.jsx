@@ -29,6 +29,20 @@ function getCategoryColors(name, isDark) {
 }
 
 // ─── Bubble chart ─────────────────────────────────────────────────────────────
+// Small bubbles only have room for one short word; multi-word options get a readable stand-in
+const SHORT_LABELS = {
+  'My own custom tool': 'Custom',
+  'Google AI Studio': 'AI Studio',
+  'Cursor or Codex': 'Cursor',
+  'n8n or Zapier': 'n8n',
+  'Wispr Flow': 'Wispr',
+};
+function shortLabel(label) {
+  if (SHORT_LABELS[label]) return SHORT_LABELS[label];
+  const words = label.split(' ');
+  return words[0].length >= 3 ? words[0] : words.slice(0, 2).join(' ');
+}
+
 function ToolBubbles({ tools, totalN, isDark }) {
   const [hovered, setHovered] = useState(null);
   const max = tools[0]?.count || 1;
@@ -120,7 +134,7 @@ function ToolBubbles({ tools, totalN, isDark }) {
                   lineHeight: 1.2,
                   wordBreak: 'break-word',
                 }}>
-                  {tool.label.split(' ')[0]}
+                  {shortLabel(tool.label)}
                 </span>
               )}
 
@@ -174,15 +188,19 @@ function ToolBubbles({ tools, totalN, isDark }) {
 
 // ─── Main export ──────────────────────────────────────────────────────────────
 export default function ToolEcosystem({ transforms }) {
-  const [toolSurvey, setToolSurvey] = useState('s3');
+  const { toolsS2, toolsS3, toolsS4, responseCounts, s4 } = transforms ?? {};
+  const s4Live = Boolean(s4?.live);
+  const [toolSurvey, setToolSurvey] = useState(s4?.solid ? 's4' : 's3');
   const theme = useTheme();
   const isDark = theme === 'dark';
 
-  const { toolsS2, toolsS3 } = transforms ?? {};
   const s2Tools = (toolsS2 ?? []).filter(t => t.count >= 2).slice(0, 20);
   const s3Tools = (toolsS3 ?? []).filter(t => t.count >= 1);
-  const activeTools = toolSurvey === 's2' ? s2Tools : s3Tools;
-  const activeN = toolSurvey === 's2' ? 106 : 101;
+  const s4Tools = (toolsS4 ?? []).filter(t => t.count >= 1);
+  const activeTools = toolSurvey === 's2' ? s2Tools : toolSurvey === 's4' ? s4Tools : s3Tools;
+  const nOf = (key, fallback) => responseCounts?.find(r => r.label === key)?.n ?? fallback;
+  const activeN = toolSurvey === 's2' ? nOf('Survey 2', 106) : toolSurvey === 's4' ? nOf('Survey 4', 0) : nOf('Survey 3', 101);
+  const options = [{ key: 's2', label: 'Survey 2' }, { key: 's3', label: 'Survey 3' }, ...(s4Live ? [{ key: 's4', label: 'Survey 4', live: true }] : [])];
 
   return (
     <section style={{ padding: '0 32px 64px', maxWidth: 1360, margin: '0 auto' }}>
@@ -217,8 +235,10 @@ export default function ToolEcosystem({ transforms }) {
               </h2>
               <p style={{ margin: 0, fontSize: 15, color: 'var(--text-support)', lineHeight: 1.7, maxWidth: 520 }}>
                 {toolSurvey === 's2'
-                  ? 'Survey 2 — all AI tools used at work (structured list, 106 respondents)'
-                  : 'Survey 3 — tools used beyond ChatGPT, Copilot, Jasper & Firefly (personal + non-endorsed, 101 respondents)'}
+                  ? `Survey 2 — all AI tools used at work (structured list, ${activeN} respondents)`
+                  : toolSurvey === 's4'
+                    ? `Survey 4 — tools used beyond ChatGPT, Copilot, Firefly & Gamma (live, ${activeN} respondents so far)`
+                    : `Survey 3 — tools used beyond ChatGPT, Copilot, Jasper & Firefly (personal + non-endorsed, ${activeN} respondents)`}
               </p>
             </div>
             <div style={{
@@ -230,7 +250,7 @@ export default function ToolEcosystem({ transforms }) {
               gap: 2,
               flexShrink: 0,
             }}>
-              {[{ key: 's2', label: 'Survey 2' }, { key: 's3', label: 'Survey 3' }].map(opt => (
+              {options.map(opt => (
                 <button
                   key={opt.key}
                   onClick={() => setToolSurvey(opt.key)}
@@ -248,7 +268,7 @@ export default function ToolEcosystem({ transforms }) {
                     color: toolSurvey === opt.key ? 'var(--accent-mint)' : 'var(--text-support)',
                   }}
                 >
-                  {opt.label}
+                  {opt.label}{opt.live && <span style={{ marginLeft: 6, fontSize: 9, fontWeight: 800, color: '#2EA84A', letterSpacing: '0.1em' }}>LIVE</span>}
                 </button>
               ))}
             </div>

@@ -6,7 +6,8 @@ import { useIsMobile } from '../hooks/useIsMobile';
 //   Wave 1 (Baseline)   = turquoise — neutral starting point
 //   Wave 2 (Momentum)   = BH green  — positive / growing
 //   Wave 3 (New Normal) = mint      — peak highlight
-const WAVE_ACCENT = ['#59BEC9', '#2EA84A', '#7DE69B'];
+//   Wave 4 (Team Sport) = BH green — live, in the field
+const WAVE_ACCENT = ['#59BEC9', '#2EA84A', '#7DE69B', '#2EA84A'];
 
 const CHAPTERS = [
   {
@@ -30,6 +31,26 @@ const CHAPTERS = [
     title: 'The New Normal',
     narrative: `The national average for daily AI use at work is 8%. This team is at 90%. That's not a rounding error — it's more than ten times the national benchmark, and it's the proof that "Human-first, AI-forward" wasn't just a philosophy. It became a practice. Positive sentiment held strong at 69%. Confidence kept climbing. Survey 3 introduced new questions that revealed the full picture for the first time: who is using AI, in what roles, and how deeply it has changed the way they work. Time savings and quality improvements top the list of benefits. And one number stands apart from all the rest — a significant share of the team is now spending their own money on AI tools. Not because anyone asked them to. Because they're convinced.`,
   },
+  {
+    waveLabel: 'WAVE 04',
+    dateRange: 'Sep 14 – Sep 25, 2026',
+    watermark: '04',
+    title: 'The Team Sport',
+    // Live narrative — fills in from Survey 4 data as responses arrive
+    narrative: (t) => {
+      const n = t?.s4?.n ?? 0;
+      if (n === 0) {
+        return `Survey 4 opens Monday, September 14 and runs through Friday, September 25. It keeps every question that built the story so far, and adds three new ones: the impact people's AI use is having, how far they've gone from prompting to building, and whether AI is part of how their team actually works. Wave 3 ended with a diagnosis: strong individual use, weak team-level redesign. This is the wave that measures whether that changed. The numbers below fill in automatically as responses come in.`;
+      }
+      const daily   = t?.frequencyTrend?.[3]?.distribution?.find(d => d.label === 'Daily')?.pct ?? 0;
+      const team    = t?.teamUseS4?.topTwoPct ?? 0;
+      const build   = (t?.builderS4?.distribution ?? []).filter(d => d.score >= 3).reduce((a, d) => a + d.pct, 0);
+      const impact  = t?.impactS4?.topTwoPct ?? 0;
+      const pocket  = t?.ownPocketS4?.yesPct ?? 0;
+      const early   = n < (t?.s4?.minN ?? 10) ? ' Early read, small sample.' : '';
+      return `Survey 4 is in the field, ${n} response${n === 1 ? '' : 's'} in so far.${early} ${daily}% use AI daily. The new questions go past usage: ${team}% say AI is built into their team's regular workflows, ${build}% have moved from prompting to building workflows, agents or apps, and ${impact}% say their AI use now helps coworkers or the whole team, not just themselves. ${pocket}% are still paying out of pocket for tools. Wave 3 asked whether people use AI. Wave 4 asks whether the work has been redesigned around it.`;
+    },
+  },
 ];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -42,7 +63,7 @@ function hexToRgb(hex) {
 //   S1: score 4 = "Confident" (scale tops at 5 = "Very Confident")
 //   S2: score 3 = "Confident" (scale tops at 4 = "Very Confident")
 //   S3: score 3 = "Confident" (scale tops at 5 = "Extremely Confident")
-const CONFIDENCE_THRESHOLD = [4, 3, 3];
+const CONFIDENCE_THRESHOLD = [4, 3, 3, 3];
 
 function getConfidentOrAbovePct(distribution, threshold) {
   return distribution
@@ -161,11 +182,14 @@ const BRIDGE_COPY = [
   `That shift didn't happen by chance. Between January and August, a deliberate playbook was activated: an AI Council was formed, enterprise subscriptions were provisioned for every team member, hands-on role-specific workshops launched, and near-daily tips landed in team channels. A dedicated AI Sherpa was appointed to coach individuals through real blockers. The 'Invent Tomorrow' recognition program made wins visible. Curiosity, it turns out, needs infrastructure.`,
   // Between Wave 2 → Wave 3
   `By September 2025, the team's daily AI usage was more than ten times the national average of 8%. But the work wasn't finished — it was compounding. The six months that followed would reveal something the numbers alone couldn't capture: how personally invested people had become. Not just in their workflows. In the tools themselves.`,
+  // Between Wave 3 → Wave 4
+  `Wave 3 handed leadership six priorities: run workflow redesign pilots, rationalize the tool stack, fix access and integration, build role-based enablement, reset the performance narrative, and open a small R&D lane. It also set targets for the next wave. Gamma became an endorsed tool. The question Wave 4 answers is not whether people kept using AI. It is whether the department redesigned itself around it.`,
 ];
 
 const BRIDGE_META = [
   { span: 'Jan 2025 → Aug 2025', months: '7 months' },
   { span: 'Aug 2025 → Mar 2026', months: '6 months' },
+  { span: 'Mar 2026 → Sep 2026', months: '6 months' },
 ];
 
 function ConnectorLine({ index }) {
@@ -298,15 +322,24 @@ export default function GrowthStory({ transforms, presentationWave }) {
   const responseCounts = transforms.responseCounts;
   const sentimentTrend = transforms.sentimentTrend;
 
+  // Waves present: 3 today, 4 once Survey 4 is configured (its chapter shows from day one)
+  const waveCount = Math.min(responseCounts.length, CHAPTERS.length);
+  const s4 = transforms.s4;
+
   // Pre-compute per-survey values for delta calculations
-  const posPcts   = [positive?.s1?.pct ?? 0, positive?.s2?.pct ?? 0, positive?.s3?.pct ?? 0];
-  const dailyPcts = [0, 1, 2].map(i => frequency[i]?.distribution?.find(d => d.label === 'Daily')?.pct ?? 0);
+  const posPcts   = Array.from({ length: waveCount }, (_, i) => positive?.[`s${i + 1}`]?.pct ?? 0);
+  const dailyPcts = Array.from({ length: waveCount }, (_, i) => frequency[i]?.distribution?.find(d => d.label === 'Daily')?.pct ?? 0);
 
   // Wave 3 new-question metrics
   const ownPocketPct     = transforms.ownPocketS3?.yesPct ?? 0;
   const acceleratingPct  = transforms.momentumS3?.find(m => m.label === 'Accelerating')?.pct ?? 0;
   const topBenefitLabel  = transforms.benefitsS3?.[0]?.label ?? 'Time Savings';
   const topBenefitPct    = transforms.benefitsS3?.[0]?.pct ?? 0;
+
+  // Wave 4 new-question metrics (live)
+  const teamPct4    = transforms.teamUseS4?.topTwoPct ?? 0;
+  const builderPct4 = (transforms.builderS4?.distribution ?? []).filter(d => d.score >= 3).reduce((a, d) => a + d.pct, 0);
+  const pocketPct4  = transforms.ownPocketS4?.yesPct ?? 0;
 
   function getStats(i) {
     const accent      = WAVE_ACCENT[i];
@@ -325,6 +358,15 @@ export default function GrowthStory({ transforms, presentationWave }) {
       { value: `${confPct}%`, label: 'Confident or Above', accentColor: accent, delta: confDelta  },
       { value: `${dailyPct}%`,label: 'Daily Usage',         accentColor: accent, delta: dailyDelta },
     ];
+
+    // Wave 4: the three new measures
+    if (i === 3) {
+      base.push(
+        { value: `${teamPct4}%`,    label: 'AI Built Into Team Workflows', accentColor: '#7DE69B', delta: null },
+        { value: `${builderPct4}%`, label: 'Building, Not Just Prompting',  accentColor: '#59BEC9', delta: null },
+        { value: `${pocketPct4}%`,  label: 'Paying Own Pocket',             accentColor: '#E5554F', delta: ownPocketPct ? pocketPct4 - ownPocketPct : null },
+      );
+    }
 
     // Wave 3 only: two additional pills for new survey questions
     if (i === 2) {
@@ -350,7 +392,8 @@ export default function GrowthStory({ transforms, presentationWave }) {
   // In presentation mode, show only the requested wave; otherwise show all.
   const indicesToShow = (presentationWave !== undefined && presentationWave !== null)
     ? [presentationWave]
-    : [0, 1, 2];
+    : Array.from({ length: waveCount }, (_, i) => i);
+  const WAVE_WORDS = ['One', 'Two', 'Three', 'Four'];
 
   return (
     <section style={{
@@ -390,7 +433,7 @@ export default function GrowthStory({ transforms, presentationWave }) {
             margin: '0 0 12px',
             fontFamily: 'DM Sans, sans-serif',
           }}>
-            Three Waves, One Story
+            {WAVE_WORDS[waveCount - 1] ?? waveCount} Waves, One Story
           </h2>
           <p style={{
             color: 'var(--text-support)',
@@ -401,7 +444,7 @@ export default function GrowthStory({ transforms, presentationWave }) {
             marginInline: 'auto',
             fontFamily: 'DM Sans, sans-serif',
           }}>
-            How AI adoption evolved across Baptist Health MarCom — January 2025 to March 2026
+            How AI adoption evolved across Baptist Health MarCom — January 2025 to {waveCount >= 4 ? 'September 2026' : 'March 2026'}
           </p>
         </div>
       )}
@@ -496,6 +539,12 @@ export default function GrowthStory({ transforms, presentationWave }) {
                   }}>
                     {chapter.dateRange}
                   </div>
+                  {i === 3 && (
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 800, color: '#2EA84A', letterSpacing: '0.08em' }}>
+                      <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#2EA84A', boxShadow: '0 0 8px rgba(46,168,74,0.9)' }} />
+                      {s4?.n > 0 ? `LIVE · ${s4.n} so far` : 'OPENS SEP 14'}
+                    </div>
+                  )}
                 </div>
 
                 {/* Chapter title */}
@@ -522,7 +571,7 @@ export default function GrowthStory({ transforms, presentationWave }) {
                   marginTop: 14,
                   fontFamily: 'DM Sans, sans-serif',
                 }}>
-                  {chapter.narrative}
+                  {typeof chapter.narrative === 'function' ? chapter.narrative(transforms) : chapter.narrative}
                 </p>
 
                 {/* Mini sentiment bar */}
@@ -534,7 +583,7 @@ export default function GrowthStory({ transforms, presentationWave }) {
                 display: 'grid',
                 gridTemplateColumns: 'repeat(2, 1fr)',
                 gap: 12,
-                minWidth: isMobile ? 'unset' : (i === 2 ? 480 : 440),
+                minWidth: isMobile ? 'unset' : (i >= 2 ? 480 : 440),
                 width: isMobile ? '100%' : 'auto',
                 flexShrink: 0,
                 position: 'relative',
@@ -554,7 +603,7 @@ export default function GrowthStory({ transforms, presentationWave }) {
             </motion.div>
 
             {/* Connector between chapters — only in normal scroll mode */}
-            {(presentationWave === undefined || presentationWave === null) && i < CHAPTERS.length - 1 && <ConnectorLine index={i} />}
+            {(presentationWave === undefined || presentationWave === null) && i < waveCount - 1 && <ConnectorLine index={i} />}
           </div>
         );
       })}
@@ -618,7 +667,7 @@ export default function GrowthStory({ transforms, presentationWave }) {
                 textTransform: 'uppercase',
                 opacity: 0.65,
               }}>
-                March 2026 — Where things stand
+                {s4?.solid ? 'September 2026 — Where things stand' : 'March 2026 — Where things stand'}
               </span>
             </div>
 
@@ -634,12 +683,9 @@ export default function GrowthStory({ transforms, presentationWave }) {
               position: 'relative',
               zIndex: 1,
             }}>
-              The national average for daily AI use at work is 8%. This team reached 90% — more than
-              ten times the benchmark. That gap is the direct result of leadership that modeled the change,
-              built the infrastructure, and trusted a team of 117 to run with it. Since Survey 3, that
-              investment hasn't stopped. New staff are onboarding into a department where AI fluency is
-              already the norm. The question has changed: it's no longer whether the team will use AI.
-              It's whether they'll have enough protected time to go as deep as they want to.
+              {s4?.solid
+                ? `Survey 4 is answering the question Wave 3 left open. With ${s4.n} responses in, ${dailyPcts[3]}% use AI daily, ${teamPct4}% say AI is built into their team's regular workflows, and ${builderPct4}% have moved past prompting into building. ${pocketPct4}% are still paying out of pocket. The national average for daily AI use at work is 8%. This team is not just using AI more than ten times as often; it is starting to rebuild the work itself around it. Whether that reaches every team is what the rest of this wave will show.`
+                : `The national average for daily AI use at work is 8%. This team reached 90% — more than ten times the benchmark. That gap is the direct result of leadership that modeled the change, built the infrastructure, and trusted a team of 117 to run with it. Since Survey 3, that investment hasn't stopped. New staff are onboarding into a department where AI fluency is already the norm. The question has changed: it's no longer whether the team will use AI. It's whether they'll have enough protected time to go as deep as they want to.`}
             </p>
 
             {/* Preview chips — barriers + excitement */}

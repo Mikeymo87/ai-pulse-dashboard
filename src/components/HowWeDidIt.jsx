@@ -53,6 +53,11 @@ function buildPrinciples(transforms) {
   const topBenefitLabel = benefitsS3[0]?.label ?? 'time savings and efficiency';
   const topBenefitPct   = benefitsS3[0]?.pct   ?? 85;
 
+  const wavesWithData = (transforms?.responseCounts ?? []).filter(w => w.n > 0);
+  const surveyCount   = wavesWithData.length || 3;
+  const monthsCovered = transforms?.monthsCovered ?? 14;
+  const totalResponses = wavesWithData.reduce((a, w) => a + w.n, 0) || 290;
+
   return [
     // ─── PHASE 0: FOUNDATION ────────────────────────────────────────────────
     {
@@ -238,9 +243,9 @@ function buildPrinciples(transforms) {
       title: 'Build a Daily Drumbeat, Measure Progress, and Write the Change Into How You Operate',
       oneLiner: 'The gains that last are the ones you institutionalize.',
       narrative: 'MarCom ran an active Slack channel with daily AI experiments, shared examples, and low-pressure questions. Three surveys over 14 months measured not just usage but sentiment, confidence, and barriers. AI use was written into job descriptions and performance expectations — not as surveillance, but as signal. The daily drumbeat prevented the pattern of initial enthusiasm followed by gradual reversion.',
-      stat: '3',
-      statLabel: 'pulse surveys over 14 months',
-      statSub: '290 total responses — behavioral proof, not self-report',
+      stat: `${surveyCount}`,
+      statLabel: `pulse surveys over ${monthsCovered} months`,
+      statSub: `${totalResponses} total responses — behavioral proof, not self-report`,
       quote: 'I\'m especially interested in building workflows and tools that make it easier for teams to focus on more strategic, high-value work.',
       actions: [
         'Create a dedicated AI channel in your team communication platform today. Call it "#ai-experiments" or "#ai-corner" — the word "experiments" signals that trying and failing is the point.',

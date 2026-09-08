@@ -26,3 +26,4 @@ dist-ssr
 # Environment variables (never commit real API keys)
 .env
 .env.local
+scripts/dev-5010.log

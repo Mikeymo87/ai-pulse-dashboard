@@ -1,5 +1,5 @@
 import Papa from 'papaparse';
-import { extractRowThemes } from './themes';
+import { extractRowThemes } from './themes.js';
 
 // ─── Normalization helpers ──────────────────────────────────────────────────
 
@@ -59,8 +59,39 @@ function normalizeConfidence(v, survey) {
     'Very Confident': 4,
     'Confident': 3,
     'Somewhat confident': 2,
+    'Not confident at all': 1,
   };
   return map[v] ?? null;
+}
+
+// ─── Wave 4 ladders (impact, builder, team use) → 1–5, "I'm not sure" → null ──
+// Matched by option prefix so light punctuation edits in the form don't break it.
+function straightQuotes(v) { return (v || '').replace(/\u2019/g, "'").trim(); }
+function ladder(v, prefixes) {
+  const t = straightQuotes(v).toLowerCase();
+  if (!t) return null;
+  for (let i = 0; i < prefixes.length; i++) {
+    if (t.startsWith(prefixes[i].toLowerCase())) return i + 1;
+  }
+  return null;
+}
+const IMPACT_LEVELS  = ["I'm not seeing much impact", 'AI helps me with occasional', 'AI regularly helps me', 'The ways I use AI also help', 'My use of AI has helped improve'];
+const BUILDER_LEVELS = ['I use AI tools to ask', 'I create reusable AI assistants', 'I create workflows or automations', 'I build AI agents', 'I build AI solutions that other people'];
+const TEAM_LEVELS    = ['AI is rarely or not used', 'People mostly use AI on their own', 'We use AI for some common', 'AI is part of some of our regular', 'AI is built into how our team'];
+export const IMPACT_LABELS  = { 1: 'Not much impact yet', 2: 'Occasional tasks', 3: 'Regularly faster or better work', 4: 'Also helps coworkers', 5: 'Improved how the team works' };
+export const BUILDER_LABELS = { 1: 'Uses AI as an assistant', 2: 'Creates reusable assistants', 3: 'Builds workflows or automations', 4: 'Builds agents', 5: 'Builds solutions others use' };
+export const TEAM_LABELS    = { 1: 'Rarely or not used by team', 2: 'Individual use only', 3: 'Some common team tasks', 4: 'Part of some team workflows', 5: 'Built into team workflows' };
+
+// Tolerant header lookup for the Wave 4 sheet: first column whose title starts with the prefix
+// (case-insensitive, curly apostrophes normalized). Wave 1–3 mappers keep exact keys.
+function pick(r, ...prefixes) {
+  const keys = Object.keys(r);
+  for (const prefix of prefixes) {
+    const p = straightQuotes(prefix).toLowerCase();
+    const k = keys.find(key => straightQuotes(key).toLowerCase().startsWith(p));
+    if (k !== undefined) return r[k];
+  }
+  return undefined;
 }
 
 // Maps full stage string → short label (S2 + S3)
@@ -102,49 +133,58 @@ const BARRIER_CATEGORIES = [
       'None, I feel there are no barriers',
       'None',
       'I feel there are no barriers',
+      "None. I don't currently face meaningful barriers",
       "I use it as a resource so currently haven't encountered any barriers",
     ],
-    keywords: ['no barrier', 'feel there are no', "haven't encountered any barrier"],
+    keywords: ['no barrier', 'feel there are no', "haven't encountered any barrier", 'meaningful barriers'],
   },
   {
     label: 'Lack of training',
-    exact: ['Lack of understanding or training'],
+    exact: ['Lack of understanding or training', 'Lack of training or knowledge'],
     keywords: ['lack of understanding', 'lack of training', 'lack of knowledge', 'need.*training', 'need.*education', 'fully understanding', 'improper training', 'better trained'],
   },
   {
     label: 'Limited access',
-    exact: ['Limited access to AI tools'],
+    exact: ['Limited access to AI tools', 'Limited access to the AI tools I need'],
     keywords: ['limited access', 'access to ai tools', 'gain access', 'access to certain tools', 'cost of.*tools', 'pay for.*tools'],
   },
   {
     label: 'Accuracy concerns',
-    exact: ['Concerns about accuracy or reliability', 'IP concerns'],
+    exact: ['Concerns about accuracy or reliability', 'IP concerns', 'Concerns about AI accuracy or reliability'],
     keywords: ['accuracy', 'reliability', 'accurate', 'reliable', 'ip concern', 'not 100%', 'human judgment'],
   },
   {
     label: 'Fear of mistakes',
-    exact: ['Fear of making mistakes with AI'],
-    keywords: ['fear of making mistakes', 'fear of mistakes', 'making mistakes with ai'],
+    exact: ['Fear of making mistakes with AI', 'Fear of making a mistake when using AI'],
+    keywords: ['fear of making mistakes', 'fear of mistakes', 'making mistakes with ai', 'fear of making a mistake', 'making a mistake when using ai'],
+  },
+  {
+    label: 'Manager support',
+    exact: ["My manager doesn't use AI and isn't encouraging it", 'My manager does not regularly use or encourage AI'],
+    keywords: ['my manager', 'manager does not', "manager doesn't", 'manager support'],
   },
   {
     label: 'Job security',
     exact: [
       'I am afraid that it will negatively affect my job',
       'I am afraid AI will replace me',
+      "I'm concerned AI could negatively affect my job",
+      "I'm concerned AI could eventually replace my job",
     ],
-    keywords: ['replace me', 'negatively affect my job', 'afraid ai will', 'take my job', 'job security'],
+    keywords: ['replace me', 'negatively affect my job', 'afraid ai will', 'take my job', 'job security', 'replace my job'],
   },
   {
     label: 'Workflow resistance',
     exact: [
       'I am not ready to make that kind of change to my workflow',
       'Unsure of the best way to integrate AI into my workflow',
+      "I'm not ready to change my current workflow",
     ],
     keywords: ['not ready.*change', 'change to my workflow', 'unsure of the best way', 'integrate ai into my workflow', 'hesitation', 'adoption.*team'],
   },
   {
     label: 'Old habits',
-    exact: ['Hard to break old habits'],
+    exact: ['Hard to break old habits', "It's hard to break old habits or change the way I work"],
     keywords: ['old habit', 'break.*habit', 'hard to break'],
   },
   {
@@ -153,16 +193,16 @@ const BARRIER_CATEGORIES = [
       "I don't see AI as relevant to my work",       // straight apostrophe
       "I don\u2019t see AI as relevant to my work",  // curly apostrophe (Google Forms export)
     ],
-    keywords: ['not relevant', "don't see ai as relevant", "don\u2019t see ai as relevant"],
+    keywords: ['not relevant', "don't see ai as relevant", "don\u2019t see ai as relevant", 'how ai is relevant', 'relevant to my work'],
   },
   {
     label: 'Unaware of permissions',
-    exact: ['I was not aware that I was allowed to use AI'],
-    keywords: ['not aware.*allowed', 'allowed to use ai', "didn't know i could"],
+    exact: ['I was not aware that I was allowed to use AI', "I'm not sure what AI use is allowed", "I\u2019m not sure what AI use is allowed"],
+    keywords: ['not aware.*allowed', 'allowed to use ai', "didn't know i could", 'what ai use is allowed'],
   },
   {
     label: 'Lack of time',
-    exact: ['Lack of time / competing priorities'],
+    exact: ['Lack of time / competing priorities', 'Lack of time or competing priorities'],
     keywords: [
       'lack of time', 'competing priorities', 'not enough time', 'too busy',
       'limited time', 'making the time', 'time to learn', 'time to really',
@@ -171,12 +211,12 @@ const BARRIER_CATEGORIES = [
   },
   {
     label: 'Privacy / compliance',
-    exact: ['Concerns about privacy / PHI / compliance'],
+    exact: ['Concerns about privacy / PHI / compliance', 'Privacy, PHI, security or compliance concerns'],
     keywords: ['privacy', 'phi', 'compliance', 'hipaa', 'patient data', 'sensitive data', 'data upload'],
   },
   {
     label: 'Too many tools',
-    exact: ['Too many tools/not sure which to use'],
+    exact: ['Too many tools/not sure which to use', "There are too many tools and I'm not sure which ones to use"],
     keywords: ['too many tools', 'not sure which tool', 'which tool to use', 'too many options', 'overwhelm.*tool', 'grow too rapid', 'tools grow'],
   },
   {
@@ -191,13 +231,13 @@ const BARRIER_CATEGORIES = [
   },
   {
     label: 'Unclear guidelines',
-    exact: ["Unclear guidelines on what's allowed (policy/guardrails)"],
+    exact: ["Unclear guidelines on what's allowed (policy/guardrails)", 'Unclear policies or guardrails'],
     keywords: ['unclear guidelines', 'guardrail', 'what.*allowed', 'legalities', 'company policy', 'bh rules', 'figuring out when', 'when to use', 'to what extent'],
   },
 ];
 
 function classifyBarrierSegment(segment) {
-  segment = segment.trim();
+  segment = straightQuotes(segment);
   if (!segment) return null;
   const lower = segment.toLowerCase();
 
@@ -243,9 +283,15 @@ function normalizeTool(t) {
   if (lower.startsWith('suite of')) return null;
   if (lower.startsWith('nano banana')) return null;
   if (t.length > 50) return null; // too long to be a tool name
-  // Normalize variants
-  if (t === 'Claud (Anthropic)') return 'Claude (Anthropic)';
-  if (t === 'NotebookLM.Google' || t === 'Notebook LM') return 'NotebookLM';
+  // Normalize variants — one canonical label per tool across all waves
+  if (t === 'Claud (Anthropic)' || t === 'Claude (Anthropic)') return 'Claude';
+  if (t === 'NotebookLM.Google' || t === 'Notebook LM' || /^Gemini Notebook/i.test(t)) return 'NotebookLM';
+  if (t === 'Gemini (Google)') return 'Gemini';
+  if (t === 'Grok (xAI)') return 'Grok';
+  if (t === 'Llama (Meta AI)') return 'Llama';
+  if (t === 'Copilot (Microsoft)') return 'Copilot';
+  if (t === 'ChatGPT (OpenAI)') return 'ChatGPT';
+  if (t === 'WISPR Flow' || t === 'Wispr' || t === 'VSPR Flow') return 'Wispr Flow';
   if (t === 'google AI studio') return 'Google AI Studio';
   if (t === 'Answer The Public' || t === 'AnswerThePublic') return 'AnswerThePublic';
   if (t === 'CODEX') return 'Codex';
@@ -266,22 +312,27 @@ function normalizeTools(v) {
  * long benefit strings themselves contain commas, making split-by-comma
  * unreliable for parsing.
  */
-const BENEFIT_PREFIXES = [
-  'Saves time / reduces busywork',
-  'Improves quality / polish',
-  'Idea generation / creative acceleration',
-  'Research and synthesis',
-  'Strategic thought partner',
-  'Communication clarity',
-  'Speed to decision',
-  'Learning / upskilling',
-  'Enablement of new capabilities',
-  'Collaboration',
+// Each canonical label maps to its Wave 3 option prefix and its Wave 4 option text.
+export const BENEFIT_CANON = [
+  { label: 'Saves time / reduces busywork',            s3: 'Saves time / reduces busywork',            s4: 'Saves me time or reduces busywork' },
+  { label: 'Improves quality / polish',                s3: 'Improves quality / polish',                s4: 'Improves the quality or polish of my work' },
+  { label: 'Idea generation / creative acceleration', s3: 'Idea generation / creative acceleration', s4: 'Helps me generate ideas or accelerate creative work' },
+  { label: 'Research and synthesis',                   s3: 'Research and synthesis',                   s4: 'Helps with research, synthesis or understanding information' },
+  { label: 'Strategic thought partner',                s3: 'Strategic thought partner',                s4: 'Serves as a strategic thought partner' },
+  { label: 'Speed to decision',                        s3: 'Speed to decision',                        s4: 'Helps me make decisions faster' },
+  { label: 'Communication clarity',                    s3: 'Communication clarity',                    s4: 'Improves the clarity of my communications' },
+  { label: 'Confidence / reduced anxiety',             s3: 'Confidence / reduced anxiety',             s4: 'Increases my confidence or reduces anxiety about a task' },
+  { label: 'Learning / upskilling',                    s3: 'Learning / upskilling',                    s4: 'Helps me learn or build new skills' },
+  { label: 'Collaboration',                            s3: 'Collaboration',                            s4: 'Improves collaboration' },
+  { label: 'Enablement / accessibility',               s3: 'Enablement / accessibility',               s4: 'Makes work or information more accessible' },
+  { label: 'More meaningful work',                     s3: 'More meaningful work',                     s4: 'Allows me to spend more time on meaningful or higher-value work' },
+  { label: 'No meaningful benefits',                   s3: 'I have found no benefits from AI',         s4: 'I have not experienced meaningful benefits' },
 ];
 
 function normalizeBenefits(v) {
   if (!v || !v.trim()) return [];
-  return BENEFIT_PREFIXES.filter(prefix => v.includes(prefix));
+  const t = straightQuotes(v);
+  return BENEFIT_CANON.filter(b => t.includes(b.s3) || t.includes(b.s4)).map(b => b.label);
 }
 
 // S3 role normalization
@@ -290,6 +341,8 @@ function normalizeRole(v) {
   v = v.trim();
   if (v.toLowerCase() === 'designer') return 'Designer';
   if (v.toLowerCase() === 'ea') return 'EA';
+  if (/^assistant vice president$/i.test(v)) return 'AVP';
+  if (/^vice president$/i.test(v)) return 'VP';
   return v;
 }
 
@@ -308,6 +361,7 @@ function normalizeFunction(v) {
   if (['hospital', 'hospital care', 'hospital marketing'].includes(v.toLowerCase())) {
     return 'Hospital Marketing';
   }
+  if (/^social media & reputation( management)?$/i.test(v)) return 'Social Media & Reputation';
   return v;
 }
 
@@ -316,6 +370,23 @@ function normalizeFunction(v) {
 //     Keep as local file to preserve the verified 97-response dataset.
 // S2: live Google Sheet — 106 responses, matches verified count.
 // S3: live Google Sheet — survey closed April 2026; data is final (101 responses).
+
+// S4: live Google Sheet — survey in the field Sep 14–25, 2026. Paste the published-CSV URL into
+//     S4_URL below (same pattern as s2/s3). Until then S4 is off and the app renders 3 waves.
+//     Dev override: append ?s4=sample to the URL to load public/data/survey4.sample.csv (synthetic rows).
+const S4_URL = '';
+
+function resolveS4Source() {
+  const env = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_S4_URL) || '';
+  if (env) return env;
+  if (S4_URL) return S4_URL;
+  if (typeof window !== 'undefined') {
+    const q = new URLSearchParams(window.location.search).get('s4');
+    if (q === 'sample') return '/data/survey4.sample.csv';
+    if (q && /^https?:/.test(q)) return q;
+  }
+  return null;
+}
 
 const DATA_SOURCES = {
   s1: '/data/survey1.csv',
@@ -433,21 +504,68 @@ function mapS3(raw) {
     });
 }
 
+// Wave 4 (Sep 2026). Column titles are the Google Form question titles; matched by prefix via pick().
+export function mapS4(raw) {
+  return raw
+    .filter(r => (r['Timestamp'] ?? '').trim())
+    .map(r => {
+      const pocket = (pick(r, 'Are you currently paying out of your own pocket') ?? '').trim().toLowerCase();
+      const row = {
+        survey: 4,
+        period: 'Sep 2026',
+        timestamp: r['Timestamp'].trim(),
+        sentiment:   normalizeSentiment(pick(r, 'How would you describe your current feelings')),
+        familiarity: normalizeFamiliarity(pick(r, 'How would you best describe your familiarity')),
+        frequency:   normalizeFrequency(pick(r, 'How often do you currently use AI')),
+        barriers:    normalizeBarriers(pick(r, 'What are the biggest barriers')),
+        importance:  parseInt(pick(r, 'How important is AI to the success'), 10) || null,
+        confidence:  normalizeConfidence(pick(r, 'How confident are you today'), 4),
+        stage:       normalizeStage(pick(r, 'Which stage best describes')),
+        momentum:    null,
+        tools:       normalizeTools(pick(r, 'In addition to the AI tools officially provided')),
+        benefits:    normalizeBenefits(pick(r, 'Which benefits have you personally experienced')),
+        ownPocket:   pocket === 'yes' ? true : pocket === 'no' ? false : null,
+        role:        normalizeRole(pick(r, 'What is your current role level', 'What is your role')),
+        function:    normalizeFunction(pick(r, 'Which Marketing and Communications function', 'What is your function')),
+        // Wave 4 ladders (new): 1–5, null when "I'm not sure"
+        impact:      ladder(pick(r, 'What kind of impact is your use of AI'), IMPACT_LEVELS),
+        builder:     ladder(pick(r, 'What is the most advanced thing'), BUILDER_LEVELS),
+        teamUse:     ladder(pick(r, 'How is AI being used on your team'), TEAM_LEVELS),
+        // One open-ended question this wave: what is helping or getting in the way
+        openEnded:   (pick(r, 'What is one thing helping', 'Anything else you') ?? '').trim() || null,
+        struggle:    null,
+        excitement:  null,
+      };
+      return { ...row, ...extractRowThemes(row) };
+    });
+}
+
+// Row mappers by wave number (used by the check script and tests)
+export const MAPPERS = { 1: mapS1, 2: mapS2, 3: mapS3, 4: mapS4 };
+
+// Parse CSV text (no network) — for node checks and tests
+export function parseCsvText(text) {
+  return Papa.parse(text, { header: true, skipEmptyLines: true }).data;
+}
+
 // ─── Main export ─────────────────────────────────────────────────────────────
 
 export async function parseAllSurveys() {
-  const [raw1, raw2, raw3] = await Promise.all([
+  const s4Source = resolveS4Source();
+  const [raw1, raw2, raw3, raw4] = await Promise.all([
     fetchParsed(DATA_SOURCES.s1),
     fetchParsed(DATA_SOURCES.s2),
     fetchParsed(DATA_SOURCES.s3),
+    s4Source ? fetchParsed(s4Source).catch(err => { console.error('[Survey Data] S4 fetch failed:', err); return []; }) : Promise.resolve([]),
   ]);
 
   const survey1 = mapS1(raw1);
   const survey2 = mapS2(raw2);
   const survey3 = mapS3(raw3);
+  const survey4 = s4Source ? mapS4(raw4) : [];
 
-  if (import.meta.env.DEV) {
-    console.log(`[Survey Data] S1: ${survey1.length} | S2: ${survey2.length} | S3: ${survey3.length} | Total: ${survey1.length + survey2.length + survey3.length}`);
+  if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.DEV) {
+    console.log(`[Survey Data] S1: ${survey1.length} | S2: ${survey2.length} | S3: ${survey3.length} | S4: ${s4Source ? survey4.length : 'off'} | Total: ${survey1.length + survey2.length + survey3.length + survey4.length}`);
     // Spot-check confidence averages
     const avg = (rows, field) => {
       const vals = rows.map(r => r[field]).filter(v => v !== null);
@@ -461,6 +579,9 @@ export async function parseAllSurveys() {
     survey1,
     survey2,
     survey3,
-    all: [...survey1, ...survey2, ...survey3],
+    survey4,
+    s4Configured: Boolean(s4Source),
+    s4Source,
+    all: [...survey1, ...survey2, ...survey3, ...survey4],
   };
 }

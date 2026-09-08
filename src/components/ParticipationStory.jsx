@@ -14,18 +14,22 @@ const WAVE_META = [
   { label: 'Jan–Feb 2025', shortLabel: 'Survey 1', color: '#7DE69B' },
   { label: 'Aug–Sep 2025', shortLabel: 'Survey 2', color: '#59BEC9' },
   { label: 'Mar 2026',     shortLabel: 'Survey 3', color: '#7DE69B' },
+  { label: 'Sep 2026',     shortLabel: 'Survey 4', color: '#2EA84A' },
 ];
 
+// One entry per wave in responseCounts (3 today, 4 once Survey 4 is configured)
 function buildWaves(responseCounts) {
-  return WAVE_META.map((meta, i) => {
-    const n       = responseCounts?.[i]?.n ?? [97, 106, 89][i];
+  const count = responseCounts?.length ?? 3;
+  return WAVE_META.slice(0, count).map((meta, i) => {
+    const n       = responseCounts?.[i]?.n ?? [97, 106, 89, 0][i];
     const pct     = Math.round((n / TOTAL) * 100);
-    const prev    = i > 0 ? (responseCounts?.[i - 1]?.n ?? [97, 106][i - 1]) : null;
+    const prev    = i > 0 ? (responseCounts?.[i - 1]?.n ?? [97, 106, 89][i - 1]) : null;
     const prevPct = prev !== null ? Math.round((prev / TOTAL) * 100) : null;
     const diff    = prevPct !== null ? pct - prevPct : null;
-    return { ...meta, respondents: n, pct, delta: diff };
+    return { ...meta, respondents: n, pct, delta: diff, inField: Boolean(responseCounts?.[i]?.inField) };
   });
 }
+const ORDINAL = ['once', 'twice', 'three times', 'four times'];
 
 // ─── Single dot — theme-aware inactive color ──────────────────────────────────
 function Dot({ active, color, delay, inactiveColor }) {
@@ -69,27 +73,28 @@ export default function ParticipationStory({ transforms }) {
   const barInactiveColor  = isLight ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.15)';
   const dotInactiveColor  = isLight ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.15)';
 
-  // Auto-play W0 → W1 → W2 once on scroll-into-view
+  // Auto-play through every completed wave once on scroll-into-view
+  const lastCompleted = Math.max(0, WAVES.findLastIndex(w => !w.inField || w.respondents > 0));
   useEffect(() => {
     if (autoPlayed) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting && !hasEnteredRef.current) {
           hasEnteredRef.current = true;
-          timerRef.current = setTimeout(() => {
-            setWave(1);
-            timerRef.current = setTimeout(() => {
-              setWave(2);
-              setAutoPlayed(true);
-            }, 1800);
-          }, 900);
+          let step = 1;
+          const advance = () => {
+            if (step > lastCompleted) { setAutoPlayed(true); return; }
+            setWave(step); step += 1;
+            timerRef.current = setTimeout(advance, 1800);
+          };
+          timerRef.current = setTimeout(advance, 900);
         }
       },
       { threshold: 0.3 }
     );
     if (ref.current) observer.observe(ref.current);
     return () => { observer.disconnect(); clearTimeout(timerRef.current); };
-  }, [autoPlayed]);
+  }, [autoPlayed, lastCompleted]);
 
   const w      = WAVES[wave];
   const active = w.respondents;
@@ -156,7 +161,7 @@ export default function ParticipationStory({ transforms }) {
           margin: 0,
           maxWidth: 520,
         }}>
-          Yours has shown up three times — over 14 months. Each dot below is a person.
+          Yours has shown up {ORDINAL[Math.min(WAVES.filter(w => w.respondents > 0).length, 4) - 1]} — over {transforms?.monthsCovered ?? 14} months. Each dot below is a person.
           Not a data point. A person who made time, answered honestly, and did it again.
           That is not compliance. That is investment.
         </p>
@@ -244,9 +249,15 @@ export default function ParticipationStory({ transforms }) {
                   color: 'var(--text-support)',
                   marginTop: 6,
                 }}>
-                  response rate — {w.respondents} of {TOTAL} people
+                  response rate — {w.respondents} of {TOTAL} people{w.inField ? ' so far' : ''}
                 </div>
-                {w.delta !== null && (
+                {w.inField && (
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 8, fontFamily: FONT, fontSize: 12, fontWeight: 700, color: '#2EA84A' }}>
+                    <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#2EA84A', boxShadow: '0 0 8px rgba(46,168,74,0.9)' }} />
+                    Live · in the field Sep 14–25
+                  </div>
+                )}
+                {w.delta !== null && !w.inField && (
                   <div style={{
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -281,7 +292,7 @@ export default function ParticipationStory({ transforms }) {
                 <p style={{ fontFamily: FONT, fontSize: 13, lineHeight: 1.65, color: 'var(--text-bridge)', margin: 0 }}>
                   For organizations under 500 employees, the industry benchmark is{' '}
                   <strong style={{ color: 'var(--text-medium)' }}>~85% participation</strong>.
-                  This team hit <strong style={{ color: w.color }}>{WAVES[0].pct}%, {WAVES[1].pct}%, and {WAVES[2].pct}%</strong> — at or above that mark all three times.
+                  This team hit <strong style={{ color: w.color }}>{WAVES[0].pct}%, {WAVES[1].pct}%, and {WAVES[2].pct}%</strong> — at or above that mark all three completed times.{WAVES[3] && WAVES[3].respondents > 0 && <span> Survey 4 is at <strong style={{ color: '#2EA84A' }}>{WAVES[3].pct}%</strong> and counting.</span>}
                   {wave === 2 && (
                     <span style={{ color: 'var(--accent-yellow)' }}>
                       {' '}The Survey 3 dip reflects a compressed sprint window, not disengagement.
@@ -336,7 +347,7 @@ export default function ParticipationStory({ transforms }) {
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                           {/* Delta badge on the row itself */}
-                          {WAVES[i].delta !== null && (
+                          {WAVES[i].delta !== null && !WAVES[i].inField && (
                             <span style={{
                               fontFamily: FONT,
                               fontSize: 10,

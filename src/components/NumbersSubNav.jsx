@@ -1,17 +1,24 @@
 import { useTheme } from '../hooks/useTheme';
 import { useIsMobile } from '../hooks/useIsMobile';
 
-const TABS = [
-  { key: 'overview', label: 'Overview' },
-  { key: 's1',       label: 'Survey 1', sub: 'Jan–Feb 2025' },
-  { key: 's2',       label: 'Survey 2', sub: 'Aug–Sep 2025' },
-  { key: 's3',       label: 'Survey 3', sub: 'Mar 2026' },
+const DEFAULT_WAVES = [
+  { key: 's1', label: 'Survey 1', period: 'Jan–Feb 2025' },
+  { key: 's2', label: 'Survey 2', period: 'Aug–Sep 2025' },
+  { key: 's3', label: 'Survey 3', period: 'Mar 2026' },
 ];
 
-export default function NumbersSubNav({ active, onChange }) {
+// `waves` comes from transforms.waves — 3 entries today, 4 once Survey 4 is configured
+export default function NumbersSubNav({ active, onChange, waves }) {
   const theme    = useTheme();
   const isLight  = theme === 'light';
   const isMobile = useIsMobile();
+  const TABS = [
+    { key: 'overview', label: 'Overview' },
+    ...(waves?.length ? waves : DEFAULT_WAVES).map(w => ({
+      key: w.key, label: w.label, sub: w.period,
+      live: Boolean(w.inField), n: w.n,
+    })),
+  ];
 
   return (
     <div style={{
@@ -59,7 +66,15 @@ export default function NumbersSubNav({ active, onChange }) {
                 flexShrink: 0,
               }}
             >
-              {tab.label}
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                {tab.label}
+                {tab.live && (
+                  <span title={`In the field · ${tab.n ?? 0} responses so far`} style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#2EA84A', boxShadow: '0 0 6px rgba(46,168,74,0.9)', display: 'inline-block' }} />
+                    <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.1em', color: '#2EA84A' }}>LIVE</span>
+                  </span>
+                )}
+              </span>
               {tab.sub && !isMobile && (
                 <span style={{
                   fontSize: 10,

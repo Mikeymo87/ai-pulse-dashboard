@@ -198,6 +198,28 @@ const SURVEY_META = {
   },
 };
 
+SURVEY_META.s4 = {
+  label: 'Survey 4', period: 'September 2026',
+  questions: [
+    { id: 'sentiment',   text: 'How would you describe your current feelings about Artificial Intelligence (AI)?', options: ['Positive', 'Negative', 'I have both positive and negative feelings about AI', "I'm not sure how I feel about it"] },
+    { id: 'stage',       text: 'Which stage best describes your current progress on the AI journey?', options: ['Curiosity', 'Understanding', 'Experimentation', 'Integration', 'Transformation'] },
+    { id: 'familiarity', text: 'How would you best describe your familiarity with AI tools and their applications in marketing & communications?', options: ["I'm unfamiliar with AI and its applications in this space", "I've heard of them but don't know much", "I know a bit about them but haven't used them", 'I understand AI tools well and have experimented with them', 'I am highly knowledgeable and use AI regularly'] },
+    { id: 'frequency',   text: 'How often do you currently use AI tools in your work? Choose the option that most closely reflects your usage.', options: ['Never', 'Rarely (Less than once per month)', 'At least once per month', 'At least once per week', 'Daily'] },
+    { id: 'impact',      text: 'What kind of impact is your use of AI having at work today?', options: ["I'm not seeing much impact yet", 'AI helps me with occasional tasks', 'AI regularly helps me work faster or produce better work', 'The ways I use AI also help some of my coworkers', 'My use of AI has helped improve how my team or department works', "I'm not sure"] },
+    { id: 'builder',     text: 'What is the most advanced thing you currently do with AI?', options: ['I use AI tools to ask questions, write, research, brainstorm or analyze', 'I create reusable AI assistants for specific tasks', 'I create workflows or automations that use AI to complete multiple steps', 'I build AI agents that can complete multi-step tasks or take actions on their own', 'I build AI solutions that other people use, such as web apps, connected workflows or multiple agents working together', "I'm not sure / none of these"] },
+    { id: 'teamUse',     text: 'How is AI being used on your team today?', options: ['AI is rarely or not used by our team', 'People mostly use AI on their own for individual tasks', 'We use AI for some common team tasks', 'AI is part of some of our regular team workflows', 'AI is built into how our team works across several important workflows', "I'm not sure"] },
+    { id: 'benefits',    text: 'Which benefits have you personally experienced from using AI at work? (Select up to three)', options: ['select all that apply'] },
+    { id: 'tools',       text: 'In addition to the AI tools officially provided or endorsed by Baptist Health (ChatGPT, Copilot, Firefly, Gamma), are you using any other AI tools for work?', options: ['Gemini', 'Claude', 'ElevenLabs', 'Grok', 'Llama', 'Perplexity', 'Gemini Notebook (formerly NotebookLM)', 'OpusClip', 'Otter.ai', 'Wispr Flow', 'Replit', 'Lovable or Base44', 'Cursor or Codex', 'n8n or Zapier', 'Google AI Studio', 'None', 'Other'] },
+    { id: 'ownPocket',   text: 'Are you currently paying out of your own pocket for any AI tools you use for work?', options: ['Yes', 'No'] },
+    { id: 'barriers',    text: 'What are the biggest barriers, if any, preventing you from getting more value from AI at work? (Select up to three)', options: ['select all that apply'] },
+    { id: 'importance',  text: 'How important is AI to the success of your individual or team work over the next 12 months?', options: ['1 – Not important at all', '2', '3', '4', '5 – Critically important'] },
+    { id: 'confidence',  text: 'How confident are you today in your ability to use AI tools effectively in your role?', options: ['Not confident at all', 'Somewhat confident', 'Confident', 'Very Confident', 'Extremely Confident'] },
+    { id: 'openEnded',   text: 'What is one thing helping, or one thing getting in the way of, your use of AI at work?', options: ['open text'] },
+    { id: 'role',        text: 'What is your current role level?', options: ['Specialist', 'Manager', 'Director', 'Assistant Vice President', 'Vice President', 'Other'] },
+    { id: 'function',    text: 'Which Marketing and Communications function are you primarily part of?', options: ['Account Services', 'Strategy & Research', 'Strategic Communications', 'Internal Communications', 'Medical Staff Communications', 'Content Marketing', 'Social Media & Reputation', 'Creative Services', 'Brand Management', 'Sports Partnerships', 'Event Marketing', 'Paid Media & Precision Marketing', 'Web & Technology', 'Marketing Operations', 'Other'] },
+  ],
+};
+
 // ─── Shared question block wrapper ───────────────────────────────────────────
 function QB({ label, question, children, fullWidth = false }) {
   return (
@@ -560,6 +582,67 @@ function RankedBar({ distribution, label, question, color = C.teal, maxItems = 1
   );
 }
 
+// ─── Visual 7b: Ladder (Wave 4 impact / builder / team use) ──────────────────
+// Levels 1→5 shown low→high; green = most advanced. "I'm not sure" excluded from %.
+function LadderCard({ ladder, label, question, color = C.green }) {
+  if (!ladder || !ladder.n) return null;
+  const levels = [...ladder.distribution].sort((a, b) => a.score - b.score);
+  const maxPct = Math.max(...levels.map(d => d.pct), 1);
+  return (
+    <QB label={label} question={question}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+        {levels.map((d, i) => {
+          const c = STAGE_COLORS[i];
+          return (
+            <div key={d.score} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ width: 18, flexShrink: 0, fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: 12, fontWeight: 800, color: c }}>{d.score}</span>
+              <span style={{ width: 150, flexShrink: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 500, color: 'var(--text-medium)', lineHeight: 1.3 }}>{d.label}</span>
+              <div style={{ flex: 1, height: 18, background: 'rgba(125,230,155,0.06)', borderRadius: 4, overflow: 'hidden' }}>
+                <motion.div initial={{ width: 0 }} whileInView={{ width: `${(d.pct / maxPct) * 100}%` }} viewport={{ once: true }} transition={{ duration: 0.44, delay: i * 0.05, ease: 'easeOut' }}
+                  style={{ height: '100%', background: c, opacity: 0.8, borderRadius: 4 }} />
+              </div>
+              <span style={{ width: 34, flexShrink: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 700, color: c }}>{d.pct}%</span>
+            </div>
+          );
+        })}
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: 'var(--text-support)' }}>
+        <span>Levels 4–5: <strong style={{ color }}>{ladder.topTwoPct}%</strong> · avg {ladder.avg}</span>
+        <span>{ladder.n} answered{ladder.notSure ? ` · ${ladder.notSure} not sure` : ''}</span>
+      </div>
+    </QB>
+  );
+}
+
+// ─── Visual 7c: Open text list (Wave 4's single open question) ───────────────
+function OpenTextCard({ quotes, label, question, themes }) {
+  if (!quotes?.length) return null;
+  const shown = quotes.filter(q => q && q.trim().length > 3).slice(0, 12);
+  return (
+    <QB label={label} question={question} fullWidth>
+      {themes?.length > 0 && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+          {themes.slice(0, 8).map(t => (
+            <span key={t.key} style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 600, color: 'var(--accent-mint)', background: 'rgba(125,230,155,0.08)', border: '1px solid rgba(125,230,155,0.18)', borderRadius: 20, padding: '3px 10px' }}>
+              {t.label} · {t.count}
+            </span>
+          ))}
+        </div>
+      )}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 10 }}>
+        {shown.map((q, i) => (
+          <blockquote key={i} style={{ margin: 0, padding: '10px 14px', borderLeft: '3px solid rgba(125,230,155,0.4)', background: 'rgba(125,230,155,0.04)', borderRadius: '0 8px 8px 0', fontFamily: 'DM Sans, sans-serif', fontSize: 12.5, fontStyle: 'italic', lineHeight: 1.6, color: 'var(--text-medium)' }}>
+            "{q.trim()}"
+          </blockquote>
+        ))}
+      </div>
+      {quotes.length > shown.length && (
+        <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: 'var(--text-support)' }}>Showing {shown.length} of {quotes.length} responses</span>
+      )}
+    </QB>
+  );
+}
+
 // ─── Visual 8: Binary yes/no card ────────────────────────────────────────────
 function BinaryCard({ yes, no, total, yesPct, noPct, label, question }) {
   return (
@@ -624,17 +707,21 @@ function SurveyArtifact({ wave, vaultUnlocked = false }) {
 }
 
 // ─── Main export ──────────────────────────────────────────────────────────────
-export default function SurveySnapshot({ wave, transforms, vaultUnlocked = false }) {
+export default function SurveySnapshot({ wave, transforms, vaultUnlocked = false, lastUpdated = null }) {
   const {
     sentimentTrend, familiarityTrend, confidenceTrend, importanceTrend,
     frequencyTrend, barriersTrend, stageTrend,
     toolsS2, toolsS3, benefitsS3, ownPocketS3, momentumS3, responseCounts,
+    toolsS4, benefitsS4, ownPocketS4, impactS4, builderS4, teamUseS4,
+    openEndedText, struggleThemesS4, excitementThemesS4, waves, s4,
   } = transforms;
 
-  const wIdx = { s1: 0, s2: 1, s3: 2 }[wave];
+  const wIdx = Math.max(0, (waves ?? []).findIndex(w => w.key === wave) >= 0 ? (waves ?? []).findIndex(w => w.key === wave) : { s1: 0, s2: 1, s3: 2, s4: 3 }[wave]);
   const wKey = wave;
   const meta = SURVEY_META[wave];
   const rc   = responseCounts?.[wIdx];
+  const isS4 = wave === 's4';
+  const s4Empty = isS4 && (rc?.n ?? 0) === 0;
 
   const sentimentDist   = (sentimentTrend ?? []).map(e => ({ label: e.sentiment, ...e[wKey] })).filter(d => d.count > 0);
   const familiarityDist = familiarityTrend?.[wIdx]?.distribution ?? [];
@@ -652,28 +739,46 @@ export default function SurveySnapshot({ wave, transforms, vaultUnlocked = false
     .map(e => ({ label: e.stage, ...e[wKey] }))
     .filter(e => e?.count > 0);
 
-  const toolsDist = wave === 's2' ? (toolsS2 ?? []) : wave === 's3' ? (toolsS3 ?? []) : [];
+  const toolsDist    = wave === 's2' ? (toolsS2 ?? []) : wave === 's3' ? (toolsS3 ?? []) : wave === 's4' ? (toolsS4 ?? []) : [];
+  const benefitsDist = wave === 's3' ? benefitsS3 : wave === 's4' ? benefitsS4 : null;
+  const ownPocket    = wave === 's3' ? ownPocketS3 : wave === 's4' ? ownPocketS4 : null;
 
   return (
     <div style={{ padding: '0 32px 80px', maxWidth: 1360, margin: '0 auto' }}>
 
       {/* Header */}
       <div style={{ marginBottom: 22 }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 4 }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 4, flexWrap: 'wrap' }}>
           <h2 style={{ margin: 0, fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: 24, fontWeight: 800, color: 'var(--text-primary)' }}>{meta.label}</h2>
           <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: 'var(--text-support)' }}>{meta.period}</span>
           {rc && (
             <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 700, color: 'var(--accent-mint)', background: 'rgba(125,230,155,0.10)', border: '1px solid rgba(125,230,155,0.20)', borderRadius: 20, padding: '2px 10px', letterSpacing: '0.05em' }}>
-              {rc.n} responses
+              {rc.n} responses{isS4 ? ' so far' : ''}
+            </span>
+          )}
+          {isS4 && (
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 800, color: '#2EA84A', letterSpacing: '0.08em' }}>
+              <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#2EA84A', boxShadow: '0 0 8px rgba(46,168,74,0.9)' }} />
+              LIVE · in the field Sep 14–25
+              {lastUpdated && <span style={{ fontWeight: 500, color: 'var(--text-support)', letterSpacing: 0 }}>· refreshed {lastUpdated.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}</span>}
             </span>
           )}
         </div>
         <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: 'var(--text-support)', lineHeight: 1.6 }}>
-          How people actually answered each question in this wave — a clean snapshot of that moment in time.
+          {isS4
+            ? `Responses land here automatically as people submit the survey (the sheet republishes about every 5 minutes). Percentages firm up as the count grows${s4?.minN ? `; headline numbers across the dashboard switch to Survey 4 at ${s4.minN} responses` : ''}.`
+            : 'How people actually answered each question in this wave — a clean snapshot of that moment in time.'}
         </p>
       </div>
 
       <SurveyArtifact wave={wave} vaultUnlocked={vaultUnlocked} />
+
+      {s4Empty && (
+        <div style={{ background: 'var(--surface-green)', border: '1px solid var(--border)', borderRadius: 14, padding: '36px 28px', textAlign: 'center', fontFamily: 'DM Sans, sans-serif' }}>
+          <p style={{ margin: '0 0 6px', fontSize: 18, fontWeight: 800, color: 'var(--text-primary)' }}>No responses yet</p>
+          <p style={{ margin: 0, fontSize: 13, color: 'var(--text-support)', lineHeight: 1.6 }}>Survey 4 opens Monday, September 14. The first answers will appear here within minutes of being submitted.</p>
+        </div>
+      )}
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 14 }}>
 
@@ -698,8 +803,13 @@ export default function SurveySnapshot({ wave, transforms, vaultUnlocked = false
           />
         )}
 
-        {/* Stage — step display, red→green (S2 + S3) */}
+        {/* Stage — step display, red→green (S2 onward) */}
         {stageDist.length > 0 && <StageSteps distribution={stageDist} label="AI Journey Stage" question="Where are you on your personal AI adoption journey?" />}
+
+        {/* Wave 4 ladders — impact, building, team use (new this wave) */}
+        {isS4 && <LadderCard ladder={impactS4}  label="Impact of Your AI Use"     question="What kind of impact is your use of AI having at work today?" color={C.green} />}
+        {isS4 && <LadderCard ladder={builderS4} label="Building With AI"          question="What is the most advanced thing you currently do with AI?" color={C.teal} />}
+        {isS4 && <LadderCard ladder={teamUseS4} label="AI on Your Team"           question="How is AI being used on your team today?" color={C.mint} />}
 
         {/* Barriers — full-width, yellow (neutral/warning) */}
         {barriersDist.length > 0 && (
@@ -711,19 +821,35 @@ export default function SurveySnapshot({ wave, transforms, vaultUnlocked = false
         {/* Tools — full-width, mint */}
         {toolsDist.length > 0 && (
           <div style={{ gridColumn: '1 / -1' }}>
-            <RankedBar distribution={toolsDist} label="Tools Beyond the Official Stack" question="Besides ChatGPT, Copilot, Jasper & Firefly — what other AI tools are you using? (S3 personal & non-endorsed tools only)" color={C.mint} maxItems={14} fullWidth />
+            <RankedBar distribution={toolsDist} label="Tools Beyond the Official Stack"
+              question={wave === 's4'
+                ? 'In addition to the officially provided tools (ChatGPT, Copilot, Firefly, Gamma), what other AI tools are you using? (free or self-paid)'
+                : wave === 's3'
+                  ? 'Besides ChatGPT, Copilot, Jasper & Firefly — what other AI tools are you using? (S3 personal & non-endorsed tools only)'
+                  : 'Which AI tools do you currently use in your work? (select all that apply)'}
+              color={C.mint} maxItems={16} fullWidth />
           </div>
         )}
 
-        {/* Benefits — full-width, green */}
-        {wave === 's3' && benefitsS3?.length > 0 && (
+        {/* Benefits — full-width, green (S3 onward) */}
+        {benefitsDist?.length > 0 && (
           <div style={{ gridColumn: '1 / -1' }}>
-            <RankedBar distribution={benefitsS3} label="Benefits Experienced" question="What benefits have you experienced from using AI in your work? (select all that apply)" color={C.green} maxItems={12} fullWidth />
+            <RankedBar distribution={benefitsDist} label="Benefits Experienced" question="Which benefits have you personally experienced from using AI at work? (select up to three)" color={C.green} maxItems={13} fullWidth />
           </div>
         )}
 
-        {/* Own Pocket — binary card (S3 only) */}
-        {wave === 's3' && ownPocketS3 && <BinaryCard {...ownPocketS3} label="Personal Investment" question="Are you paying out of pocket for AI tools not provided by Baptist Health?" />}
+        {/* Own Pocket — binary card (S3 onward) */}
+        {ownPocket && ownPocket.total > 0 && <BinaryCard {...ownPocket} label="Personal Investment" question="Are you paying out of pocket for AI tools not provided by Baptist Health?" />}
+
+        {/* Wave 4 open text — the one written question */}
+        {isS4 && (
+          <OpenTextCard
+            quotes={openEndedText?.s4 ?? []}
+            themes={[...(struggleThemesS4 ?? []), ...(excitementThemesS4 ?? [])].sort((a, b) => b.count - a.count)}
+            label="In Their Words"
+            question="What is one thing helping, or one thing getting in the way of, your use of AI at work?"
+          />
+        )}
 
         {/* Momentum — teal bars (S3 only) */}
         {wave === 's3' && momentumS3?.length > 0 && <RankedBar distribution={momentumS3} label="Department Momentum" question="How would you describe AI adoption momentum in MarCom right now?" color={C.teal} />}

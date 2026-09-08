@@ -257,7 +257,7 @@ export default function StruggleMap({ transforms }) {
             color: 'var(--text-support)', fontSize: 'var(--text-base)',
             margin: '6px 0 0', fontFamily: FONT, lineHeight: 1.6,
           }}>
-            Open-text responses thematically coded &middot; Hover any cell to read verbatim quotes
+            Survey 3 open-text responses thematically coded &middot; Hover any cell to read verbatim quotes
           </p>
           {/* Editorial anecdote */}
           <p style={{

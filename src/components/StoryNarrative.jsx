@@ -30,12 +30,40 @@ const BEATS = [
     accentBorder: 'rgba(89,190,201,0.30)',
     label: 'Where We Are Today',
     heading: 'Most advanced in the region. Just getting started.',
-    body: `By March 2026, daily usage reached 92% — more than ten times the national benchmark. That likely makes this the most AI-advanced healthcare marketing department in the state, and among the most advanced in the region. The conviction is real. The momentum is set. And we're nowhere close to done.`,
+    body: (t) => `By March 2026, daily usage reached ${dailyPct(t, 2)}% — more than ten times the national benchmark. That likely makes this the most AI-advanced healthcare marketing department in the state, and among the most advanced in the region. The conviction is real. The momentum is set. And we're nowhere close to done.`,
   },
 ];
 
-export default function StoryNarrative() {
+// Fourth beat appears once Survey 4 has enough responses to headline
+const BEAT_4 = {
+  number: '04',
+  accent: '#2EA84A',
+  labelColor: '#1d8040',
+  accentBg: 'rgba(46,168,74,0.10)',
+  accentBorder: 'rgba(46,168,74,0.28)',
+  label: 'Where We Are Now',
+  heading: 'From individual fluency to a team sport.',
+  body: (t) => {
+    const n = t.s4?.n ?? 0;
+    const team = t.teamUseS4?.topTwoPct ?? 0;
+    const builders = builderPct(t);
+    const impact = t.impactS4?.topTwoPct ?? 0;
+    return `September 2026, ${n} responses in so far: ${dailyPct(t, 3)}% use AI daily, ${team}% say AI is built into their team's regular workflows, ${builders}% are building workflows, agents or apps rather than just prompting, and ${impact}% say their AI use now helps coworkers or the whole team. The question has moved from "are people using it" to "is the work being redesigned around it."`;
+  },
+};
+
+function dailyPct(t, idx) {
+  return t?.frequencyTrend?.[idx]?.distribution?.find(d => d.label === 'Daily')?.pct ?? (idx === 2 ? 90 : 0);
+}
+function builderPct(t) {
+  const d = t?.builderS4?.distribution ?? [];
+  return d.filter(x => x.score >= 3).reduce((s, x) => s + x.pct, 0);
+}
+
+export default function StoryNarrative({ transforms }) {
   const isMobile = useIsMobile();
+  const beats = transforms?.s4?.solid ? [...BEATS, BEAT_4] : BEATS;
+  const cols = beats.length;
 
   return (
     <motion.section
@@ -72,9 +100,9 @@ export default function StoryNarrative() {
         borderRadius: 20,
         overflow: 'hidden',
         display: 'grid',
-        gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr 1fr',
+        gridTemplateColumns: isMobile ? '1fr' : `repeat(${cols}, 1fr)`,
       }}>
-        {BEATS.map((beat, i) => (
+        {beats.map((beat, i) => (
           <motion.div
             key={beat.number}
             initial={{ opacity: 0, y: 12 }}
@@ -83,8 +111,8 @@ export default function StoryNarrative() {
             transition={{ duration: 0.5, delay: isMobile ? 0 : i * 0.12 }}
             style={{
               padding: isMobile ? '24px 20px' : '32px 28px',
-              borderRight: !isMobile && i < 2 ? '1px solid var(--border)' : 'none',
-              borderBottom: isMobile && i < 2 ? '1px solid var(--border)' : 'none',
+              borderRight: !isMobile && i < cols - 1 ? '1px solid var(--border)' : 'none',
+              borderBottom: isMobile && i < cols - 1 ? '1px solid var(--border)' : 'none',
               display: 'flex',
               flexDirection: 'column',
               gap: 14,
@@ -143,7 +171,7 @@ export default function StoryNarrative() {
               fontFamily: 'DM Sans, sans-serif',
               lineHeight: 1.75,
             }}>
-              {beat.body}
+              {typeof beat.body === 'function' ? beat.body(transforms ?? {}) : beat.body}
             </p>
 
             {/* Accent line at bottom */}

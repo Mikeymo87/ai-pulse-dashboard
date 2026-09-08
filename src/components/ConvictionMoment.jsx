@@ -24,12 +24,15 @@ const FALLBACK_QUOTES = [
 
 // ── Time as Barrier Panel ─────────────────────────────────────────────────────
 export default function ConvictionMoment({ transforms }) {
-  // Pull time-barrier % from structured data
+  // Pull time-barrier % from the latest wave with enough responses (Survey 4 once solid, else Survey 3)
+  const latestKey = transforms.latest?.key ?? 's3';
+  const latestNum = transforms.latest?.num ?? 3;
   const pct = transforms.barriersTrend
-    ?.find(b => b.barrier === 'Lack of time')?.s3?.pct ?? 44;
+    ?.find(b => b.barrier === 'Lack of time')?.[latestKey]?.pct ?? 44;
 
-  // Pull time-related quotes from open-text struggle responses
-  const liveQuotes = (transforms.openEndedText?.s3Struggle ?? [])
+  // Pull time-related quotes from that wave's open text
+  const source = latestKey === 's4' ? (transforms.openEndedText?.s4 ?? []) : (transforms.openEndedText?.s3Struggle ?? []);
+  const liveQuotes = source
     .filter(q => q && q.trim().length > 20)
     .filter(q => TIME_KEYWORDS.some(kw => q.toLowerCase().includes(kw)));
 
@@ -248,7 +251,7 @@ export default function ConvictionMoment({ transforms }) {
             fontWeight: 500,
             letterSpacing: '0.06em',
           }}>
-            Survey 3 respondent
+            Survey {liveQuotes.length >= 3 ? latestNum : 3} respondent
           </div>
         </div>
 

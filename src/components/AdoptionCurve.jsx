@@ -6,10 +6,11 @@ import { useTheme } from '../hooks/useTheme';
 // S1 + S2 hardcoded from beating_the_curve.md
 // S3 computed live from familiarityTrend (score 5 = Innovators, 4 = Pragmatists, 1–3 = Laggards)
 
-const WAVE_META = [
-  { label: 'Survey 1', date: 'Jan–Feb 2025' },
-  { label: 'Survey 2', date: 'Aug–Sep 2025' },
-  { label: 'Survey 3', date: 'Mar 2026' },
+// Survey 1 + 2 segments are fixed (from beating_the_curve.md). Survey 3 onward is computed live
+// from familiarityTrend, so Survey 4 appears here automatically once it has responses.
+const FIXED_WAVES = [
+  { Innovators: 16, Pragmatists: 59, Laggards: 25 },
+  { Innovators: 27, Pragmatists: 68, Laggards: 5  },
 ];
 
 // ─── Inverse Gaussian helpers ────────────────────────────────────────────────
@@ -67,16 +68,15 @@ const BASE_Y  = 204;   // baseline y (scaled ×0.75 from 272)
 const X_MIN   = -50;   // extend path past left edge for clean clip
 const X_MAX   = 650;   // extend path past right edge for clean clip
 
-// ─── S3 computation from familiarityTrend ────────────────────────────────────
-function computeS3Segments(familiarityTrend) {
-  const s3 = familiarityTrend?.find(s => s.period === 'Mar 2026');
-  if (!s3 || !s3.distribution?.length) {
-    return { Innovators: 38, Pragmatists: 61, Laggards: 1 }; // fallback
-  }
-  const total       = s3.distribution.reduce((sum, d) => sum + d.count, 0);
-  const innovators  = s3.distribution.filter(d => d.score === 5).reduce((s, d) => s + d.count, 0);
-  const pragmatists = s3.distribution.filter(d => d.score === 4).reduce((s, d) => s + d.count, 0);
-  const laggards    = s3.distribution.filter(d => d.score <= 3).reduce((s, d) => s + d.count, 0);
+// ─── Live segment computation from a familiarityTrend entry ──────────────────
+// score 5 = Innovators, 4 = Pragmatists, 1–3 = Laggards
+function computeSegments(entry, fallback) {
+  if (!entry || !entry.distribution?.length) return fallback;
+  const total       = entry.distribution.reduce((sum, d) => sum + d.count, 0);
+  if (!total) return fallback;
+  const innovators  = entry.distribution.filter(d => d.score === 5).reduce((s, d) => s + d.count, 0);
+  const pragmatists = entry.distribution.filter(d => d.score === 4).reduce((s, d) => s + d.count, 0);
+  const laggards    = entry.distribution.filter(d => d.score <= 3).reduce((s, d) => s + d.count, 0);
   return {
     Innovators:  Math.round((innovators  / total) * 100),
     Pragmatists: Math.round((pragmatists / total) * 100),
@@ -145,37 +145,45 @@ export default function AdoptionCurve({ familiarityTrend, compact = false }) {
   const [wave, setWave]     = useState(0);
   const [hasEntered, setHasEntered] = useState(false);
 
-  // Compute all 3 waves of segment data
-  const s3 = computeS3Segments(familiarityTrend);
-  const WAVES = [
-    { Innovators: 16, Pragmatists: 59, Laggards: 25 },
-    { Innovators: 27, Pragmatists: 68, Laggards: 5  },
-    s3,
-  ];
+  // Build the wave list: S1/S2 fixed, S3 onward live. Waves with no responses yet are skipped.
+  const trend = familiarityTrend ?? [];
+  const WAVE_META = [];
+  const WAVES = [];
+  trend.forEach((entry, i) => {
+    if (i < 2) { WAVE_META.push({ label: entry.label ?? `Survey ${i + 1}`, date: entry.period }); WAVES.push(FIXED_WAVES[i]); return; }
+    if (!entry.n) return; // Survey 4 before any responses
+    WAVE_META.push({ label: entry.label ?? `Survey ${i + 1}`, date: entry.period, live: i >= 3 });
+    WAVES.push(computeSegments(entry, i === 2 ? { Innovators: 38, Pragmatists: 61, Laggards: 1 } : FIXED_WAVES[1]));
+  });
+  if (WAVES.length < 3) { WAVE_META.push({ label: 'Survey 3', date: 'Mar 2026' }); WAVES.push({ Innovators: 38, Pragmatists: 61, Laggards: 1 }); }
+  const lastIdx = WAVES.length - 1;
+  const s3 = WAVES[2];
+  const last = WAVES[lastIdx];
 
-  // Auto-play on scroll-in (once)
+  // Auto-play on scroll-in (once) — steps through every wave
   useEffect(() => {
     if (!inView || autoPlayedRef.current) return;
     autoPlayedRef.current = true;
     setHasEntered(true);
     setWave(0);
-    const t1 = setTimeout(() => setWave(1), 1600);
-    const t2 = setTimeout(() => setWave(2), 3200);
-    return () => { clearTimeout(t1); clearTimeout(t2); };
-  }, [inView]);
+    const timers = [];
+    for (let i = 1; i <= lastIdx; i++) timers.push(setTimeout(() => setWave(i), 1600 * i));
+    return () => timers.forEach(clearTimeout);
+  }, [inView, lastIdx]);
 
   function handleWave(i) {
     autoPlayedRef.current = true; // stop any pending auto-play
     setWave(i);
   }
 
-  const cfg      = buildConfig(WAVES[wave].Innovators, WAVES[wave].Pragmatists, WAVES[wave].Laggards);
+  const safeWave = Math.min(wave, lastIdx);
+  const cfg      = buildConfig(WAVES[safeWave].Innovators, WAVES[safeWave].Pragmatists, WAVES[safeWave].Laggards);
   const bellPath = gaussianPath(cfg.mu, SIGMA, H, BASE_Y, X_MIN, X_MAX);
-  const data = WAVES[wave];
-  const meta = WAVE_META[wave];
+  const data = WAVES[safeWave];
+  const meta = WAVE_META[safeWave];
 
   // Delta vs previous wave (null for S1 — it's the baseline)
-  const prev   = wave > 0 ? WAVES[wave - 1] : null;
+  const prev   = safeWave > 0 ? WAVES[safeWave - 1] : null;
   const deltas = prev ? {
     Innovators:  data.Innovators  - prev.Innovators,
     Pragmatists: data.Pragmatists - prev.Pragmatists,
@@ -208,6 +216,7 @@ export default function AdoptionCurve({ familiarityTrend, compact = false }) {
           <button key={i} style={waveBtn(wave === i, isLight)} onClick={() => handleWave(i)}>
             {m.label}
             <span style={{ opacity: 0.6, fontWeight: 400, marginLeft: 6 }}>{m.date}</span>
+            {m.live && <span style={{ marginLeft: 6, fontSize: 9, fontWeight: 800, color: '#2EA84A', letterSpacing: '0.1em' }}>LIVE</span>}
           </button>
         ))}
       </div>
@@ -471,7 +480,7 @@ export default function AdoptionCurve({ familiarityTrend, compact = false }) {
             type="range"
             className="ac-slider"
             min={0}
-            max={2}
+            max={lastIdx}
             step={1}
             value={wave}
             onChange={e => handleWave(Number(e.target.value))}
@@ -531,7 +540,7 @@ export default function AdoptionCurve({ familiarityTrend, compact = false }) {
             <span style={{ color: 'var(--accent-mint)', fontWeight: 700, fontStyle: 'normal', marginRight: 4 }}>
               What this tells us:
             </span>
-            The team shifted left — faster than most organizations ever do. Innovators grew from 16% → {s3.Innovators}% while Laggards virtually disappeared ({`25% → ${s3.Laggards}%`}). In Survey 3, even the Pragmatist group shrank — not because people fell behind, but because they graduated forward into Innovators. The curve isn't just shifting. It's changing shape.
+            The team shifted left — faster than most organizations ever do. Innovators grew from 16% → {s3.Innovators}% while Laggards virtually disappeared ({`25% → ${s3.Laggards}%`}). In Survey 3, even the Pragmatist group shrank — not because people fell behind, but because they graduated forward into Innovators. The curve isn't just shifting. It's changing shape.{lastIdx >= 3 && ` Survey 4 (${WAVE_META[lastIdx].date}, live) currently reads ${last.Innovators}% Innovators and ${last.Laggards}% Laggards.`}
           </p>
         </div>
       )}

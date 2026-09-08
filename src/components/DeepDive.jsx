@@ -151,6 +151,9 @@ const SORT_OPTIONS = [
 ];
 
 export default function DeepDive({ surveys, transforms }) {
+  const s4Rows = surveys?.survey4 ?? [];
+  const s4Live = s4Rows.length > 0;
+  const [waveKey, setWaveKey] = useState(transforms?.s4?.solid ? 's4' : 's3');
   const [groupBy, setGroupBy] = useState('role');
   const [sortBy, setSortBy] = useState('confidence');
   const [cardFilter, setCardFilter] = useState('all');
@@ -165,7 +168,9 @@ export default function DeepDive({ surveys, transforms }) {
   const gridStroke = isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.05)';
   const refLineStroke = isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.08)';
 
-  const s3Rows = surveys?.survey3 ?? [];
+  const activeWave = waveKey === 's4' && s4Live ? 's4' : 's3';
+  const s3Rows = activeWave === 's4' ? s4Rows : (surveys?.survey3 ?? []);
+  const waveNum = activeWave === 's4' ? 4 : 3;
 
   // ── Scatter dimension lists ───────────────────────────────────────────────
   const allRoles = useMemo(() =>
@@ -294,8 +299,22 @@ export default function DeepDive({ surveys, transforms }) {
           marginBottom: 16,
           fontFamily: 'DM Sans, sans-serif',
         }}>
-          Survey 3 Deep Dive
+          Survey {waveNum} Deep Dive{activeWave === 's4' ? ` · live, ${s4Rows.length} responses so far` : ''}
         </div>
+        {s4Live && (
+          <div style={{ display: 'inline-flex', marginLeft: 12, background: 'var(--card-bg-dark)', border: '1px solid var(--border)', borderRadius: 10, padding: 3, gap: 2, verticalAlign: 'middle' }}>
+            {[{ key: 's3', label: 'Survey 3' }, { key: 's4', label: 'Survey 4' }].map(opt => (
+              <button key={opt.key} onClick={() => setWaveKey(opt.key)} style={{
+                padding: '5px 14px', borderRadius: 8, border: 'none', cursor: 'pointer',
+                fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '0.03em',
+                background: activeWave === opt.key ? 'rgba(125,230,155,0.15)' : 'transparent',
+                color: activeWave === opt.key ? 'var(--accent-mint)' : 'var(--text-support)',
+              }}>
+                {opt.label}{opt.key === 's4' && <span style={{ marginLeft: 6, fontSize: 9, fontWeight: 800, color: '#2EA84A', letterSpacing: '0.1em' }}>LIVE</span>}
+              </button>
+            ))}
+          </div>
+        )}
         <h2 style={{
           margin: '0 0 12px',
           fontSize: 'clamp(28px, 4vw, 40px)',
@@ -315,7 +334,7 @@ export default function DeepDive({ surveys, transforms }) {
           lineHeight: 1.7,
           fontFamily: 'DM Sans, sans-serif',
         }}>
-          Role and function data is from Survey 3 only — Surveys 1 &amp; 2 were anonymous.
+          Role and function data exists from Survey 3 onward — Surveys 1 &amp; 2 were anonymous.{activeWave === 's4' ? ' Survey 4 groups are small while responses are still coming in; read them directionally.' : ''}
         </p>
       </motion.div>
 

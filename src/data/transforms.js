@@ -1,4 +1,11 @@
-import { USE_CASE_THEMES, STRUGGLE_THEMES, EXCITEMENT_THEMES, USE_CASE_LABEL, STRUGGLE_LABEL, EXCITEMENT_LABEL } from './themes';
+import { USE_CASE_THEMES, STRUGGLE_THEMES, EXCITEMENT_THEMES, USE_CASE_LABEL, STRUGGLE_LABEL, EXCITEMENT_LABEL } from './themes.js';
+import { IMPACT_LABELS, BUILDER_LABELS, TEAM_LABELS } from './parseCSVs.js';
+
+const DEV = typeof import.meta !== 'undefined' && import.meta.env ? Boolean(import.meta.env.DEV) : false;
+
+// Survey 4 is "solid" (headline numbers switch to it) once this many responses are in.
+// Below it, S4 still shows everywhere with an "n so far" badge, but Wave 3 stays the headline.
+export const LIVE_MIN_N = 10;
 
 // ─── Utility helpers ─────────────────────────────────────────────────────────
 
@@ -56,7 +63,8 @@ const STAGE_ORDER = ['Curiosity', 'Understanding', 'Experimentation', 'Integrati
 const CONFIDENCE_LABELS = {
   s1: { 5: 'Very Confident', 4: 'Confident', 3: 'Somewhat confident', 2: 'Not confident at all' },
   s2: { 4: 'Very Confident', 3: 'Confident', 2: 'Somewhat confident' },
-  s3: { 5: 'Extremely Confident', 4: 'Very Confident', 3: 'Confident', 2: 'Somewhat confident' },
+  s3: { 5: 'Extremely Confident', 4: 'Very Confident', 3: 'Confident', 2: 'Somewhat confident', 1: 'Not confident at all' },
+  s4: { 5: 'Extremely Confident', 4: 'Very Confident', 3: 'Confident', 2: 'Somewhat confident', 1: 'Not confident at all' },
 };
 
 const FAMILIARITY_LABELS = {
@@ -69,18 +77,36 @@ const FAMILIARITY_LABELS = {
 
 // ─── Main transform builder ───────────────────────────────────────────────────
 
-export function buildTransforms({ survey1, survey2, survey3 }) {
+export function buildTransforms({ survey1, survey2, survey3, survey4 = [], s4Configured = false }) {
   const surveys = [
-    { key: 's1', num: 1, label: 'Survey 1', period: 'Jan–Feb 2025', rows: survey1, n: survey1.length },
-    { key: 's2', num: 2, label: 'Survey 2', period: 'Aug–Sep 2025', rows: survey2, n: survey2.length },
-    { key: 's3', num: 3, label: 'Survey 3', period: 'Mar 2026',     rows: survey3, n: survey3.length },
+    { key: 's1', num: 1, label: 'Survey 1', period: 'Jan–Feb 2025', dateRange: 'Jan 30 – Feb 10, 2025',  rows: survey1, n: survey1.length },
+    { key: 's2', num: 2, label: 'Survey 2', period: 'Aug–Sep 2025', dateRange: 'Aug 27 – Sep 12, 2025',  rows: survey2, n: survey2.length },
+    { key: 's3', num: 3, label: 'Survey 3', period: 'Mar 2026',     dateRange: 'Mar 18 – Apr 2, 2026',    rows: survey3, n: survey3.length },
   ];
+  // Survey 4 joins the wave list only when a source is configured (so the 3-wave app is unchanged until then)
+  if (s4Configured) {
+    surveys.push({ key: 's4', num: 4, label: 'Survey 4', period: 'Sep 2026', dateRange: 'Sep 14 – Sep 25, 2026', rows: survey4, n: survey4.length, inField: true });
+  }
+
+  // ── Wave metadata + "latest" pointers ───────────────────────────────────
+  const waves = surveys.map(s => ({ key: s.key, num: s.num, label: s.label, period: s.period, dateRange: s.dateRange, n: s.n, inField: Boolean(s.inField) }));
+  const latestSolid = [...surveys].reverse().find(s => s.n >= LIVE_MIN_N) ?? surveys[2];
+  const s4 = {
+    configured: s4Configured,
+    n: survey4.length,
+    live: s4Configured && survey4.length > 0,
+    solid: s4Configured && survey4.length >= LIVE_MIN_N,
+    minN: LIVE_MIN_N,
+  };
+  // Months covered, first wave to latest wave with data (Jan 2025 → Mar 2026 = 14, → Sep 2026 = 20)
+  const monthsCovered = latestSolid.key === 's4' ? 20 : 14;
 
   // ── Response counts per survey ───────────────────────────────────────────
   const responseCounts = surveys.map(s => ({
     label: s.label,
     period: s.period,
     n: s.n,
+    inField: Boolean(s.inField),
   }));
 
   // ── Sentiment trend (S1 → S2 → S3) ──────────────────────────────────────
@@ -169,25 +195,20 @@ export function buildTransforms({ survey1, survey2, survey3 }) {
     return { label: s.label, period: s.period, avg, n: vals.length, distribution };
   });
 
-  // ── AI Journey Stage trend (S2 + S3 only) ────────────────────────────────
+  // ── AI Journey Stage trend (S2 onward) ───────────────────────────────────
   // Use only respondents who answered the stage question as the denominator.
-  // S2 has 1 blank; S3 has 0 blanks — this handles both correctly.
-  const s2StageAnswered = survey2.filter(r => r.stage !== null).length;
-  const s3StageAnswered = survey3.filter(r => r.stage !== null).length;
-
+  const stageWaves = surveys.filter(s => s.num >= 2);
   const stageTrend = STAGE_ORDER
-    .map(stage => ({
-      stage,
-      s2: {
-        count: survey2.filter(r => r.stage === stage).length,
-        pct: s2StageAnswered ? Math.round((survey2.filter(r => r.stage === stage).length / s2StageAnswered) * 100) : 0,
-      },
-      s3: {
-        count: survey3.filter(r => r.stage === stage).length,
-        pct: s3StageAnswered ? Math.round((survey3.filter(r => r.stage === stage).length / s3StageAnswered) * 100) : 0,
-      },
-    }))
-    .filter(e => e.s2.count > 0 || e.s3.count > 0);
+    .map(stage => {
+      const entry = { stage };
+      for (const s of stageWaves) {
+        const answered = s.rows.filter(r => r.stage !== null).length;
+        const count = s.rows.filter(r => r.stage === stage).length;
+        entry[s.key] = { count, pct: answered ? Math.round((count / answered) * 100) : 0 };
+      }
+      return entry;
+    })
+    .filter(e => stageWaves.some(s => e[s.key].count > 0));
 
   // ── Barriers trend (all 3 surveys) ───────────────────────────────────────
   // Collects all classified barrier categories then builds cross-survey counts
@@ -217,64 +238,96 @@ export function buildTransforms({ survey1, survey2, survey3 }) {
   const toolCountsS2 = countArrayField(survey2, 'tools');
   const toolsS2 = toDistribution(toolCountsS2, survey2.length);
 
-  // ── Non-endorsed tools in S3 (personal / free tools) ────────────────────
-  // Exclude respondents who only use officially endorsed tools
-  const s3WithPersonalTools = survey3.filter(r =>
-    r.tools.length > 0 && !r.tools.some(t => t.startsWith('None'))
-  );
-  const toolCountsS3 = countArrayField(s3WithPersonalTools, 'tools');
-  const toolsS3 = toDistribution(toolCountsS3, survey3.length);
+  // ── Per-wave stats that only exist from Survey 3 onward ─────────────────
+  // Same computation for S3 and S4 so the two waves compare cleanly.
+  function toolsFor(rows) {
+    const withPersonal = rows.filter(r => r.tools.length > 0 && !r.tools.some(t => t.startsWith('None')));
+    return toDistribution(countArrayField(withPersonal, 'tools'), rows.length);
+  }
+  function benefitsFor(rows) {
+    return toDistribution(countArrayField(rows, 'benefits'), rows.length);
+  }
+  function ownPocketFor(rows) {
+    const pocketRows = rows.filter(r => r.ownPocket !== null);
+    const yes = pocketRows.filter(r => r.ownPocket === true).length;
+    const no  = pocketRows.filter(r => r.ownPocket === false).length;
+    return {
+      yes, no, total: pocketRows.length,
+      yesPct: pocketRows.length ? Math.round((yes / pocketRows.length) * 100) : 0,
+      noPct:  pocketRows.length ? Math.round((no  / pocketRows.length) * 100) : 0,
+    };
+  }
+  function byRoleFor(rows) {
+    const roleCounts = countField(rows.filter(r => r.role), 'role');
+    return toDistribution(roleCounts, rows.length).map(({ label, count, pct }) => {
+      const roleRows = rows.filter(r => r.role === label);
+      return {
+        role: label, count, pct,
+        confidenceAvg: avgField(roleRows, 'confidence'),
+        importanceAvg: avgField(roleRows, 'importance'),
+        familiarityAvg: avgField(roleRows, 'familiarity'),
+        frequencyDist: countField(roleRows.filter(r => r.frequency), 'frequency'),
+      };
+    });
+  }
+  function byFunctionFor(rows) {
+    const functionCounts = countField(rows.filter(r => r.function), 'function');
+    return toDistribution(functionCounts, rows.length).map(({ label, count, pct }) => {
+      const fnRows = rows.filter(r => r.function === label);
+      return {
+        function: label, count, pct,
+        confidenceAvg: avgField(fnRows, 'confidence'),
+        importanceAvg: avgField(fnRows, 'importance'),
+        familiarityAvg: avgField(fnRows, 'familiarity'),
+        stageDist: countField(fnRows.filter(r => r.stage), 'stage'),
+        frequencyDist: countField(fnRows.filter(r => r.frequency), 'frequency'),
+      };
+    });
+  }
+  // Wave 4 ladders: 1–5 distributions (answered = excludes "I'm not sure")
+  function ladderFor(rows, field, labels) {
+    const answered = rows.filter(r => r[field] !== null && r[field] !== undefined);
+    const counts = countField(answered, field);
+    const distribution = [5, 4, 3, 2, 1].map(score => ({
+      score, label: labels[score], count: counts[score] || 0,
+      pct: answered.length ? Math.round(((counts[score] || 0) / answered.length) * 100) : 0,
+    }));
+    const vals = answered.map(r => r[field]);
+    const avg = vals.length ? Math.round((vals.reduce((a, b) => a + b, 0) / vals.length) * 100) / 100 : null;
+    const topTwoPct = answered.length ? Math.round((answered.filter(r => r[field] >= 4).length / answered.length) * 100) : 0;
+    return { n: answered.length, notSure: rows.length - answered.length, avg, topTwoPct, distribution };
+  }
 
-  // ── Benefits experienced (S3 only) ───────────────────────────────────────
-  const benefitCounts = countArrayField(survey3, 'benefits');
-  const benefitsS3 = toDistribution(benefitCounts, survey3.length);
+  const toolsS3     = toolsFor(survey3);
+  const benefitsS3  = benefitsFor(survey3);
+  const ownPocketS3 = ownPocketFor(survey3);
+  const byRole      = byRoleFor(survey3);
+  const byFunction  = byFunctionFor(survey3);
 
-  // ── Departmental momentum (S3 only) ─────────────────────────────────────
+  const toolsS4      = toolsFor(survey4);
+  const benefitsS4   = benefitsFor(survey4);
+  const ownPocketS4  = ownPocketFor(survey4);
+  const byRoleS4     = byRoleFor(survey4);
+  const byFunctionS4 = byFunctionFor(survey4);
+  const impactS4     = ladderFor(survey4, 'impact',  IMPACT_LABELS);
+  const builderS4    = ladderFor(survey4, 'builder', BUILDER_LABELS);
+  const teamUseS4    = ladderFor(survey4, 'teamUse', TEAM_LABELS);
+
+  // ── Departmental momentum (S3 only — question retired in Wave 4) ─────────
   const momentumCounts = countField(survey3.filter(r => r.momentum), 'momentum');
   const momentumS3 = toDistribution(momentumCounts, survey3.filter(r => r.momentum).length);
 
-  // ── Own pocket spending (S3 only) ────────────────────────────────────────
-  const pocketRows = survey3.filter(r => r.ownPocket !== null);
-  const pocketYes = pocketRows.filter(r => r.ownPocket === true).length;
-  const pocketNo  = pocketRows.filter(r => r.ownPocket === false).length;
-  const ownPocketS3 = {
-    yes: pocketYes,
-    no: pocketNo,
-    total: pocketRows.length,
-    yesPct: pocketRows.length ? Math.round((pocketYes / pocketRows.length) * 100) : 0,
-    noPct:  pocketRows.length ? Math.round((pocketNo  / pocketRows.length) * 100) : 0,
+  // "latest" = newest wave with enough responses to headline (S4 once it passes LIVE_MIN_N, else S3)
+  const latestIsS4 = latestSolid.key === 's4';
+  const latest = {
+    key: latestSolid.key, num: latestSolid.num, label: latestSolid.label, period: latestSolid.period,
+    n: latestSolid.n, index: surveys.findIndex(s => s.key === latestSolid.key),
+    tools:      latestIsS4 ? toolsS4      : toolsS3,
+    benefits:   latestIsS4 ? benefitsS4   : benefitsS3,
+    ownPocket:  latestIsS4 ? ownPocketS4  : ownPocketS3,
+    byRole:     latestIsS4 ? byRoleS4     : byRole,
+    byFunction: latestIsS4 ? byFunctionS4 : byFunction,
   };
-
-  // ── S3 breakdown by Role ─────────────────────────────────────────────────
-  const roleCounts = countField(survey3.filter(r => r.role), 'role');
-  const byRole = toDistribution(roleCounts, survey3.length).map(({ label, count, pct }) => {
-    const roleRows = survey3.filter(r => r.role === label);
-    return {
-      role: label,
-      count,
-      pct,
-      confidenceAvg: avgField(roleRows, 'confidence'),
-      importanceAvg: avgField(roleRows, 'importance'),
-      familiarityAvg: avgField(roleRows, 'familiarity'),
-      frequencyDist: countField(roleRows.filter(r => r.frequency), 'frequency'),
-    };
-  });
-
-  // ── S3 breakdown by Function ─────────────────────────────────────────────
-  const functionCounts = countField(survey3.filter(r => r.function), 'function');
-  const byFunction = toDistribution(functionCounts, survey3.length).map(({ label, count, pct }) => {
-    const fnRows = survey3.filter(r => r.function === label);
-    return {
-      function: label,
-      count,
-      pct,
-      confidenceAvg: avgField(fnRows, 'confidence'),
-      importanceAvg: avgField(fnRows, 'importance'),
-      familiarityAvg: avgField(fnRows, 'familiarity'),
-      stageDist: countField(fnRows.filter(r => r.stage), 'stage'),
-      frequencyDist: countField(fnRows.filter(r => r.frequency), 'frequency'),
-    };
-  });
 
   // ── Use-case theme frequencies (S1 + S2 open-ended) ─────────────────────
   // Shows what tasks people are actually doing with AI, trend-able S1→S2.
@@ -334,12 +387,29 @@ export function buildTransforms({ survey1, survey2, survey3 }) {
     };
   }).filter(t => t.count > 0).sort((a, b) => b.count - a.count);
 
+  // ── Wave 4 open text themes (struggle + excitement sets over the one question) ─
+  const s4TextN = survey4.filter(r => r.openEnded && r.openEnded.trim().length > 3).length;
+  function themesFor4(themeSet, field) {
+    return themeSet.map(({ key, label }) => {
+      const matching = survey4.filter(r => r[field]?.includes(key));
+      return {
+        key, label, count: matching.length,
+        pct: s4TextN ? Math.round((matching.length / s4TextN) * 100) : 0,
+        quotes: matching.map(r => (r.openEnded || '').trim()).filter(q => q.length > 15).slice(0, 3),
+      };
+    }).filter(t => t.count > 0).sort((a, b) => b.count - a.count);
+  }
+  const struggleThemesS4   = themesFor4(STRUGGLE_THEMES, 'struggleThemes');
+  const excitementThemesS4 = themesFor4(EXCITEMENT_THEMES, 'excitementThemes');
+
   // ── Raw open-ended text collections (for Claude API phases 4 + 7) ────────
   const openEndedText = {
     s1: survey1.filter(r => r.openEnded).map(r => r.openEnded),
     s2: survey2.filter(r => r.openEnded).map(r => r.openEnded),
     s3Struggle:   survey3.filter(r => r.struggle).map(r => r.struggle),
     s3Excitement: survey3.filter(r => r.excitement).map(r => r.excitement),
+    // Wave 4: one open question — what is helping, or getting in the way
+    s4: survey4.filter(r => r.openEnded).map(r => r.openEnded),
     // Struggle text from own-pocket respondents that specifically mentions paying/purchasing
     s3OwnPocketQuotes: (() => {
       const payKeywords = ['pay', 'paid', 'paying', 'pocket', 'cost', 'subscription',
@@ -497,13 +567,17 @@ export function buildTransforms({ survey1, survey2, survey3 }) {
     'pipeline', 'orchestrat', 'custom gpt', 'deploy', 'mapping',
   ];
 
+  function rowText(r) {
+    return ((r.struggle || '') + ' ' + (r.excitement || '') + ' ' + (r.survey === 4 ? (r.openEnded || '') : '')).trim();
+  }
+
   function voiceKeywordCount(r) {
-    const text = ((r.struggle || '') + ' ' + (r.excitement || '')).toLowerCase();
+    const text = rowText(r).toLowerCase();
     return VOICE_KEYWORDS.filter(kw => text.includes(kw)).length;
   }
 
   function combinedTextLength(r) {
-    return ((r.struggle || '') + ' ' + (r.excitement || '')).trim().length;
+    return rowText(r).length;
   }
 
   // ── Five scorer functions ─────────────────────────────────────────────────
@@ -649,16 +723,20 @@ export function buildTransforms({ survey1, survey2, survey3 }) {
 
   const ARCHETYPE_KEYS = ['multiplier', 'blocked-believer', 'thoughtful-skeptic', 'experimenter', 'confident-bystander'];
 
+  // Personas are built from the latest wave with enough responses (S4 once solid, else S3)
+  const personaRows = latestIsS4 ? survey4 : survey3;
+  const archetypesWave = { key: latestSolid.key, label: latestSolid.label, period: latestSolid.period, n: personaRows.length };
+
   const archetypeGroups = {};
   for (const key of ARCHETYPE_KEYS) archetypeGroups[key] = [];
 
-  for (const row of survey3) {
+  for (const row of personaRows) {
     const key = classifyRow(row);
     archetypeGroups[key].push(row);
   }
 
-  if (import.meta.env.DEV) {
-    const n3 = survey3.length;
+  if (DEV) {
+    const n3 = personaRows.length;
     console.log('[Archetypes] Distribution:');
     for (const k of ARCHETYPE_KEYS) {
       const c = archetypeGroups[k].length;
@@ -674,11 +752,11 @@ export function buildTransforms({ survey1, survey2, survey3 }) {
   const archetypes = {};
   for (const key of ARCHETYPE_KEYS) {
     const rows = archetypeGroups[key];
-    const n = survey3.length;
+    const n = personaRows.length;
 
     // Pull 1 representative quote (struggle or excitement, whichever is more specific)
     const quotes = rows
-      .map(r => (r.excitement || r.struggle || '').trim())
+      .map(r => (r.excitement || r.struggle || r.openEnded || '').trim())
       .filter(q => q.length > 20)
       .sort((a, b) => b.length - a.length); // prefer more detailed quotes
 
@@ -790,6 +868,11 @@ export function buildTransforms({ survey1, survey2, survey3 }) {
   const openTextInsights = { aspirationGap, toolMindset, leadershipVoices, blockedInvestors };
 
   return {
+    // Wave metadata (4 entries when Survey 4 is configured, else 3) + live-wave pointers
+    waves,
+    s4,
+    latest,
+    monthsCovered,
     // Cross-survey trends (the core story)
     responseCounts,
     sentimentTrend,
@@ -803,6 +886,8 @@ export function buildTransforms({ survey1, survey2, survey3 }) {
     useCaseThemesTrend,
     struggleThemesS3,
     excitementThemesS3,
+    struggleThemesS4,
+    excitementThemesS4,
     openEndedText,
     // S2-specific
     toolsS2,
@@ -813,8 +898,18 @@ export function buildTransforms({ survey1, survey2, survey3 }) {
     ownPocketS3,
     byRole,
     byFunction,
-    // S3 persona clustering
+    // S4-specific (same shapes as S3, plus the three new ladders)
+    toolsS4,
+    benefitsS4,
+    ownPocketS4,
+    byRoleS4,
+    byFunctionS4,
+    impactS4,
+    builderS4,
+    teamUseS4,
+    // Persona clustering (latest solid wave; see archetypesWave)
     archetypes,
+    archetypesWave,
     // S3 open text intelligence (cross-dimensional hidden insights)
     openTextInsights,
   };

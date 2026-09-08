@@ -372,10 +372,13 @@ function extractThemesFromText(text, themeSet) {
  *   excitementThemes — from S3 excitement
  */
 export function extractRowThemes(row) {
+  // Wave 4 asks one question ("one thing helping, or one thing getting in the way"),
+  // so its text is scanned for both struggle and excitement themes.
+  const w4Text = row.survey === 4 ? row.openEnded : null;
   return {
     useCaseThemes:    extractThemesFromText(row.openEnded, USE_CASE_THEMES),
-    struggleThemes:   extractThemesFromText(row.struggle,  STRUGGLE_THEMES),
-    excitementThemes: extractThemesFromText(row.excitement, EXCITEMENT_THEMES),
+    struggleThemes:   extractThemesFromText(row.struggle ?? w4Text,  STRUGGLE_THEMES),
+    excitementThemes: extractThemesFromText(row.excitement ?? w4Text, EXCITEMENT_THEMES),
   };
 }
 

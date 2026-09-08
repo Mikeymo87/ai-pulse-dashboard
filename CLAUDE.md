@@ -15,6 +15,22 @@ Dashboard showing 14 months of AI adoption data across 3 pulse surveys for the B
 - **Survey data:** S1 local CSV (97), S2+S3 live Google Sheets (auto-update on page load)
 - **Dev server:** `npm run dev` → http://localhost:5000 (or 5001 if port taken)
 
+## Survey 4 (Sep 2026) — live wave wiring (added 2026-09-08)
+
+**How it turns on:** paste the Wave 4 responses sheet's published-CSV URL into `S4_URL` in `src/data/parseCSVs.js` (same pattern as s2/s3), or set `VITE_S4_URL` in Replit Secrets. Until then `s4Configured` is false and the app renders exactly the 3-wave dashboard. Dev preview without a sheet: `http://localhost:5000/?s4=sample` loads `public/data/survey4.sample.csv` (14 synthetic rows, every text starts with "SAMPLE ROW"). Never deploy with the sample as the source.
+
+**What happens once it is on (all automatic, no per-component edits):**
+- `parseCSVs.js` `mapS4` reads the Wave 4 columns by title prefix (`pick()`), so minor punctuation edits in the form do not break it. New row fields: `impact`, `builder`, `teamUse` (1–5, null for "I'm not sure"), `openEnded` = the one open question.
+- `transforms.js` builds 4 waves (`waves`, `responseCounts`, every trend array gets an `s4` key / 4th entry) plus `toolsS4`, `benefitsS4`, `ownPocketS4`, `byRoleS4`, `byFunctionS4`, `impactS4`, `builderS4`, `teamUseS4`, `struggleThemesS4`, `excitementThemesS4`, `openEndedText.s4`. `transforms.s4 = { configured, n, live, solid, minN }`. `transforms.latest` points at the newest wave with at least `LIVE_MIN_N` (10) responses; headline copy, scorecards, archetypes, Deep Dive default and the conviction panel follow `latest`. Below 10 responses Survey 4 still shows everywhere with an "n so far" badge, but Wave 3 stays the headline.
+- `useSurveyData.js` polls every 5 minutes while S4 is configured (Google republishes the CSV about every 5 min), 60 minutes otherwise.
+- Screens that read the 4th wave: Hero (live pill + 20 months), StoryNarrative (4th beat), GrowthStory (Wave 04 chapter, 3rd bridge, live closing), ConvictionMoment, TrendCharts + AdoptionScorecard + AdoptionCurve (4th point / wave), NumbersSubNav + SurveySnapshot (Survey 4 tab with ladder cards + "In Their Words"), ParticipationStory, ToolEcosystem (Survey 4 toggle), DeepDive (Survey 3 / Survey 4 toggle inside the vault), WhatsnextInsights (scorecard Now = W4, W3 baseline), ChatPanel (live S4 block in the system prompt), HowWeDidIt (survey count / months stat). PresentationMode is still the Wave 3 deck on purpose.
+
+**Canonical labels (cross-wave):** tools (`Gemini`, `Claude`, `NotebookLM`, `Wispr Flow`, …), benefits (`BENEFIT_CANON` in parseCSVs.js; Wave 3's "Enablement / accessibility", "More meaningful work" and "Confidence / reduced anxiety" now count, they were silently dropped before), role (`AVP`, `VP`), function (`Social Media & Reputation`). Barrier classifier gained a `Manager support` category and every Wave 4 phrasing.
+
+**Regression net (no credits):** `node scripts/check-data.mjs` (data layer, S1 local + S2/S3 live + S4 sample; `--no-s4` for the 3-wave path; `--s4-url=<csv url>` once the real sheet exists) and `node scripts/smoke-ui.mjs` (headless Puppeteer, needs `npx vite --port 5010 --strictPort` running; clicks every tab in both modes, fails on any console error beyond the known framer-motion SVG baseline). Run both before pushing.
+
+**Known baseline:** the bell curve's `motion.rect/path/line` log 10 "Expected length … undefined" console errors on first paint. Pre-dates this work; harmless.
+
 ## Tech Stack
 React + Vite · Tailwind CSS · Recharts · Framer Motion · Papa Parse · Claude API (claude-sonnet-4-6)
 
@@ -222,8 +238,8 @@ This removes the vault password from the public GitHub repo.
 Open Presentation Mode (P key) → test all 3 lenses (AI Council / Executive / Wave 3 Readout).
 Check: bell curve slide, archetypes slide, struggle map slide, Wave 3 slides — any overflow or padding issues.
 
-### Step 4: Survey 4 readiness
-Wait for S4 Google Sheet URL from Michael before starting this.
+### Step 4: Survey 4 readiness — DONE 2026-09-08 (see "Survey 4 (Sep 2026) — live wave wiring" above)
+Remaining: paste the published-CSV URL into `S4_URL`, run both check scripts, push, redeploy on Replit.
 
 ### Deferred (do not start until user says so)
 - Mobile Presentation Mode

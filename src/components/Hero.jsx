@@ -85,7 +85,7 @@ const QUOTE_PAIRS = [
   },
 ];
 
-function ThenNowDiptych({ s1Quotes, s3Quotes, isMobile }) {
+function ThenNowDiptych({ isMobile, months = 14 }) {
   const [idx, setIdx]         = useState(0);
   const [visible, setVisible] = useState(true);
   const timerRef              = useRef(null);
@@ -123,7 +123,7 @@ function ThenNowDiptych({ s1Quotes, s3Quotes, isMobile }) {
           letterSpacing: '0.18em',
           textTransform: 'uppercase',
         }}>
-          14 Months of Change — In Their Own Words
+          {months} Months of Change — In Their Own Words
         </div>
       </div>
 
@@ -203,12 +203,18 @@ function ThenNowDiptych({ s1Quotes, s3Quotes, isMobile }) {
 }
 
 // ── Hero ──────────────────────────────────────────────────────────────────────
-export default function Hero({ transforms }) {
+export default function Hero({ transforms, lastUpdated }) {
   const theme          = useTheme();
   const isLight        = theme === 'light';
   const isMobile       = useIsMobile();
   const totalResponses = transforms.responseCounts.reduce((sum, s) => sum + s.n, 0);
-  const statValues     = [3, totalResponses, 14];
+  const wavesWithData  = transforms.responseCounts.filter(s => s.n > 0).length;
+  const months         = transforms.monthsCovered ?? 14;
+  const statValues     = [wavesWithData, totalResponses, months];
+  const s4             = transforms.s4;
+  const liveLabel      = s4?.configured
+    ? (s4.n > 0 ? `Survey 4 live · ${s4.n} response${s4.n === 1 ? '' : 's'} so far` : 'Survey 4 opens Sep 14')
+    : null;
 
   // Scroll-driven hero collapse
   const heroRef = useRef(null);
@@ -309,6 +315,13 @@ export default function Hero({ transforms }) {
               style={{ width: 6, height: 6, borderRadius: '50%', background: '#2EA84A', display: 'inline-block', boxShadow: '0 0 8px rgba(46,168,74,0.9)', flexShrink: 0 }}
             />
             Baptist Health · Marketing &amp; Communications
+            {liveLabel && (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginLeft: 4, paddingLeft: 10, borderLeft: '1px solid var(--border)', color: '#2EA84A' }}
+                title={lastUpdated ? `Last refreshed ${lastUpdated.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}` : undefined}>
+                {s4.n > 0 && <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#2EA84A', boxShadow: '0 0 8px rgba(46,168,74,0.9)' }} />}
+                {liveLabel}
+              </span>
+            )}
           </motion.div>
 
           {/* Giant headline */}
@@ -481,9 +494,8 @@ export default function Hero({ transforms }) {
         padding: isMobile ? '40px 0 48px' : '72px 0 80px',
       }}>
         <ThenNowDiptych
-          s1Quotes={transforms.openEndedText?.s1 ?? []}
-          s3Quotes={transforms.openEndedText?.s3Excitement ?? []}
           isMobile={isMobile}
+          months={months}
         />
       </div>
 

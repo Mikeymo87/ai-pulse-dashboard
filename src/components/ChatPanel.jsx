@@ -36,7 +36,13 @@ function buildSystemPrompt(transforms, vaultUnlocked = false) {
     barriersTrend, byRole, byFunction,
     toolsS2, toolsS3, benefitsS3, momentumS3, ownPocketS3,
     archetypes, openTextInsights,
+    waves, s4, toolsS4, benefitsS4, ownPocketS4, impactS4, builderS4, teamUseS4, openEndedText,
   } = transforms;
+
+  const waveLines = (waves ?? [
+    { label: 'Survey 1', period: 'Jan–Feb 2025', n: 97 }, { label: 'Survey 2', period: 'Aug–Sep 2025', n: 106 }, { label: 'Survey 3', period: 'Mar 2026', n: 101 },
+  ]).map(w => `- ${w.label}: ${w.period} (${w.n} responses${w.num >= 3 ? ', includes role + function data' : ', anonymous'}${w.inField ? ', IN THE FIELD NOW, count still growing' : ''})`).join('\n');
+  const monthsCovered = transforms.monthsCovered ?? 14;
 
   const posS1 = sentimentTrend.find(e => e.sentiment === 'Positive')?.s1.pct ?? 0;
   const posS2 = sentimentTrend.find(e => e.sentiment === 'Positive')?.s2.pct ?? 0;
@@ -76,10 +82,8 @@ function buildSystemPrompt(transforms, vaultUnlocked = false) {
   const topMomentum = (momentumS3 ?? []).slice(0, 3).map(m => `"${m.label}" (${m.pct}%)`).join(', ');
 
   return `You are an AI data assistant for the Baptist Health Marketing & Communications department.
-You have access to results from 3 AI adoption pulse surveys conducted over 14 months:
-- Survey 1: Jan–Feb 2025 (97 responses, anonymous)
-- Survey 2: Aug–Sep 2025 (106 responses, anonymous)
-- Survey 3: Mar 2026 (101 responses, includes role + function data)
+You have access to results from ${(waves ?? []).length || 3} AI adoption pulse surveys conducted over ${monthsCovered} months:
+${waveLines}
 
 STRICT RULES:
 1. Only cite numbers from the data below — never invent or estimate figures not provided
@@ -141,7 +145,15 @@ TOOLS USED — Survey 3 (SUPPLEMENTAL tools only — used ON TOP OF the official
 IMPORTANT: The S3 question asked "Besides ChatGPT, Copilot, Firefly, Jasper — what other tools do you use?" So these are personal/supplemental tools added on top of the official endorsed tools. ChatGPT not appearing here does NOT mean the team doesn't use it — it's the primary official tool. 77% of S3 respondents use at least one supplemental tool beyond the official stack.
 ${topToolsS3 || 'No data'}
 
-TEAM READINESS BY ROLE (S3 only — confidence avg / importance avg):
+${s4?.live ? `SURVEY 4 — LIVE, ${s4.n} responses so far (Sep 2026; treat as early and moving${s4.solid ? '' : ', below the ' + s4.minN + '-response threshold for headline use'}):
+Daily use: ${freqPct(3, 'Daily')}% | Positive: ${sentimentTrend.find(e => e.sentiment === 'Positive')?.s4?.pct ?? 0}% | Confident or higher: ${confPct(3)}% | Experimentation or higher: ${stageTrend.filter(e => ADVANCED.includes(e.stage)).reduce((sum, e) => sum + (e.s4?.pct ?? 0), 0)}%
+NEW Q — Impact of own AI use (1 none … 5 improved how the team works): avg ${impactS4?.avg ?? '—'}, ${impactS4?.topTwoPct ?? 0}% at levels 4–5 (helps coworkers or the team)
+NEW Q — Building with AI (1 assistant use … 5 builds solutions others use): avg ${builderS4?.avg ?? '—'}, ${(builderS4?.distribution ?? []).filter(d => d.score >= 3).reduce((a, d) => a + d.pct, 0)}% build workflows, agents or apps (levels 3–5)
+NEW Q — AI on the team (1 rarely used … 5 built into several workflows): avg ${teamUseS4?.avg ?? '—'}, ${teamUseS4?.topTwoPct ?? 0}% at levels 4–5 (AI part of regular team workflows)
+Own pocket: ${ownPocketS4?.yesPct ?? 0}% | Top benefits: ${(benefitsS4 ?? []).slice(0, 4).map(b => `${b.label} (${b.pct}%)`).join(', ') || 'n/a'} | Top supplemental tools: ${(toolsS4 ?? []).slice(0, 6).map(t => `${t.label} (${t.pct}%)`).join(', ') || 'n/a'}
+Top barriers (S4): ${[...barriersTrend].filter(b => b.barrier !== 'No barriers').sort((a, b) => (b.s4?.pct ?? 0) - (a.s4?.pct ?? 0)).slice(0, 5).map(b => `${b.barrier} (${b.s4?.pct ?? 0}%)`).join(', ')}
+Open text (S4, "one thing helping or getting in the way"): ${(openEndedText?.s4 ?? []).length} comments.
+` : ''}TEAM READINESS BY ROLE (S3 only — confidence avg / importance avg):
 ${vaultUnlocked ? (topRoles || 'No role data') : '[Role-level data available in Leadership Vault]'}
 
 TEAM READINESS BY FUNCTION (S3 only):

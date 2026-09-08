@@ -13,6 +13,7 @@ const PERIOD_LABEL = {
   'Jan–Feb 2025': { survey: 'Survey 1', date: 'Jan–Feb 2025' },
   'Aug–Sep 2025': { survey: 'Survey 2', date: 'Aug–Sep 2025' },
   'Mar 2026':     { survey: 'Survey 3', date: 'Mar 2026' },
+  'Sep 2026':     { survey: 'Survey 4', date: 'Sep 2026' },
 };
 
 function CustomXTick({ x, y, payload }) {
@@ -108,8 +109,8 @@ function Sparkline({ values, color }) {
           {typeof values[i] === 'number' && values[i] % 1 !== 0 ? values[i].toFixed(1) : Math.round(values[i])}
         </text>
       ))}
-      {/* S1/S2/S3 labels below */}
-      {['S1', 'S2', 'S3'].map((lbl, i) => (
+      {/* S1…Sn labels below */}
+      {values.map((_, i) => `S${i + 1}`).map((lbl, i) => (
         <text
           key={lbl}
           x={pts[i].x} y={H + 13}
@@ -276,7 +277,7 @@ function ScorecardTile({ label, tag, value, unit, delta, deltaLabel, sparkValues
           >
             ▼
           </motion.span>
-          {open ? 'Hide trend chart' : 'View 3-survey trend ↓'}
+          {open ? 'Hide trend chart' : `View ${sparkValues.length}-survey trend ↓`}
         </button>
 
         {/* ── Expanded chart ── */}
@@ -313,44 +314,53 @@ export default function AdoptionScorecard({ transforms }) {
   const gridStyle = { stroke: isLight ? 'rgba(46,168,74,0.09)' : 'rgba(125,230,155,0.07)', strokeDasharray: '3 3' };
 
   const { sentimentTrend, familiarityTrend, importanceTrend, confidenceTrend } = transforms;
+  // Waves with responses (Survey 4 joins once its first answers land). Hero numbers use the latest
+  // wave with enough responses to headline (transforms.latest), trends show every wave with data.
+  const allWaves = transforms.waves ?? [{ key: 's1', period: 'Jan–Feb 2025' }, { key: 's2', period: 'Aug–Sep 2025' }, { key: 's3', period: 'Mar 2026' }];
+  const waves = allWaves.filter((w, i) => i < 3 || w.n > 0);
+  const li = Math.min(transforms.latest?.index ?? 2, waves.length - 1);   // latest solid wave index
+  const latestNum = waves[li]?.num ?? li + 1;
+  const trendLabel = waves.map((_, i) => i + 1).join(' → ');
 
   // ── Sentiment ────────────────────────────────────────────────────────────────
-  const sentimentData = ['Jan–Feb 2025', 'Aug–Sep 2025', 'Mar 2026'].map((period, i) => {
-    const key = ['s1', 's2', 's3'][i];
-    const row = { period };
+  const sentimentData = waves.map(w => {
+    const row = { period: w.period };
     for (const entry of sentimentTrend) {
-      row[entry.sentiment] = entry[key]?.pct ?? 0;
+      row[entry.sentiment] = entry[w.key]?.pct ?? 0;
     }
     return row;
   });
   const posEntry = sentimentTrend.find(e => e.sentiment === 'Positive') || {};
-  const s1Pos = posEntry.s1?.pct ?? 0;
-  const s2Pos = posEntry.s2?.pct ?? 0;
-  const s3Pos = posEntry.s3?.pct ?? 0;
+  const posSeries = waves.map(w => posEntry[w.key]?.pct ?? 0);
+  const s1Pos = posSeries[0];
+  const s3Pos = posSeries[li];
   const showUnsure = sentimentData.some(d => (d['Unsure'] ?? 0) > 0);
 
   // ── Familiarity ──────────────────────────────────────────────────────────────
-  const familiarityData = familiarityTrend.map(s => ({ period: s.period, 'Avg Score': s.avg ?? 0 }));
-  const [s1Fam, s2Fam, s3Fam] = familiarityData.map(d => d['Avg Score']);
-  const famDomain = autoDomain(familiarityData.map(d => d['Avg Score']), 0.25, 1, 5);
+  const familiarityData = familiarityTrend.slice(0, waves.length).map(s => ({ period: s.period, 'Avg Score': s.avg ?? 0 }));
+  const famSeries = familiarityData.map(d => d['Avg Score']);
+  const s1Fam = famSeries[0], s3Fam = famSeries[li];
+  const famDomain = autoDomain(famSeries, 0.25, 1, 5);
 
   // ── Importance ───────────────────────────────────────────────────────────────
-  const importanceData = importanceTrend.map(s => ({ period: s.period, 'Avg Score': s.avg ?? 0 }));
-  const [s1Imp, s2Imp, s3Imp] = importanceData.map(d => d['Avg Score']);
-  const impDomain = autoDomain(importanceData.map(d => d['Avg Score']), 0.25, 1, 5);
+  const importanceData = importanceTrend.slice(0, waves.length).map(s => ({ period: s.period, 'Avg Score': s.avg ?? 0 }));
+  const impSeries = importanceData.map(d => d['Avg Score']);
+  const s1Imp = impSeries[0], s3Imp = impSeries[li];
+  const impDomain = autoDomain(impSeries, 0.25, 1, 5);
 
   // ── Confidence ───────────────────────────────────────────────────────────────
   // "Confident or higher" = exclude "Somewhat confident" and "Not confident at all".
   // Each survey uses a different score scale, so we filter by label text rather than
   // a raw score threshold (score >= 3 incorrectly pulls in S1's "Somewhat confident").
-  const confidenceData = confidenceTrend.map(s => ({
+  const confidenceData = confidenceTrend.slice(0, waves.length).map(s => ({
     period: s.period,
     'Confident or Higher': s.distribution
       .filter(d => d.label && !d.label.toLowerCase().includes('somewhat') && !d.label.toLowerCase().startsWith('not confident'))
       .reduce((sum, d) => sum + d.pct, 0),
   }));
-  const [s1Conf, s2Conf, s3Conf] = confidenceData.map(d => d['Confident or Higher']);
-  const confDomain = autoDomain(confidenceData.map(d => d['Confident or Higher']), 5, 0, 100);
+  const confSeries = confidenceData.map(d => d['Confident or Higher']);
+  const s1Conf = confSeries[0], s3Conf = confSeries[li];
+  const confDomain = autoDomain(confSeries, 5, 0, 100);
 
   const tiles = [
     {
@@ -361,13 +371,13 @@ export default function AdoptionScorecard({ transforms }) {
       unit: 'of the team',
       delta: `${s3Pos - s1Pos} pts`,
       deltaLabel: 'gain since Survey 1',
-      sparkValues: [s1Pos, s2Pos, s3Pos],
+      sparkValues: posSeries,
       color: '#2EA84A',
       delay: 0,
       expandedChart: (
         <>
           <p style={{ color: '#e0e0e0', fontWeight: 700, fontSize: 15, margin: '0 0 18px', fontFamily: 'DM Sans, sans-serif' }}>
-            Sentiment Shift — Survey 1 → 2 → 3
+            Sentiment Shift — Survey {trendLabel}
           </p>
           <div className="chart-scroll"><ResponsiveContainer width="100%" height={300}>
             <LineChart data={sentimentData} margin={{ top: 4, right: 50, bottom: 20, left: -10 }}>
@@ -398,13 +408,13 @@ export default function AdoptionScorecard({ transforms }) {
       unit: '/ 5.0 avg score',
       delta: `+${((s3Fam ?? 0) - (s1Fam ?? 0)).toFixed(1)} pts`,
       deltaLabel: 'average score gain since S1',
-      sparkValues: [s1Fam ?? 0, s2Fam ?? 0, s3Fam ?? 0],
+      sparkValues: famSeries.map(v => v ?? 0),
       color: '#59BEC9',
       delay: 0.1,
       expandedChart: (
         <>
           <p style={{ color: '#e0e0e0', fontWeight: 700, fontSize: 15, margin: '0 0 18px', fontFamily: 'DM Sans, sans-serif' }}>
-            AI Familiarity — Survey 1 → 2 → 3
+            AI Familiarity — Survey {trendLabel}
           </p>
           <div className="chart-scroll"><ResponsiveContainer width="100%" height={300}>
             <AreaChart data={familiarityData} margin={{ top: 4, right: 50, bottom: 20, left: -10 }}>
@@ -433,13 +443,13 @@ export default function AdoptionScorecard({ transforms }) {
       unit: 'feel confident',
       delta: `+${Math.round((s3Conf ?? 0) - (s1Conf ?? 0))} pts`,
       deltaLabel: 'gain since Survey 1',
-      sparkValues: [s1Conf ?? 0, s2Conf ?? 0, s3Conf ?? 0],
+      sparkValues: confSeries.map(v => v ?? 0),
       color: '#FFCD00',
       delay: 0.2,
       expandedChart: (
         <>
           <p style={{ color: '#e0e0e0', fontWeight: 700, fontSize: 15, margin: '0 0 18px', fontFamily: 'DM Sans, sans-serif' }}>
-            Confidence Over Time — Survey 1 → 2 → 3
+            Confidence Over Time — Survey {trendLabel}
           </p>
           <div className="chart-scroll"><ResponsiveContainer width="100%" height={300}>
             <AreaChart data={confidenceData} margin={{ top: 4, right: 50, bottom: 20, left: -10 }}>
@@ -468,13 +478,13 @@ export default function AdoptionScorecard({ transforms }) {
       unit: '/ 5.0 avg score',
       delta: `+${((s3Imp ?? 0) - (s1Imp ?? 0)).toFixed(1)} pts`,
       deltaLabel: 'average score gain since S1',
-      sparkValues: [s1Imp ?? 0, s2Imp ?? 0, s3Imp ?? 0],
+      sparkValues: impSeries.map(v => v ?? 0),
       color: '#7DE69B',
       delay: 0.3,
       expandedChart: (
         <>
           <p style={{ color: '#e0e0e0', fontWeight: 700, fontSize: 15, margin: '0 0 18px', fontFamily: 'DM Sans, sans-serif' }}>
-            Importance to Role — Survey 1 → 2 → 3
+            Importance to Role — Survey {trendLabel}
           </p>
           <div className="chart-scroll"><ResponsiveContainer width="100%" height={300}>
             <AreaChart data={importanceData} margin={{ top: 4, right: 50, bottom: 20, left: -10 }}>
@@ -512,10 +522,10 @@ export default function AdoptionScorecard({ transforms }) {
           letterSpacing: '0.13em', textTransform: 'uppercase',
           margin: '0 0 8px', fontFamily: 'DM Sans, sans-serif',
         }}>
-          Adoption Scorecard — Survey 3 Snapshot
+          Adoption Scorecard — Survey {latestNum} Snapshot{latestNum === 4 ? ` (live, ${waves[li]?.n ?? 0} responses so far)` : ''}
         </p>
         <p style={{ color: '#797D80', fontSize: 15, margin: 0, fontFamily: 'DM Sans, sans-serif', lineHeight: 1.6 }}>
-          Four key metrics at a glance. Expand any tile to see the full 3-survey trend.
+          Four key metrics at a glance. Expand any tile to see the full {waves.length}-survey trend.
         </p>
       </motion.div>
 

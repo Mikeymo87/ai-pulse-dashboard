@@ -109,19 +109,23 @@ const OPEN_TEXT_CARDS = [
 ];
 
 // ── Scorecard rows ────────────────────────────────────────────────────────────
+// Each getVal takes (t, wave) where wave = { key: 's3'|'s4', idx: 2|3 }. Wave 3 is always the
+// baseline; "now" switches to Wave 4 once it has enough responses (t.s4.solid).
+const W3 = { key: 's3', idx: 2 };
+const W4 = { key: 's4', idx: 3 };
 const SCORECARD_ROWS = [
   { metric: 'Integration + Transformation', targetDisplay: '>80%', targetLabel: 'Move above 80%', direction: 'above', threshold: 80, unit: '%',
-    getVal: (t) => Math.round(['Integration','Transformation'].reduce((s, st) => s + (t.stageTrend?.find(e => e.stage === st)?.s3?.pct ?? 0), 0)) },
+    getVal: (t, w = W3) => Math.round(['Integration','Transformation'].reduce((s, st) => s + (t.stageTrend?.find(e => e.stage === st)?.[w.key]?.pct ?? 0), 0)) },
   { metric: 'Very / extremely confident',   targetDisplay: '>75%', targetLabel: 'Move above 75%', direction: 'above', threshold: 75, unit: '%',
-    getVal: (t) => Math.round((t.confidenceTrend?.[2]?.distribution ?? []).filter(d => d.score >= 4).reduce((s,d) => s+d.pct, 0)) },
+    getVal: (t, w = W3) => Math.round((t.confidenceTrend?.[w.idx]?.distribution ?? []).filter(d => d.score >= 4).reduce((s,d) => s+d.pct, 0)) },
   { metric: 'Time as a barrier',            targetDisplay: '<25%', targetLabel: 'Pull below 25%',  direction: 'below', threshold: 25, unit: '%',
-    getVal: (t) => Math.round(t.barriersTrend?.find(b => b.barrier?.toLowerCase().includes('time'))?.s3?.pct ?? 34) },
+    getVal: (t, w = W3) => Math.round(t.barriersTrend?.find(b => b.barrier?.toLowerCase().includes('time'))?.[w.key]?.pct ?? (w.key === 's3' ? 34 : 0)) },
   { metric: 'Too many tools as a barrier',  targetDisplay: '<10%', targetLabel: 'Pull below 10%',  direction: 'below', threshold: 10, unit: '%',
-    getVal: (t) => Math.round(t.barriersTrend?.find(b => b.barrier?.toLowerCase().includes('too many'))?.s3?.pct ?? 16) },
+    getVal: (t, w = W3) => Math.round(t.barriersTrend?.find(b => b.barrier?.toLowerCase().includes('too many'))?.[w.key]?.pct ?? (w.key === 's3' ? 16 : 0)) },
   { metric: 'Strategic thought partner',    targetDisplay: '>50%', targetLabel: 'Move above 50%',  direction: 'above', threshold: 50, unit: '%',
-    getVal: (t) => Math.round((t.benefitsS3 ?? []).find(b => b.label?.toLowerCase().includes('strategic'))?.pct ?? 42) },
+    getVal: (t, w = W3) => Math.round(((w.key === 's4' ? t.benefitsS4 : t.benefitsS3) ?? []).find(b => b.label?.toLowerCase().includes('strategic'))?.pct ?? (w.key === 's3' ? 42 : 0)) },
   { metric: 'Out-of-pocket tool spend',     targetDisplay: '↓',    targetLabel: 'Reduce via sanctioned support', direction: 'below', threshold: 20, unit: '%',
-    getVal: (t) => Math.round(t.ownPocketS3?.yesPct ?? 32) },
+    getVal: (t, w = W3) => Math.round((w.key === 's4' ? t.ownPocketS4 : t.ownPocketS3)?.yesPct ?? (w.key === 's3' ? 32 : 0)) },
 ];
 
 // ── Shimmer skeleton ──────────────────────────────────────────────────────────
@@ -406,10 +410,13 @@ function OpenTextCard({ card, stat, quote, aiData, loading, index }) {
 // ── Wave 4 scorecard ──────────────────────────────────────────────────────────
 function Wave4Scorecard({ transforms }) {
   const isMobile = useIsMobile();
+  const s4 = transforms?.s4;
+  const live = Boolean(s4?.solid);
   const rows = SCORECARD_ROWS.map(r => {
-    const val = r.getVal(transforms ?? {});
+    const baseline = r.getVal(transforms ?? {}, W3);
+    const val = live ? r.getVal(transforms ?? {}, W4) : baseline;
     const onTrack = r.direction === 'above' ? val >= r.threshold : val <= r.threshold;
-    return { ...r, val, onTrack };
+    return { ...r, val, baseline, onTrack };
   });
 
   return (
@@ -418,7 +425,11 @@ function Wave4Scorecard({ transforms }) {
       <SectionHeader
         pill="Wave 4 accountability" pillColor="#2EA84A"
         title="If the priorities work," accent="these numbers move"
-        subtitle="Each metric below is the direct outcome measure for one of the 6 priorities above. Wave 3 baselines are live. When Wave 4 data comes in, this scorecard updates automatically."
+        subtitle={live
+          ? `Each metric below is the direct outcome measure for one of the 6 priorities above. "Now" is live Wave 4 data (${s4.n} responses so far) and moves as responses come in; the smaller number is the Wave 3 baseline.`
+          : s4?.configured
+            ? `Each metric below is the direct outcome measure for one of the 6 priorities above. Wave 3 baselines are shown. Wave 4 is in the field${s4.n > 0 ? ` (${s4.n} so far)` : ''}; the scorecard switches to live Wave 4 numbers at ${s4.minN} responses.`
+            : 'Each metric below is the direct outcome measure for one of the 6 priorities above. Wave 3 baselines are live. When Wave 4 data comes in, this scorecard updates automatically.'}
       />
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: 12 }}>
         {rows.map((row, i) => (
@@ -439,10 +450,13 @@ function Wave4Scorecard({ transforms }) {
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               {/* Current */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <span style={{ fontFamily: MONO, fontSize: 9, color: 'var(--text-support)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Now</span>
+                <span style={{ fontFamily: MONO, fontSize: 9, color: 'var(--text-support)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>{live ? 'Now · W4' : 'Now'}</span>
                 <span style={{ fontFamily: SANS, fontSize: 'clamp(22px, 2.3vw, 28px)', fontWeight: 900, color: row.onTrack ? '#2EA84A' : 'var(--text-medium)', lineHeight: 1, letterSpacing: '-0.02em' }}>
                   {row.val}{row.unit}
                 </span>
+                {live && (
+                  <span style={{ fontFamily: MONO, fontSize: 9, color: 'var(--text-support)', letterSpacing: '0.04em' }}>W3 {row.baseline}{row.unit}</span>
+                )}
               </div>
               <span style={{ color: '#2EA84A', fontSize: 14, opacity: 0.35, flexShrink: 0 }}>→</span>
               {/* Goal */}

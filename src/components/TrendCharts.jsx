@@ -52,6 +52,7 @@ const PERIOD_LABEL = {
   'Jan–Feb 2025': { survey: 'Survey 1', date: 'Jan–Feb 2025' },
   'Aug–Sep 2025': { survey: 'Survey 2', date: 'Aug–Sep 2025' },
   'Mar 2026':     { survey: 'Survey 3', date: 'Mar 2026' },
+  'Sep 2026':     { survey: 'Survey 4', date: 'Sep 2026' },
 };
 
 // ─── Custom two-line X-axis tick (Survey # + date) ────────────────────────────
@@ -195,17 +196,21 @@ export default function TrendCharts({ transforms }) {
   const gridStyle = { stroke: isLight ? 'rgba(46,168,74,0.09)' : 'rgba(125,230,155,0.07)', strokeDasharray: '3 3' };
 
   const { frequencyTrend, familiarityTrend } = transforms;
+  const months = transforms.monthsCovered ?? 14;
+  const li = transforms.latest?.index ?? 2;           // latest wave with enough responses to headline
+  const latestLabel = transforms.latest?.label ?? 'Survey 3';
 
   // ── Frequency (Daily vs Never) — the "too dramatic to hide" chart ──────────
-  const frequencyData = frequencyTrend.map(s => {
+  // Survey 4 appears on the chart as soon as it has responses.
+  const frequencyData = frequencyTrend.filter(s => s.n > 0).map(s => {
     const daily = s.distribution.find(d => d.label === 'Daily')?.pct ?? 0;
     const never = s.distribution.find(d => d.label === 'Never')?.pct ?? 0;
     return { period: s.period, 'Daily Use': daily, 'Never': never };
   });
   const s1Daily = frequencyData[0]?.['Daily Use'] ?? 0;
-  const s3Daily = frequencyData[2]?.['Daily Use'] ?? 0;
+  const s3Daily = frequencyTrend[li]?.distribution.find(d => d.label === 'Daily')?.pct ?? 0;
   const s1Never = frequencyData[0]?.['Never'] ?? 0;
-  const s3Never = frequencyData[2]?.['Never'] ?? 0;
+  const s3Never = frequencyTrend[li]?.distribution.find(d => d.label === 'Never')?.pct ?? 0;
 
   return (
     <section id="trends" style={{ maxWidth: 1360, margin: '0 auto', padding: isMobile ? '48px 16px' : '80px 32px' }}>
@@ -232,7 +237,7 @@ export default function TrendCharts({ transforms }) {
           marginBottom: 16,
           fontFamily: 'DM Sans, sans-serif',
         }}>
-          14-Month Trend
+          {months}-Month Trend
         </div>
         <h2 style={{
           color: 'var(--text-primary)', fontSize: 'clamp(28px, 4vw, 40px)',
@@ -309,7 +314,7 @@ export default function TrendCharts({ transforms }) {
                 letterSpacing: '0.015em',
                 margin: '0 0 8px',
               }}>
-                Daily AI use across the team — 14 months
+                Daily AI use across the team — {months} months
               </p>
               <p style={{
                 color: '#797D80',
@@ -339,7 +344,7 @@ export default function TrendCharts({ transforms }) {
                 +{s3Daily - s1Daily}
               </p>
               <p style={{ color: '#797D80', fontSize: 13, margin: 0, fontFamily: 'DM Sans, sans-serif', letterSpacing: '0.03em' }}>
-                percentage points<br />in 14 months
+                percentage points<br />in {months} months
               </p>
             </div>
           </div>
@@ -374,7 +379,7 @@ export default function TrendCharts({ transforms }) {
             margin: 0, lineHeight: 1.7, fontFamily: 'DM Sans, sans-serif',
           }}>
             <span style={{ color: 'var(--accent-mint)', fontWeight: 700, fontStyle: 'normal', marginRight: 6, letterSpacing: '0.02em' }}>What this tells us:</span>
-            {`Daily use climbed from ${s1Daily}% in Survey 1 to ${s3Daily}% today — a ${s3Daily - s1Daily}-point leap in 14 months. Respondents who never use AI dropped from ${s1Never}% to ${s3Never}%. This is organic adoption, not mandated compliance. The team moved itself.`}
+            {`Daily use climbed from ${s1Daily}% in Survey 1 to ${s3Daily}% in ${latestLabel} — a ${s3Daily - s1Daily}-point leap in ${months} months. Respondents who never use AI dropped from ${s1Never}% to ${s3Never}%. This is organic adoption, not mandated compliance. The team moved itself.`}
           </p>
         </div>
       </motion.div>

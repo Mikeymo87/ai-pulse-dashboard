@@ -21,7 +21,7 @@ import HowWeDidIt from './components/HowWeDidIt';
 import ToolEcosystem from './components/ToolEcosystem';
 
 export default function App() {
-  const { surveys, transforms, loading, error } = useSurveyData();
+  const { surveys, transforms, loading, error, lastUpdated } = useSurveyData();
   const [chatOpen, setChatOpen]         = useState(false);
   const [presentMode, setPresentMode]   = useState(false);
   const [activeTab, setActiveTab]         = useState('story');
@@ -123,8 +123,8 @@ export default function App() {
         >
           {activeTab === 'story' && (
             <>
-              <Hero transforms={transforms} />
-              <StoryNarrative />
+              <Hero transforms={transforms} lastUpdated={lastUpdated} />
+              <StoryNarrative transforms={transforms} />
               <GrowthStory transforms={transforms} />
               <ConvictionMoment transforms={transforms} />
               <div className="pad-section" style={{ padding: '0 32px', maxWidth: 1360, margin: '0 auto' }}>
@@ -135,12 +135,13 @@ export default function App() {
           {activeTab === 'numbers' && (
             <>
               <div style={{ paddingTop: 24 }}>
-                <NumbersSubNav active={numbersSubTab} onChange={setNumbersSubTab} />
+                <NumbersSubNav active={numbersSubTab} onChange={setNumbersSubTab} waves={transforms.waves} />
               </div>
               {numbersSubTab === 'overview' && <TrendCharts transforms={transforms} />}
               {numbersSubTab === 's1' && <SurveySnapshot wave="s1" transforms={transforms} vaultUnlocked={vaultUnlocked} />}
               {numbersSubTab === 's2' && <SurveySnapshot wave="s2" transforms={transforms} vaultUnlocked={vaultUnlocked} />}
               {numbersSubTab === 's3' && <SurveySnapshot wave="s3" transforms={transforms} vaultUnlocked={vaultUnlocked} />}
+              {numbersSubTab === 's4' && transforms.s4?.configured && <SurveySnapshot wave="s4" transforms={transforms} vaultUnlocked={vaultUnlocked} lastUpdated={lastUpdated} />}
             </>
           )}
           {activeTab === 'team' && (
