@@ -3,7 +3,7 @@
 //        node scripts/check-data.mjs --no-s4    (3-wave path, must match today's app)
 // Exits non-zero on any failed assertion. No API calls, no browser.
 import { readFileSync } from 'node:fs';
-import { MAPPERS, parseCsvText, BENEFIT_CANON } from '../src/data/parseCSVs.js';
+import { MAPPERS, parseCsvText, BENEFIT_CANON, HUMAN_CANON } from '../src/data/parseCSVs.js';
 import { buildTransforms, LIVE_MIN_N } from '../src/data/transforms.js';
 
 const S2 = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSB9O1TzD7Ipk50nBG2wHFLlVytf1aaEgcWYeEMLuyAUTF4aXMFU8ByFfFHGP74QzbyOJOaSZqaBHUK/pub?gid=1201512326&single=true&output=csv';
@@ -54,7 +54,7 @@ check(T.archetypes && Object.values(T.archetypes).reduce((s, a) => s + a.count, 
 if (withS4) {
   console.log('\n[wave 4]');
   check(survey4.length > 0, `S4 rows parsed: ${survey4.length}`);
-  const fields = ['sentiment', 'stage', 'familiarity', 'frequency', 'importance', 'confidence', 'impact', 'builder', 'teamUse', 'ownPocket'];
+  const fields = ['sentiment', 'stage', 'familiarity', 'frequency', 'importance', 'confidence', 'builder', 'teamUse', 'ownPocket'];
   for (const f of fields) {
     const filled = survey4.filter(r => r[f] !== null && r[f] !== undefined).length;
     check(filled > 0, `S4 field "${f}" populated on ${filled}/${survey4.length} rows`);
@@ -70,8 +70,17 @@ if (withS4) {
   console.log('       S4 tools seen: ' + [...s4Tools].join(' | '));
   check(!s4Tools.has('Gemini Notebook (formerly NotebookLM)') && (s4Tools.size === 0 || s4Tools.has('NotebookLM') || true), 'NotebookLM label canonical in S4');
   check(survey4.every(r => r.role === null || !/^(assistant vice president|vice president)$/i.test(r.role)), 'AVP/VP canonical in S4');
-  check(T.impactS4.distribution.length === 5 && T.builderS4.distribution.length === 5 && T.teamUseS4.distribution.length === 5, 'ladders have 5 levels');
-  console.log(`       impact avg ${T.impactS4.avg} (top-two ${T.impactS4.topTwoPct}%), builder avg ${T.builderS4.avg}, team avg ${T.teamUseS4.avg}, not-sure impact=${T.impactS4.notSure}`);
+  check(T.builderS4.distribution.length === 4 && T.teamUseS4.distribution.length === 5, 'ladders: builder has 4 rungs (9/9 form), team has 5');
+  check(survey4.filter(r => r.builder !== null).length + survey4.filter(r => r.builder === null).length === survey4.length && survey4.some(r => r.builder === 1) && survey4.some(r => r.builder === 4), 'builder ladder maps the live Q5 wording (levels 1 and 4 both seen)');
+  check(survey4.some(r => r.teamUse === 5), 'team ladder maps "integrally built into" to level 5');
+  console.log(`       builder avg ${T.builderS4.avg} (top-two ${T.builderS4.topTwoPct}%), team avg ${T.teamUseS4.avg} (top-two ${T.teamUseS4.topTwoPct}%), not-sure builder=${T.builderS4.notSure} team=${T.teamUseS4.notSure}`);
+  const humanCanon = new Set(HUMAN_CANON.map(h => h.label));
+  check(survey4.every(r => (r.humanContrib ?? []).length >= 1 && r.humanContrib.length <= 3), 'every S4 row has 1 to 3 canonical human contributions');
+  check(survey4.every(r => r.humanContrib.every(h => humanCanon.has(h))), 'S4 human contributions are canonical labels only');
+  check(T.humanS4.distribution.length === HUMAN_CANON.length && T.humanS4.n === survey4.length, `humanS4: ${HUMAN_CANON.length} options ranked, n=${T.humanS4.n}, write-ins=${T.humanS4.other.length}`);
+  console.log('       top human contributions: ' + T.humanS4.distribution.slice(0, 3).map(d => `${d.label} ${d.pct}%`).join(' | ') + (T.humanS4.other.length ? ' | write-ins: ' + T.humanS4.other.join(' / ') : ''));
+  const aliasHits = survey4.flatMap(r => r.tools).filter(t => ['Gemini', 'Claude', 'Grok', 'Llama'].includes(t));
+  check(aliasHits.length > 0 && !s4Tools.has('xAI Grok') && !s4Tools.has('Anthropic Claude') && !s4Tools.has('Google Gemini') && !s4Tools.has('Meta Llama'), `company-first tool names fold into Wave 3 labels (${aliasHits.length} hits)`);
   check(T.s4.configured && T.s4.n === survey4.length, `s4 pointer: configured=${T.s4.configured} n=${T.s4.n} live=${T.s4.live} solid=${T.s4.solid}`);
   const daily4 = T.frequencyTrend[3].distribution.find(d => d.label === 'Daily')?.pct ?? 0;
   check(daily4 >= 0 && daily4 <= 100, `S4 daily = ${daily4}%`);

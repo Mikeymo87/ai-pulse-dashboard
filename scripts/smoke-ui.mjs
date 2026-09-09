@@ -54,7 +54,7 @@ await run('3 waves', `${base}/`,
   ['Survey 4', 'Four Waves', 'NaN', 'undefined']);
 
 const t = await run('S4 sample', `${base}/?s4=sample`,
-  ['Four Waves, One Story', 'January 2025 to September 2026', 'The Team Sport', 'Survey 4 is in the field, 14 responses', 'Survey 4 live · 14 responses so far', '20-Month Trend', 'Adoption Scorecard — Survey 4 Snapshot', 'Impact of Your AI Use', 'Building With AI', 'AI on Your Team', 'In Their Words', 'Now · W4', 'From individual fluency to a team sport', 'Survey 4 is at', 'Survey 4 Deep Dive|Leadership Vault'.split('|')[1]],
+  ['Four Waves, One Story', 'January 2025 to September 2026', 'The Team Sport', 'Survey 4 is in the field, 14 responses', 'Survey 4 live · 14 responses so far', '20-Month Trend', 'Adoption Scorecard — Survey 4 Snapshot', 'Building With AI', 'AI on Your Team', 'Human Contributions', 'In Their Words', 'Now · W4', 'From individual fluency to a team sport', 'Survey 4 is at', 'Survey 4 Deep Dive|Leadership Vault'.split('|')[1]],
   ['NaN', 'undefined']);
 const s4tab = (t['numbers:Survey 4'] ?? '').toLowerCase();
 ok(s4tab.includes('14 responses so far') && s4tab.includes('live · in the field'), 'Survey 4 snapshot tab renders with live badge');

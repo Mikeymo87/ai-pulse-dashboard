@@ -1,5 +1,5 @@
 import { USE_CASE_THEMES, STRUGGLE_THEMES, EXCITEMENT_THEMES, USE_CASE_LABEL, STRUGGLE_LABEL, EXCITEMENT_LABEL } from './themes.js';
-import { IMPACT_LABELS, BUILDER_LABELS, TEAM_LABELS } from './parseCSVs.js';
+import { BUILDER_LABELS, TEAM_LABELS, HUMAN_CANON } from './parseCSVs.js';
 
 const DEV = typeof import.meta !== 'undefined' && import.meta.env ? Boolean(import.meta.env.DEV) : false;
 
@@ -284,18 +284,31 @@ export function buildTransforms({ survey1, survey2, survey3, survey4 = [], s4Con
       };
     });
   }
-  // Wave 4 ladders: 1–5 distributions (answered = excludes "I'm not sure")
+  // Wave 4 ladders: ordinal distributions (answered = excludes "I'm not sure").
+  // Level count comes from the labels (builder = 4 rungs since 9/9, team = 5); topTwoPct = the
+  // two highest rungs whatever the count.
   function ladderFor(rows, field, labels) {
     const answered = rows.filter(r => r[field] !== null && r[field] !== undefined);
     const counts = countField(answered, field);
-    const distribution = [5, 4, 3, 2, 1].map(score => ({
+    const scores = Object.keys(labels).map(Number).sort((a, b) => b - a);
+    const maxScore = scores[0];
+    const distribution = scores.map(score => ({
       score, label: labels[score], count: counts[score] || 0,
       pct: answered.length ? Math.round(((counts[score] || 0) / answered.length) * 100) : 0,
     }));
     const vals = answered.map(r => r[field]);
     const avg = vals.length ? Math.round((vals.reduce((a, b) => a + b, 0) / vals.length) * 100) / 100 : null;
-    const topTwoPct = answered.length ? Math.round((answered.filter(r => r[field] >= 4).length / answered.length) * 100) : 0;
-    return { n: answered.length, notSure: rows.length - answered.length, avg, topTwoPct, distribution };
+    const topTwoPct = answered.length ? Math.round((answered.filter(r => r[field] >= maxScore - 1).length / answered.length) * 100) : 0;
+    return { n: answered.length, notSure: rows.length - answered.length, avg, maxScore, topTwoPct, distribution };
+  }
+  // Wave 4 Q7: human contributions, ranked like benefits (pct of all Wave 4 rows), plus write-ins
+  function humanFor(rows) {
+    const dist = toDistribution(countArrayField(rows, 'humanContrib'), rows.length);
+    // keep every canonical option in the list, zero-count ones last, so the card shows the full set
+    const seen = new Set(dist.map(d => d.label));
+    for (const h of HUMAN_CANON) if (!seen.has(h.label)) dist.push({ label: h.label, count: 0, pct: 0 });
+    const other = rows.flatMap(r => r.humanContribOther || []);
+    return { distribution: dist, other, n: rows.filter(r => (r.humanContrib || []).length > 0).length };
   }
 
   const toolsS3     = toolsFor(survey3);
@@ -309,9 +322,9 @@ export function buildTransforms({ survey1, survey2, survey3, survey4 = [], s4Con
   const ownPocketS4  = ownPocketFor(survey4);
   const byRoleS4     = byRoleFor(survey4);
   const byFunctionS4 = byFunctionFor(survey4);
-  const impactS4     = ladderFor(survey4, 'impact',  IMPACT_LABELS);
   const builderS4    = ladderFor(survey4, 'builder', BUILDER_LABELS);
   const teamUseS4    = ladderFor(survey4, 'teamUse', TEAM_LABELS);
+  const humanS4      = humanFor(survey4);
 
   // ── Departmental momentum (S3 only — question retired in Wave 4) ─────────
   const momentumCounts = countField(survey3.filter(r => r.momentum), 'momentum');
@@ -898,15 +911,15 @@ export function buildTransforms({ survey1, survey2, survey3, survey4 = [], s4Con
     ownPocketS3,
     byRole,
     byFunction,
-    // S4-specific (same shapes as S3, plus the three new ladders)
+    // S4-specific (same shapes as S3, plus the two new ladders and the human-contributions pick list)
     toolsS4,
     benefitsS4,
     ownPocketS4,
     byRoleS4,
     byFunctionS4,
-    impactS4,
     builderS4,
     teamUseS4,
+    humanS4,
     // Persona clustering (latest solid wave; see archetypesWave)
     archetypes,
     archetypesWave,

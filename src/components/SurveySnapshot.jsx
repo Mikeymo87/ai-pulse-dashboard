@@ -205,11 +205,11 @@ SURVEY_META.s4 = {
     { id: 'stage',       text: 'Which stage best describes your current progress on the AI journey?', options: ['Curiosity', 'Understanding', 'Experimentation', 'Integration', 'Transformation'] },
     { id: 'familiarity', text: 'How would you best describe your familiarity with AI tools and their applications in marketing & communications?', options: ["I'm unfamiliar with AI and its applications in this space", "I've heard of them but don't know much", "I know a bit about them but haven't used them", 'I understand AI tools well and have experimented with them', 'I am highly knowledgeable and use AI regularly'] },
     { id: 'frequency',   text: 'How often do you currently use AI tools in your work? Choose the option that most closely reflects your usage.', options: ['Never', 'Rarely (Less than once per month)', 'At least once per month', 'At least once per week', 'Daily'] },
-    { id: 'impact',      text: 'What kind of impact is your use of AI having at work today?', options: ["I'm not seeing much impact yet", 'AI helps me with occasional tasks', 'AI regularly helps me work faster or produce better work', 'The ways I use AI also help some of my coworkers', 'My use of AI has helped improve how my team or department works', "I'm not sure"] },
-    { id: 'builder',     text: 'What is the most advanced thing you currently do with AI?', options: ['I use AI tools to ask questions, write, research, brainstorm or analyze', 'I create reusable AI assistants for specific tasks', 'I create workflows or automations that use AI to complete multiple steps', 'I build AI agents that can complete multi-step tasks or take actions on their own', 'I build AI solutions that other people use, such as web apps, connected workflows or multiple agents working together', "I'm not sure / none of these"] },
-    { id: 'teamUse',     text: 'How is AI being used on your team today?', options: ['AI is rarely or not used by our team', 'People mostly use AI on their own for individual tasks', 'We use AI for some common team tasks', 'AI is part of some of our regular team workflows', 'AI is built into how our team works across several important workflows', "I'm not sure"] },
+    { id: 'builder',     text: 'What is the most advanced thing you currently do with AI?', options: ['I mainly use AI chat tools for simple, one-off tasks like asking questions, writing assistance, research, brainstorming or analysis', 'I use AI in more structured ways like ChatGPT Projects, saved prompts or creating Custom GPTs', 'I build AI agents that can complete multi-step tasks or take actions on their own', 'I build AI solutions that other people use, such as custom websites, connected workflows or multiple agents working together', "I'm not sure / none of these"] },
+    { id: 'teamUse',     text: 'How is AI being used on your team today?', options: ['AI is rarely or not used by our team', 'People mostly use AI on their own for individual tasks', 'We use AI for some common team tasks', 'AI is part of some of our regular team workflows', 'AI is integrally built into how our team works across several important workflows', "I'm not sure"] },
+    { id: 'humanContrib', text: 'As AI takes on more tasks, what do you believe will be your most important human contributions at work? (Select up to three)', options: ['Judgment and decision-making', 'Strategic thinking', 'Creativity and original point of view', 'Critical thinking', 'Empathy and relationship-building', 'Taste and quality judgment', 'Experience and subject-matter expertise', 'Communication and storytelling', 'Ethics and accountability', 'Curiosity and adaptability', 'Orchestration', 'Other'] },
     { id: 'benefits',    text: 'Which benefits have you personally experienced from using AI at work? (Select up to three)', options: ['select all that apply'] },
-    { id: 'tools',       text: 'In addition to the AI tools officially provided or endorsed by Baptist Health (ChatGPT, Copilot, Firefly, Gamma), are you using any other AI tools for work?', options: ['Gemini', 'Claude', 'ElevenLabs', 'Grok', 'Llama', 'Perplexity', 'Gemini Notebook (formerly NotebookLM)', 'OpusClip', 'Otter.ai', 'Wispr Flow', 'Replit', 'Lovable or Base44', 'Cursor or Codex', 'n8n or Zapier', 'Google AI Studio', 'None', 'Other'] },
+    { id: 'tools',       text: 'In addition to the AI tools officially provided or endorsed by Baptist Health (ChatGPT, Copilot, Firefly, Gamma), are you using any other AI tools for work?', options: ['Google Gemini', 'Anthropic Claude', 'xAI Grok', 'Meta Llama', 'Perplexity', 'Gemini Notebook (formerly NotebookLM)', 'OpusClip', 'Otter.ai', 'Wispr Flow', 'Replit', 'Lovable or Base44', 'Cursor or Codex', 'n8n or Zapier', 'Google AI Studio', 'None', 'Other'] },
     { id: 'ownPocket',   text: 'Are you currently paying out of your own pocket for any AI tools you use for work?', options: ['Yes', 'No'] },
     { id: 'barriers',    text: 'What are the biggest barriers, if any, preventing you from getting more value from AI at work? (Select up to three)', options: ['select all that apply'] },
     { id: 'importance',  text: 'How important is AI to the success of your individual or team work over the next 12 months?', options: ['1 – Not important at all', '2', '3', '4', '5 – Critically important'] },
@@ -582,8 +582,8 @@ function RankedBar({ distribution, label, question, color = C.teal, maxItems = 1
   );
 }
 
-// ─── Visual 7b: Ladder (Wave 4 impact / builder / team use) ──────────────────
-// Levels 1→5 shown low→high; green = most advanced. "I'm not sure" excluded from %.
+// ─── Visual 7b: Ladder (Wave 4 builder / team use) ───────────────────────────
+// Levels shown low→high (builder has 4 rungs, team 5); green = most advanced. "I'm not sure" excluded from %.
 function LadderCard({ ladder, label, question, color = C.green }) {
   if (!ladder || !ladder.n) return null;
   const levels = [...ladder.distribution].sort((a, b) => a.score - b.score);
@@ -592,7 +592,7 @@ function LadderCard({ ladder, label, question, color = C.green }) {
     <QB label={label} question={question}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
         {levels.map((d, i) => {
-          const c = STAGE_COLORS[i];
+          const c = STAGE_COLORS[levels.length === STAGE_COLORS.length ? i : Math.round(i * (STAGE_COLORS.length - 1) / Math.max(levels.length - 1, 1))];
           return (
             <div key={d.score} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <span style={{ width: 18, flexShrink: 0, fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: 12, fontWeight: 800, color: c }}>{d.score}</span>
@@ -607,10 +607,42 @@ function LadderCard({ ladder, label, question, color = C.green }) {
         })}
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: 'var(--text-support)' }}>
-        <span>Levels 4–5: <strong style={{ color }}>{ladder.topTwoPct}%</strong> · avg {ladder.avg}</span>
+        <span>Levels {(ladder.maxScore ?? 5) - 1}–{ladder.maxScore ?? 5}: <strong style={{ color }}>{ladder.topTwoPct}%</strong> · avg {ladder.avg}</span>
         <span>{ladder.n} answered{ladder.notSure ? ` · ${ladder.notSure} not sure` : ''}</span>
       </div>
     </QB>
+  );
+}
+
+// ─── Visual 7d: Human contributions (Wave 4 Q7, up to three picks, new this wave) ──
+function HumanContribCard({ human, label, question, color = C.teal }) {
+  if (!human || !human.n) return null;
+  const items = human.distribution;
+  const maxPct = items[0]?.pct || 1;
+  const other = (human.other || []).filter(Boolean).slice(0, 6);
+  return (
+    <div style={{ gridColumn: '1 / -1' }}>
+      <QB label={label} question={question} fullWidth>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+          {items.map((d, i) => (
+            <div key={d.label} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ width: 220, flexShrink: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 12, fontWeight: 500, color: d.pct > 0 ? 'var(--text-medium)' : 'var(--text-dim)', textAlign: 'right', lineHeight: 1.35 }}>{d.label}</span>
+              <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ flex: 1, height: 18, background: 'rgba(125,230,155,0.06)', borderRadius: 4, overflow: 'hidden' }}>
+                  <motion.div initial={{ width: 0 }} whileInView={{ width: `${(d.pct / maxPct) * 100}%` }} viewport={{ once: true }} transition={{ duration: 0.44, delay: i * 0.03, ease: 'easeOut' }}
+                    style={{ height: '100%', background: color, opacity: 0.78, borderRadius: 4 }} />
+                </div>
+                <span style={{ width: 32, flexShrink: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 700, color: d.pct > 0 ? color : 'var(--text-dim)' }}>{d.pct}%</span>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: 'var(--text-support)' }}>
+          <span>New in Survey 4, so this is the baseline. Percent of all respondents; each person picked up to three.</span>
+          <span>{human.n} answered{other.length ? ` · write-ins: ${other.join(' / ')}` : ''}</span>
+        </div>
+      </QB>
+    </div>
   );
 }
 
@@ -712,7 +744,7 @@ export default function SurveySnapshot({ wave, transforms, vaultUnlocked = false
     sentimentTrend, familiarityTrend, confidenceTrend, importanceTrend,
     frequencyTrend, barriersTrend, stageTrend,
     toolsS2, toolsS3, benefitsS3, ownPocketS3, momentumS3, responseCounts,
-    toolsS4, benefitsS4, ownPocketS4, impactS4, builderS4, teamUseS4,
+    toolsS4, benefitsS4, ownPocketS4, builderS4, teamUseS4, humanS4,
     openEndedText, struggleThemesS4, excitementThemesS4, waves, s4,
   } = transforms;
 
@@ -806,10 +838,12 @@ export default function SurveySnapshot({ wave, transforms, vaultUnlocked = false
         {/* Stage — step display, red→green (S2 onward) */}
         {stageDist.length > 0 && <StageSteps distribution={stageDist} label="AI Journey Stage" question="Where are you on your personal AI adoption journey?" />}
 
-        {/* Wave 4 ladders — impact, building, team use (new this wave) */}
-        {isS4 && <LadderCard ladder={impactS4}  label="Impact of Your AI Use"     question="What kind of impact is your use of AI having at work today?" color={C.green} />}
-        {isS4 && <LadderCard ladder={builderS4} label="Building With AI"          question="What is the most advanced thing you currently do with AI?" color={C.teal} />}
-        {isS4 && <LadderCard ladder={teamUseS4} label="AI on Your Team"           question="How is AI being used on your team today?" color={C.mint} />}
+        {/* Wave 4 ladders — building, team use (new this wave, baseline only) */}
+        {isS4 && <LadderCard ladder={builderS4} label="Building With AI (New in Survey 4)" question="What is the most advanced thing you currently do with AI?" color={C.teal} />}
+        {isS4 && <LadderCard ladder={teamUseS4} label="AI on Your Team (New in Survey 4)"  question="How is AI being used on your team today?" color={C.mint} />}
+
+        {/* Wave 4 Q7 — human contributions (new this wave, baseline only) */}
+        {isS4 && <HumanContribCard human={humanS4} label="Human Contributions (New in Survey 4)" question="As AI takes on more tasks, what do you believe will be your most important human contributions at work? (select up to three)" color={C.teal} />}
 
         {/* Barriers — full-width, yellow (neutral/warning) */}
         {barriersDist.length > 0 && (

@@ -64,23 +64,64 @@ function normalizeConfidence(v, survey) {
   return map[v] ?? null;
 }
 
-// ─── Wave 4 ladders (impact, builder, team use) → 1–5, "I'm not sure" → null ──
+// ─── Wave 4 ladders (builder, team use) → ordinal score, "I'm not sure" → null ──
 // Matched by option prefix so light punctuation edits in the form don't break it.
+// Each level accepts several prefixes: the live Wave 4 wording first, then the 9/8 draft wording
+// so a revert in the form still parses. Dan's 9/9 edits are the live wording.
 function straightQuotes(v) { return (v || '').replace(/\u2019/g, "'").trim(); }
-function ladder(v, prefixes) {
+function ladder(v, levels) {
   const t = straightQuotes(v).toLowerCase();
   if (!t) return null;
-  for (let i = 0; i < prefixes.length; i++) {
-    if (t.startsWith(prefixes[i].toLowerCase())) return i + 1;
+  for (let i = 0; i < levels.length; i++) {
+    const prefixes = Array.isArray(levels[i]) ? levels[i] : [levels[i]];
+    if (prefixes.some(p => t.startsWith(p.toLowerCase()))) return i + 1;
   }
   return null;
 }
-const IMPACT_LEVELS  = ["I'm not seeing much impact", 'AI helps me with occasional', 'AI regularly helps me', 'The ways I use AI also help', 'My use of AI has helped improve'];
-const BUILDER_LEVELS = ['I use AI tools to ask', 'I create reusable AI assistants', 'I create workflows or automations', 'I build AI agents', 'I build AI solutions that other people'];
-const TEAM_LEVELS    = ['AI is rarely or not used', 'People mostly use AI on their own', 'We use AI for some common', 'AI is part of some of our regular', 'AI is built into how our team'];
-export const IMPACT_LABELS  = { 1: 'Not much impact yet', 2: 'Occasional tasks', 3: 'Regularly faster or better work', 4: 'Also helps coworkers', 5: 'Improved how the team works' };
-export const BUILDER_LABELS = { 1: 'Uses AI as an assistant', 2: 'Creates reusable assistants', 3: 'Builds workflows or automations', 4: 'Builds agents', 5: 'Builds solutions others use' };
+// Q5 (4 rungs since Dan's 9/9 cut; the "workflows or automations" rung is gone)
+const BUILDER_LEVELS = [
+  ['I mainly use AI chat tools', 'I use AI tools to ask'],
+  ['I use AI in more structured ways', 'I create reusable AI assistants'],
+  ['I build AI agents'],
+  ['I build AI solutions that other people'],
+];
+// Q6 (5 rungs)
+const TEAM_LEVELS = [
+  ['AI is rarely or not used'],
+  ['People mostly use AI on their own'],
+  ['We use AI for some common'],
+  ['AI is part of some of our regular'],
+  ['AI is integrally built into', 'AI is built into how our team'],
+];
+export const BUILDER_LABELS = { 1: 'Chat tools for one-off tasks', 2: 'Projects, saved prompts, Custom GPTs', 3: 'Builds agents', 4: 'Builds solutions others use' };
 export const TEAM_LABELS    = { 1: 'Rarely or not used by team', 2: 'Individual use only', 3: 'Some common team tasks', 4: 'Part of some team workflows', 5: 'Built into team workflows' };
+
+// ─── Q7 Human contributions (new in Wave 4, checkboxes, max 3, Other) ────────
+// Each option is "<contribution> - <gloss>"; the gloss has commas, so match on the contribution
+// phrase instead of splitting the cell. Write-ins (Other) are whatever is left after removing
+// every matched option text.
+export const HUMAN_CANON = [
+  { label: 'Judgment and decision-making',           s4: 'Judgment and decision-making - knowing what is right, useful or appropriate' },
+  { label: 'Strategic thinking',                     s4: 'Strategic thinking - seeing the bigger picture and making connections' },
+  { label: 'Creativity and original point of view',  s4: 'Creativity and original point of view - bringing new ideas, perspective and imagination' },
+  { label: 'Critical thinking',                      s4: 'Critical thinking - questioning assumptions, evaluating information and knowing when AI may be wrong' },
+  { label: 'Empathy and relationship-building',      s4: 'Empathy and relationship-building - understanding people, emotions and context' },
+  { label: 'Taste and quality judgment',             s4: 'Taste and quality judgment - recognizing what is strong, distinctive and on-brand' },
+  { label: 'Experience and subject-matter expertise',s4: 'Experience and subject-matter expertise - applying knowledge that comes from doing the work' },
+  { label: 'Communication and storytelling',         s4: 'Communication and storytelling - influencing, persuading and making ideas meaningful' },
+  { label: 'Ethics and accountability',              s4: 'Ethics and accountability - applying human values and taking responsibility for outcomes' },
+  { label: 'Curiosity and adaptability',             s4: 'Curiosity and adaptability - continuing to learn and adjust as technology changes' },
+  { label: 'Orchestration',                          s4: 'Orchestration - knowing how to combine people, AI and tools to get the best result' },
+];
+function normalizeHumanContrib(v) {
+  const t = straightQuotes(v);
+  if (!t) return { picks: [], other: [] };
+  const picks = HUMAN_CANON.filter(h => t.includes(h.label)).map(h => h.label);
+  let rest = t;
+  for (const h of HUMAN_CANON) { rest = rest.replace(h.s4, '').replace(h.label, ''); }
+  const other = rest.split(',').map(x => x.trim()).filter(x => x && x !== '-' && x.length > 2);
+  return { picks, other };
+}
 
 // Tolerant header lookup for the Wave 4 sheet: first column whose title starts with the prefix
 // (case-insensitive, curly apostrophes normalized). Wave 1–3 mappers keep exact keys.
@@ -284,11 +325,11 @@ function normalizeTool(t) {
   if (lower.startsWith('nano banana')) return null;
   if (t.length > 50) return null; // too long to be a tool name
   // Normalize variants — one canonical label per tool across all waves
-  if (t === 'Claud (Anthropic)' || t === 'Claude (Anthropic)') return 'Claude';
+  if (t === 'Claud (Anthropic)' || t === 'Claude (Anthropic)' || t === 'Anthropic Claude') return 'Claude';
   if (t === 'NotebookLM.Google' || t === 'Notebook LM' || /^Gemini Notebook/i.test(t)) return 'NotebookLM';
-  if (t === 'Gemini (Google)') return 'Gemini';
-  if (t === 'Grok (xAI)') return 'Grok';
-  if (t === 'Llama (Meta AI)') return 'Llama';
+  if (t === 'Gemini (Google)' || t === 'Google Gemini') return 'Gemini';
+  if (t === 'Grok (xAI)' || t === 'xAI Grok' || t === 'SpaceXAi Grok') return 'Grok';
+  if (t === 'Llama (Meta AI)' || t === 'Meta Llama') return 'Llama';
   if (t === 'Copilot (Microsoft)') return 'Copilot';
   if (t === 'ChatGPT (OpenAI)') return 'ChatGPT';
   if (t === 'WISPR Flow' || t === 'Wispr' || t === 'VSPR Flow') return 'Wispr Flow';
@@ -510,6 +551,7 @@ export function mapS4(raw) {
     .filter(r => (r['Timestamp'] ?? '').trim())
     .map(r => {
       const pocket = (pick(r, 'Are you currently paying out of your own pocket') ?? '').trim().toLowerCase();
+      const human  = normalizeHumanContrib(pick(r, 'As AI takes on more tasks'));
       const row = {
         survey: 4,
         period: 'Sep 2026',
@@ -527,10 +569,12 @@ export function mapS4(raw) {
         ownPocket:   pocket === 'yes' ? true : pocket === 'no' ? false : null,
         role:        normalizeRole(pick(r, 'What is your current role level', 'What is your role')),
         function:    normalizeFunction(pick(r, 'Which Marketing and Communications function', 'What is your function')),
-        // Wave 4 ladders (new): 1–5, null when "I'm not sure"
-        impact:      ladder(pick(r, 'What kind of impact is your use of AI'), IMPACT_LEVELS),
+        // Wave 4 ladders (new): builder 1–4, team 1–5, null when "I'm not sure"
         builder:     ladder(pick(r, 'What is the most advanced thing'), BUILDER_LEVELS),
         teamUse:     ladder(pick(r, 'How is AI being used on your team'), TEAM_LEVELS),
+        // Wave 4 Q7 (new): most important human contributions, up to three, plus write-ins
+        humanContrib:      human.picks,
+        humanContribOther: human.other,
         // One open-ended question this wave: what is helping or getting in the way
         openEnded:   (pick(r, 'What is one thing helping', 'Anything else you') ?? '').trim() || null,
         struggle:    null,

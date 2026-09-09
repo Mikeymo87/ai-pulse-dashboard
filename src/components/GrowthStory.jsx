@@ -40,15 +40,16 @@ const CHAPTERS = [
     narrative: (t) => {
       const n = t?.s4?.n ?? 0;
       if (n === 0) {
-        return `Survey 4 opens Monday, September 14 and runs through Friday, September 25. It keeps every question that built the story so far, and adds three new ones: the impact people's AI use is having, how far they've gone from prompting to building, and whether AI is part of how their team actually works. Wave 3 ended with a diagnosis: strong individual use, weak team-level redesign. This is the wave that measures whether that changed. The numbers below fill in automatically as responses come in.`;
+        return `Survey 4 opens Monday, September 14 and runs through Friday, September 25. It keeps every question that built the story so far, and adds three new ones: how far people have gone from prompting to building, whether AI is part of how their team actually works, and which human contributions they believe matter most as AI takes on more of the tasks. Wave 3 ended with a diagnosis: strong individual use, weak team-level redesign. This is the wave that measures whether that changed. The numbers below fill in automatically as responses come in.`;
       }
       const daily   = t?.frequencyTrend?.[3]?.distribution?.find(d => d.label === 'Daily')?.pct ?? 0;
       const team    = t?.teamUseS4?.topTwoPct ?? 0;
       const build   = (t?.builderS4?.distribution ?? []).filter(d => d.score >= 3).reduce((a, d) => a + d.pct, 0);
-      const impact  = t?.impactS4?.topTwoPct ?? 0;
+      const top     = t?.humanS4?.distribution?.[0];
+      const human   = top && top.pct > 0 ? `${top.label.toLowerCase()} (${top.pct}%)` : null;
       const pocket  = t?.ownPocketS4?.yesPct ?? 0;
       const early   = n < (t?.s4?.minN ?? 10) ? ' Early read, small sample.' : '';
-      return `Survey 4 is in the field, ${n} response${n === 1 ? '' : 's'} in so far.${early} ${daily}% use AI daily. The new questions go past usage: ${team}% say AI is built into their team's regular workflows, ${build}% have moved from prompting to building workflows, agents or apps, and ${impact}% say their AI use now helps coworkers or the whole team, not just themselves. ${pocket}% are still paying out of pocket for tools. Wave 3 asked whether people use AI. Wave 4 asks whether the work has been redesigned around it.`;
+      return `Survey 4 is in the field, ${n} response${n === 1 ? '' : 's'} in so far.${early} ${daily}% use AI daily. The new questions go past usage: ${team}% say AI is built into their team's regular workflows, ${build}% have moved from prompting to building agents or solutions others use${human ? `, and the human contribution people rank highest as AI takes on more tasks is ${human}` : ''}. ${pocket}% are still paying out of pocket for tools. Wave 3 asked whether people use AI. Wave 4 asks whether the work has been redesigned around it.`;
     },
   },
 ];

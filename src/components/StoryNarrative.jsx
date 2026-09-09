@@ -47,8 +47,9 @@ const BEAT_4 = {
     const n = t.s4?.n ?? 0;
     const team = t.teamUseS4?.topTwoPct ?? 0;
     const builders = builderPct(t);
-    const impact = t.impactS4?.topTwoPct ?? 0;
-    return `September 2026, ${n} responses in so far: ${dailyPct(t, 3)}% use AI daily, ${team}% say AI is built into their team's regular workflows, ${builders}% are building workflows, agents or apps rather than just prompting, and ${impact}% say their AI use now helps coworkers or the whole team. The question has moved from "are people using it" to "is the work being redesigned around it."`;
+    const top = t.humanS4?.distribution?.[0];
+    const human = top && top.pct > 0 ? `, and ${top.pct}% name ${top.label.toLowerCase()} as the human contribution that matters most as AI takes on more tasks` : '';
+    return `September 2026, ${n} responses in so far: ${dailyPct(t, 3)}% use AI daily, ${team}% say AI is built into their team's regular workflows, ${builders}% are building agents or solutions others use rather than just prompting${human}. The question has moved from "are people using it" to "is the work being redesigned around it."`;
   },
 };
 
