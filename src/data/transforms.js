@@ -5,7 +5,7 @@ const DEV = typeof import.meta !== 'undefined' && import.meta.env ? Boolean(impo
 
 // Survey 4 is "solid" (headline numbers switch to it) once this many responses are in.
 // Below it, S4 still shows everywhere with an "n so far" badge, but Wave 3 stays the headline.
-export const LIVE_MIN_N = 10;
+export const LIVE_MIN_N = 30;
 
 // ─── Utility helpers ─────────────────────────────────────────────────────────
 

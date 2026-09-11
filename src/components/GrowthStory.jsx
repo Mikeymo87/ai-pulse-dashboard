@@ -48,7 +48,7 @@ const CHAPTERS = [
       const top     = t?.humanS4?.distribution?.[0];
       const human   = top && top.pct > 0 ? `${top.label.toLowerCase()} (${top.pct}%)` : null;
       const pocket  = t?.ownPocketS4?.yesPct ?? 0;
-      const early   = n < (t?.s4?.minN ?? 10) ? ' Early read, small sample.' : '';
+      const early   = n < (t?.s4?.minN ?? 30) ? ' Early read, small sample.' : '';
       return `Survey 4 is in the field, ${n} response${n === 1 ? '' : 's'} in so far.${early} ${daily}% use AI daily. The new questions go past usage: ${team}% say AI is built into their team's regular workflows, ${build}% have moved from prompting to building agents or solutions others use${human ? `, and the human contribution people rank highest as AI takes on more tasks is ${human}` : ''}. ${pocket}% are still paying out of pocket for tools. Wave 3 asked whether people use AI. Wave 4 asks whether the work has been redesigned around it.`;
     },
   },
