@@ -1,9 +1,12 @@
 // Credit-free regression net for the survey data layer.
-// Usage: node scripts/check-data.mjs            (S1 local + S2/S3 live + S4 sample)
-//        node scripts/check-data.mjs --no-s4    (3-wave path, must match today's app)
+// Usage: node scripts/check-data.mjs                      (S1 local + S2/S3 live + S4 sample, 36 rows, past the flip)
+//        node scripts/check-data.mjs --no-s4              (3-wave path)
+//        node scripts/check-data.mjs --s4-url=<csv url>   (the real Wave 4 published-CSV; also accepts a local path)
+//        A header-only sheet (no responses yet) passes when every Wave 4 column maps; row checks wait for rows.
 // Exits non-zero on any failed assertion. No API calls, no browser.
 import { readFileSync } from 'node:fs';
-import { MAPPERS, parseCsvText, BENEFIT_CANON, HUMAN_CANON } from '../src/data/parseCSVs.js';
+import { MAPPERS, parseCsvText, BENEFIT_CANON, HUMAN_CANON, s4HeaderReport } from '../src/data/parseCSVs.js';
+import Papa from 'papaparse';
 import { buildTransforms, LIVE_MIN_N } from '../src/data/transforms.js';
 
 const S2 = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSB9O1TzD7Ipk50nBG2wHFLlVytf1aaEgcWYeEMLuyAUTF4aXMFU8ByFfFHGP74QzbyOJOaSZqaBHUK/pub?gid=1201512326&single=true&output=csv';
@@ -14,17 +17,30 @@ const s4Url = process.argv.find(a => a.startsWith('--s4-url='))?.slice(9);
 let failures = 0;
 function check(cond, msg) { if (cond) console.log('  ok   ' + msg); else { failures++; console.log('  FAIL ' + msg); } }
 
-async function load(url) { const r = await fetch(url); if (!r.ok) throw new Error(`${url} → ${r.status}`); return r.text(); }
+async function load(url) {
+  if (!/^https?:/i.test(url)) return readFileSync(url, 'utf8');
+  const r = await fetch(url); if (!r.ok) throw new Error(`${url} → ${r.status}`); return r.text();
+}
 
 const raw1 = parseCsvText(readFileSync('public/data/survey1.csv', 'utf8'));
 const [t2, t3] = await Promise.all([load(S2), load(S3)]);
 const raw2 = parseCsvText(t2), raw3 = parseCsvText(t3);
-const raw4 = withS4 ? parseCsvText(s4Url ? await load(s4Url) : readFileSync('public/data/survey4.sample.csv', 'utf8')) : [];
+const t4 = withS4 ? (s4Url ? await load(s4Url) : readFileSync('public/data/survey4.sample.csv', 'utf8')) : '';
+const raw4 = withS4 ? parseCsvText(t4) : [];
+const headers4 = withS4 ? (Papa.parse(t4, { header: false, skipEmptyLines: true }).data[0] ?? []) : [];
 
 const survey1 = MAPPERS[1](raw1), survey2 = MAPPERS[2](raw2), survey3 = MAPPERS[3](raw3), survey4 = withS4 ? MAPPERS[4](raw4) : [];
 const T = buildTransforms({ survey1, survey2, survey3, survey4, s4Configured: withS4 });
 
 console.log(`\nRows: S1=${survey1.length} S2=${survey2.length} S3=${survey3.length} S4=${withS4 ? survey4.length : 'off'}`);
+if (withS4) {
+  console.log(`\n[survey 4 columns] source = ${s4Url ?? 'public/data/survey4.sample.csv'} (${headers4.length} columns)`);
+  const report = s4HeaderReport(headers4);
+  for (const { field, matched } of report) check(matched !== null, `column for "${field}" → ${matched ? JSON.stringify(matched.slice(0, 60)) : 'MISSING'}`);
+  const unmapped = headers4.filter(h => !report.some(r => r.matched === h));
+  check(unmapped.length === 0, unmapped.length ? `unmapped columns (would be ignored): ${unmapped.map(h => JSON.stringify(h.slice(0, 50))).join(', ')}` : 'every sheet column is read by mapS4');
+  if (survey4.length === 0) console.log('  note  header-only sheet: no responses yet, row-level checks wait for the first response');
+}
 console.log('\n[waves]');
 check(T.waves.length === (withS4 ? 4 : 3), `waves = ${T.waves.length}`);
 check(T.responseCounts.length === T.waves.length, 'responseCounts matches waves');
@@ -51,7 +67,7 @@ check(probe.barriers.includes('Manager support') && probe.barriers.includes('Lac
 check(T.latest.key === (withS4 && survey4.length >= LIVE_MIN_N ? 's4' : 's3'), `latest = ${T.latest.key}`);
 check(T.archetypes && Object.values(T.archetypes).reduce((s, a) => s + a.count, 0) === T.archetypesWave.n, `archetypes classify every row of ${T.archetypesWave.label}`);
 
-if (withS4) {
+if (withS4 && survey4.length > 0) {
   console.log('\n[wave 4]');
   check(survey4.length > 0, `S4 rows parsed: ${survey4.length}`);
   const fields = ['sentiment', 'stage', 'familiarity', 'frequency', 'importance', 'confidence', 'builder', 'teamUse', 'ownPocket'];
@@ -87,6 +103,13 @@ if (withS4) {
   check(T.openEndedText.s4.length === survey4.filter(r => r.openEnded).length, `S4 open text collected (${T.openEndedText.s4.length})`);
   check(T.struggleThemesS4.length + T.excitementThemesS4.length > 0, 'S4 open text produced at least one theme');
   const nan = JSON.stringify(T).includes('null,null') ? 0 : 0;
+  check(!JSON.stringify(T).includes('NaN'), 'no NaN anywhere in transforms');
+}
+
+if (withS4) {
+  console.log('\n[survey 4 state]');
+  check(T.s4.configured && T.s4.n === survey4.length, `s4 pointer: configured=${T.s4.configured} n=${T.s4.n} live=${T.s4.live} solid=${T.s4.solid} minN=${T.s4.minN}`);
+  check(T.latest.key === (survey4.length >= LIVE_MIN_N ? 's4' : 's3'), `headline wave = ${T.latest.key} (flips to s4 at ${LIVE_MIN_N})`);
   check(!JSON.stringify(T).includes('NaN'), 'no NaN anywhere in transforms');
 }
 

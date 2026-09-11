@@ -17,7 +17,7 @@ Dashboard showing 14 months of AI adoption data across 3 pulse surveys for the B
 
 ## Survey 4 (Sep 2026) — live wave wiring (added 2026-09-08)
 
-**How it turns on:** paste the Wave 4 responses sheet's published-CSV URL into `S4_URL` in `src/data/parseCSVs.js` (same pattern as s2/s3), or set `VITE_S4_URL` in Replit Secrets. Until then `s4Configured` is false and the app renders exactly the 3-wave dashboard. Dev preview without a sheet: `http://localhost:5000/?s4=sample` loads `public/data/survey4.sample.csv` (14 synthetic rows, every text starts with "SAMPLE ROW"). Never deploy with the sample as the source.
+**How it turns on:** paste the Wave 4 responses sheet's published-CSV URL into `S4_URL` in `src/data/parseCSVs.js` (same pattern as s2/s3), or set `VITE_S4_URL` in Replit Secrets. Until then `s4Configured` is false and the app renders exactly the 3-wave dashboard. Dev previews without a sheet (never deploy with any of them as the source): `?s4=empty` loads `public/data/survey4.sample-empty.csv` (header row only, the Monday-morning state before the first response), `?s4=early` loads `survey4.sample-early.csv` (14 synthetic rows, in the field but below the 30-response headline flip), `?s4=sample` loads `survey4.sample.csv` (36 synthetic rows, past the flip). Every synthetic open-text answer starts with "SAMPLE ROW".
 
 **What happens once it is on (all automatic, no per-component edits):**
 - `parseCSVs.js` `mapS4` reads the Wave 4 columns by title prefix (`pick()`), so minor punctuation edits in the form do not break it. New row fields: `builder` (1–4; Dan cut the form to 4 rungs on 9/9, the workflows/automations rung is gone), `teamUse` (1–5; level 5 = "AI is integrally built into"), `humanContrib` (array of up to 3 canonical labels from `HUMAN_CANON`, Q7 "As AI takes on more tasks…") + `humanContribOther` (write-ins), `openEnded` = the one open question. The impact ladder was REMOVED from the form by Dan on 9/9 and from the app on 9/9; do not re-add without a source question. Ladder prefixes accept both the live 9/9 wording and the 9/8 draft wording, so a revert in the form still parses. Tool aliases: "Google Gemini", "Anthropic Claude", "xAI Grok" (and the "SpaceXAi Grok" typo), "Meta Llama" fold into the Wave 3 labels; ElevenLabs is off the Wave 4 list.
@@ -239,7 +239,7 @@ Open Presentation Mode (P key) → test all 3 lenses (AI Council / Executive / W
 Check: bell curve slide, archetypes slide, struggle map slide, Wave 3 slides — any overflow or padding issues.
 
 ### Step 4: Survey 4 readiness — DONE 2026-09-08, remapped 2026-09-09 to Dan's final form (see "Survey 4 (Sep 2026) — live wave wiring" above)
-Remaining: paste the published-CSV URL into `S4_URL` (or Replit secret `VITE_S4_URL`), run `node scripts/check-data.mjs --s4-url=<url>` + `node scripts/smoke-ui.mjs`, push, redeploy on Replit (one republish, after the link exists; a republish before then changes nothing visible because `s4Configured` stays false).
+Remaining: the Monday runbook is `docs/MONDAY-RUNBOOK-2026-09-14.md`. Paste the published-CSV URL into `S4_URL`, run `node scripts/check-data.mjs --s4-url=<url>` (validates a header-only sheet against the `S4_COLUMNS` contract in `parseCSVs.js`, then row checks once responses exist) + `node scripts/smoke-ui.mjs` (3 waves, empty, early, solid), push, redeploy on Replit (one republish, after the link exists; a republish before then changes nothing visible because `s4Configured` stays false).
 
 ### Deferred (do not start until user says so)
 - Mobile Presentation Mode

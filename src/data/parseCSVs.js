@@ -414,7 +414,8 @@ function normalizeFunction(v) {
 
 // S4: live Google Sheet — survey in the field Sep 14–25, 2026. Paste the published-CSV URL into
 //     S4_URL below (same pattern as s2/s3). Until then S4 is off and the app renders 3 waves.
-//     Dev override: append ?s4=sample to the URL to load public/data/survey4.sample.csv (synthetic rows).
+//     Dev overrides: ?s4=sample (36 synthetic rows, past the flip), ?s4=early (14 rows, below the flip),
+//     ?s4=empty (header only, the Monday-morning state). Never deploy with any of these as the source.
 const S4_URL = '';
 
 function resolveS4Source() {
@@ -423,7 +424,9 @@ function resolveS4Source() {
   if (S4_URL) return S4_URL;
   if (typeof window !== 'undefined') {
     const q = new URLSearchParams(window.location.search).get('s4');
-    if (q === 'sample') return '/data/survey4.sample.csv';
+    if (q === 'sample') return '/data/survey4.sample.csv';        // 36 synthetic rows: past the headline flip
+    if (q === 'early')  return '/data/survey4.sample-early.csv';  // 14 synthetic rows: in the field, below the flip
+    if (q === 'empty')  return '/data/survey4.sample-empty.csv';  // header only: linked sheet, no responses yet
     if (q && /^https?:/.test(q)) return q;
   }
   return null;
@@ -543,6 +546,38 @@ function mapS3(raw) {
       };
       return { ...row, ...extractRowThemes(row) };
     });
+}
+
+// Wave 4 column contract: every field mapS4 reads, with the header prefixes it accepts.
+// Used by scripts/check-data.mjs to verify a freshly linked responses sheet (header row only,
+// before the first response lands) maps completely. Keep in sync with mapS4 below.
+export const S4_COLUMNS = [
+  { field: 'timestamp',    prefixes: ['Timestamp'] },
+  { field: 'sentiment',    prefixes: ['How would you describe your current feelings'] },
+  { field: 'stage',        prefixes: ['Which stage best describes'] },
+  { field: 'familiarity',  prefixes: ['How would you best describe your familiarity'] },
+  { field: 'frequency',    prefixes: ['How often do you currently use AI'] },
+  { field: 'builder',      prefixes: ['What is the most advanced thing'] },
+  { field: 'teamUse',      prefixes: ['How is AI being used on your team'] },
+  { field: 'humanContrib', prefixes: ['As AI takes on more tasks'] },
+  { field: 'benefits',     prefixes: ['Which benefits have you personally experienced'] },
+  { field: 'tools',        prefixes: ['In addition to the AI tools officially provided'] },
+  { field: 'ownPocket',    prefixes: ['Are you currently paying out of your own pocket'] },
+  { field: 'barriers',     prefixes: ['What are the biggest barriers'] },
+  { field: 'importance',   prefixes: ['How important is AI to the success'] },
+  { field: 'confidence',   prefixes: ['How confident are you today'] },
+  { field: 'openEnded',    prefixes: ['What is one thing helping', 'Anything else you'] },
+  { field: 'role',         prefixes: ['What is your current role level', 'What is your role'] },
+  { field: 'function',     prefixes: ['Which Marketing and Communications function', 'What is your function'] },
+];
+
+// Given the header row of a Wave 4 CSV, report which contract fields matched which column.
+export function s4HeaderReport(headers) {
+  const norm = h => straightQuotes(String(h ?? '')).toLowerCase();
+  return S4_COLUMNS.map(({ field, prefixes }) => {
+    const hit = headers.find(h => prefixes.some(p => norm(h).startsWith(norm(p))));
+    return { field, matched: hit ?? null };
+  });
 }
 
 // Wave 4 (Sep 2026). Column titles are the Google Form question titles; matched by prefix via pick().
