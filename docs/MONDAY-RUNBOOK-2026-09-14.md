@@ -11,12 +11,15 @@ Goal for the day: Mike shares the responses-sheet link, Claude wires it, Mike re
 
 Doing this Friday or over the weekend is better than Monday: Claude can run the header check against the real sheet with zero rows in it, and the only thing left for Monday is the republish.
 
-## Claude: wire, verify, push (10 minutes)
+## Claude: wire, verify, push (one command, about 4 minutes)
 
-1. `node scripts/check-data.mjs --s4-url=<the csv url>`: confirms every one of the 17 columns maps by prefix (`S4_COLUMNS` contract in `src/data/parseCSVs.js`). With zero rows it reports "header-only sheet" and passes; with rows it also runs the row-level checks.
-2. Paste the URL into `S4_URL` in `src/data/parseCSVs.js` (same pattern as s2/s3). Do not use the sample files.
-3. `npx vite --port 5010 --strictPort` then `node scripts/smoke-ui.mjs` (3 waves, empty, early, solid all green), `npx vite build`.
-4. Commit and push to `main`.
+Skill: `ai-pulse-wave-golive` (auto-loads when the link is pasted). It runs:
+
+    cd ~/Desktop/Claude/ai-pulse-dashboard && node scripts/go-live.mjs --s4-url=<the csv url>
+
+which, in order: validates the link shape, fetches the sheet, checks every one of the 17 columns against the `S4_COLUMNS` contract (`src/data/parseCSVs.js`), counts rows (zero is fine before launch), writes `S4_URL`, runs `check-data`, runs `smoke-ui` in all four states, runs `vite build`, and prints the commit and Replit lines. It stops at the first problem and names the fix. `--dry-run` shows the header report without writing anything. Then Claude commits and pushes `src/data/parseCSVs.js`.
+
+To watch responses land from the terminal after wiring: `node scripts/go-live.mjs --s4-url=<url> --skip-smoke --watch` (count every 60 seconds with the flip state).
 
 ## Mike: republish on Replit (2 minutes)
 
@@ -43,4 +46,5 @@ Doing this Friday or over the weekend is better than Monday: Claude can run the 
 - Sheet shape confirmed against the live Wave 2 and Wave 3 sheets: Timestamp plus question titles in form order. The Wave 4 sample header row equals the live form's titles, 17 columns.
 - `check-data` green in four modes: solid sample (36 rows, headline = s4), early (14 rows, headline = s3), empty (header only, headline = s3), three waves.
 - `smoke-ui` green in four states: 3 waves, empty, early, solid. `vite build` green.
+- `scripts/go-live.mjs` dry-run green against the header-only and early samples; refuses editor links and local paths outside dry-run; wrote nothing.
 - `LIVE_MIN_N = 30`.

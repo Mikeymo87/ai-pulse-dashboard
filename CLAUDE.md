@@ -239,7 +239,7 @@ Open Presentation Mode (P key) → test all 3 lenses (AI Council / Executive / W
 Check: bell curve slide, archetypes slide, struggle map slide, Wave 3 slides — any overflow or padding issues.
 
 ### Step 4: Survey 4 readiness — DONE 2026-09-08, remapped 2026-09-09 to Dan's final form (see "Survey 4 (Sep 2026) — live wave wiring" above)
-Remaining: the Monday runbook is `docs/MONDAY-RUNBOOK-2026-09-14.md`. Paste the published-CSV URL into `S4_URL`, run `node scripts/check-data.mjs --s4-url=<url>` (validates a header-only sheet against the `S4_COLUMNS` contract in `parseCSVs.js`, then row checks once responses exist) + `node scripts/smoke-ui.mjs` (3 waves, empty, early, solid), push, redeploy on Replit (one republish, after the link exists; a republish before then changes nothing visible because `s4Configured` stays false).
+Remaining: the Monday runbook is `docs/MONDAY-RUNBOOK-2026-09-14.md`; the go-live is one command, `node scripts/go-live.mjs --s4-url=<url>` (skill `ai-pulse-wave-golive`), which does the steps below in order. Manually: paste the published-CSV URL into `S4_URL`, run `node scripts/check-data.mjs --s4-url=<url>` (validates a header-only sheet against the `S4_COLUMNS` contract in `parseCSVs.js`, then row checks once responses exist) + `node scripts/smoke-ui.mjs` (3 waves, empty, early, solid), push, redeploy on Replit (one republish, after the link exists; a republish before then changes nothing visible because `s4Configured` stays false).
 
 ### Deferred (do not start until user says so)
 - Mobile Presentation Mode
