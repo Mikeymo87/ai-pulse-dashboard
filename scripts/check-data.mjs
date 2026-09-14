@@ -115,6 +115,8 @@ if (withS4) {
   check(T.s4.configured && T.s4.n === survey4.length, `s4 pointer: configured=${T.s4.configured} n=${T.s4.n} live=${T.s4.live} solid=${T.s4.solid} minN=${T.s4.minN}`);
   check(T.latest.key === (survey4.length >= LIVE_MIN_N ? 's4' : 's3'), `headline wave = ${T.latest.key} (flips to s4 at ${LIVE_MIN_N})`);
   check(!JSON.stringify(T).includes('NaN'), 'no NaN anywhere in transforms');
+  const sp = T.openEndedSplitS4;
+  check(sp && sp.n === sp.helpingN + sp.hinderingN + sp.mixedN + sp.unclearN, `open text split: ${sp?.n ?? 0} answers = ${sp?.helpingN ?? 0} helping + ${sp?.hinderingN ?? 0} in the way + ${sp?.mixedN ?? 0} both + ${sp?.unclearN ?? 0} unclear`);
 }
 
 console.log(`\n${failures === 0 ? 'ALL CHECKS PASSED' : failures + ' CHECK(S) FAILED'}\n`);

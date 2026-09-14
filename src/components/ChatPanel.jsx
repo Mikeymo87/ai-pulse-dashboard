@@ -37,7 +37,7 @@ function buildSystemPrompt(transforms, vaultUnlocked = false) {
     barriersTrend, byRole, byFunction,
     toolsS2, toolsS3, benefitsS3, momentumS3, ownPocketS3,
     archetypes, openTextInsights,
-    waves, s4, toolsS4, benefitsS4, ownPocketS4, builderS4, teamUseS4, humanS4, openEndedText,
+    waves, s4, toolsS4, benefitsS4, ownPocketS4, builderS4, teamUseS4, humanS4, openEndedText, openEndedSplitS4,
   } = transforms;
 
   const waveLines = (waves ?? [
@@ -151,6 +151,7 @@ NEW Q — Building with AI (4 rungs: 1 chat tools for one-off tasks, 2 Projects/
 NEW Q — AI on the team (1 rarely used … 5 integrally built into several workflows): avg ${teamUseS4?.avg ?? '—'}, ${teamUseS4?.topTwoPct ?? 0}% at levels 4–5 (AI part of regular team workflows). No back data; Wave 4 is the baseline.
 NEW Q — Most important human contributions as AI takes on more tasks (up to three picks, % of respondents): ${(humanS4?.distribution ?? []).filter(d => d.pct > 0).slice(0, 5).map(d => `${d.label} (${d.pct}%)`).join(', ') || 'n/a'}${humanS4?.other?.length ? ` | write-ins: ${humanS4.other.slice(0, 4).join('; ')}` : ''}. No back data; Wave 4 is the baseline.
 Own pocket: ${ownPocketS4?.yesPct ?? 0}% | Top benefits: ${(benefitsS4 ?? []).slice(0, 4).map(b => `${b.label} (${b.pct}%)`).join(', ') || 'n/a'} | Top supplemental tools: ${(toolsS4 ?? []).slice(0, 6).map(t => `${t.label} (${t.pct}%)`).join(', ') || 'n/a'}
+Open question (S4, "one thing helping, or one thing getting in the way"): ${openEndedSplitS4?.n ?? 0} answers, ${openEndedSplitS4?.helpingN ?? 0} helping, ${openEndedSplitS4?.hinderingN ?? 0} in the way${openEndedSplitS4?.mixedN ? `, ${openEndedSplitS4.mixedN} both` : ''}${openEndedSplitS4?.unclearN ? `, ${openEndedSplitS4.unclearN} not classified` : ''}.
 Top barriers (S4): ${[...barriersTrend].filter(b => b.barrier !== 'No barriers').sort((a, b) => (b.s4?.pct ?? 0) - (a.s4?.pct ?? 0)).slice(0, 5).map(b => `${b.barrier} (${b.s4?.pct ?? 0}%)`).join(', ')}
 Open text (S4, "one thing helping or getting in the way"): ${(openEndedText?.s4 ?? []).length} comments.
 ` : ''}TEAM READINESS BY ROLE (S3 only — confidence avg / importance avg):

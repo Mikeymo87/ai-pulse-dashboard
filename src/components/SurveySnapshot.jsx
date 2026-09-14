@@ -647,11 +647,35 @@ function HumanContribCard({ human, label, question, color = C.teal }) {
 }
 
 // ─── Visual 7c: Open text list (Wave 4's single open question) ───────────────
-function OpenTextCard({ quotes, label, question, themes }) {
+function OpenTextCard({ quotes, label, question, themes, split }) {
   if (!quotes?.length) return null;
+  const HELP = '#2EA84A', HINDER = '#E5554F';
+  const groups = split ? [
+    { key: 'helping',   title: 'Helping',        n: split.helpingN,   color: HELP,   items: split.helping },
+    { key: 'hindering', title: 'In the way',     n: split.hinderingN, color: HINDER, items: split.hindering },
+    { key: 'mixed',     title: 'Both',           n: split.mixedN,     color: '#59BEC9', items: split.mixed },
+    { key: 'unclear',   title: 'Not classified', n: split.unclearN,   color: 'var(--text-dim)', items: split.unclear },
+  ].filter(g => g.n > 0) : null;
   const shown = quotes.filter(q => q && q.trim().length > 3).slice(0, 12);
+  const Quote = ({ q, color }) => (
+    <blockquote style={{ margin: 0, padding: '10px 14px', borderLeft: `3px solid ${color}`, background: 'rgba(125,230,155,0.04)', borderRadius: '0 8px 8px 0', fontFamily: 'DM Sans, sans-serif', fontSize: 12.5, fontStyle: 'italic', lineHeight: 1.6, color: 'var(--text-medium)' }}>
+      "{q.trim()}"
+    </blockquote>
+  );
   return (
     <QB label={label} question={question} fullWidth>
+      {groups && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+          {groups.map(g => (
+            <div key={g.key} style={{ display: 'flex', alignItems: 'baseline', gap: 8, padding: '8px 14px', borderRadius: 10, background: 'rgba(125,230,155,0.05)', border: `1px solid ${g.color}33` }}>
+              <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 22, fontWeight: 800, color: g.color, lineHeight: 1 }}>{g.n}</span>
+              <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-support)' }}>{g.title}</span>
+              {split.n > 0 && <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: 'var(--text-dim)' }}>{Math.round((g.n / split.n) * 100)}%</span>}
+            </div>
+          ))}
+          <span style={{ alignSelf: 'center', fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: 'var(--text-support)' }}>of {split.n} answers, sorted by what each person wrote</span>
+        </div>
+      )}
       {themes?.length > 0 && (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
           {themes.slice(0, 8).map(t => (
@@ -661,14 +685,27 @@ function OpenTextCard({ quotes, label, question, themes }) {
           ))}
         </div>
       )}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 10 }}>
-        {shown.map((q, i) => (
-          <blockquote key={i} style={{ margin: 0, padding: '10px 14px', borderLeft: '3px solid rgba(125,230,155,0.4)', background: 'rgba(125,230,155,0.04)', borderRadius: '0 8px 8px 0', fontFamily: 'DM Sans, sans-serif', fontSize: 12.5, fontStyle: 'italic', lineHeight: 1.6, color: 'var(--text-medium)' }}>
-            "{q.trim()}"
-          </blockquote>
-        ))}
-      </div>
-      {quotes.length > shown.length && (
+      {groups ? (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 14 }}>
+          {groups.filter(g => g.key === 'helping' || g.key === 'hindering').map(g => (
+            <div key={g.key} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: g.color }}>{g.title} · {g.n}</span>
+              {g.items.slice(0, 8).map((q, i) => <Quote key={i} q={q} color={g.color} />)}
+            </div>
+          ))}
+          {groups.filter(g => g.key === 'mixed' || g.key === 'unclear').map(g => (
+            <div key={g.key} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: g.color }}>{g.title} · {g.n}</span>
+              {g.items.slice(0, 4).map((q, i) => <Quote key={i} q={q} color={g.color} />)}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 10 }}>
+          {shown.map((q, i) => <Quote key={i} q={q} color="rgba(125,230,155,0.4)" />)}
+        </div>
+      )}
+      {!groups && quotes.length > shown.length && (
         <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: 'var(--text-support)' }}>Showing {shown.length} of {quotes.length} responses</span>
       )}
     </QB>
@@ -745,7 +782,7 @@ export default function SurveySnapshot({ wave, transforms, vaultUnlocked = false
     frequencyTrend, barriersTrend, stageTrend,
     toolsS2, toolsS3, benefitsS3, ownPocketS3, momentumS3, responseCounts,
     toolsS4, benefitsS4, ownPocketS4, builderS4, teamUseS4, humanS4,
-    openEndedText, struggleThemesS4, excitementThemesS4, waves, s4,
+    openEndedText, openEndedSplitS4, struggleThemesS4, excitementThemesS4, waves, s4,
   } = transforms;
 
   const wIdx = Math.max(0, (waves ?? []).findIndex(w => w.key === wave) >= 0 ? (waves ?? []).findIndex(w => w.key === wave) : { s1: 0, s2: 1, s3: 2, s4: 3 }[wave]);
@@ -879,6 +916,7 @@ export default function SurveySnapshot({ wave, transforms, vaultUnlocked = false
         {isS4 && (
           <OpenTextCard
             quotes={openEndedText?.s4 ?? []}
+            split={openEndedSplitS4}
             themes={[...(struggleThemesS4 ?? []), ...(excitementThemesS4 ?? [])].sort((a, b) => b.count - a.count)}
             label="In Their Words"
             question="What is one thing helping, or one thing getting in the way of, your use of AI at work?"
