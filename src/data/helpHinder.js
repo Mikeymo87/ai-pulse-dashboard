@@ -64,6 +64,8 @@ const HINDER = [
   [/\btime to (learn|train|play|explore|experiment|dive|focus|create|build|dedicate|really|truly|practice|deepen|set|do)\b/i, 2],
   [/\btakes? (a lot of |so much |more |too much )?(time|longer|effort)\b/i, 2], [/\btime[- ]consuming\b/i, 2],
   [/\bworkload/i, 2], [/\bwork ?volume\b/i, 2], [/\bbusy\b/i, 1], [/\bslammed\b/i, 2], [/\bbandwidth\b/i, 2],
+  [/\btime is (getting |being )?(crushed|tight|scarce|short|limited|squeezed|eaten|gone)\b/i, 3], [/\bcrush/i, 2], [/\bdemand(s|ing|ed)?\b/i, 2], [/\bescalat/i, 1],
+  [/\bstretched\b/i, 2], [/\bswamped\b/i, 2], [/\bdrowning\b/i, 2], [/\boverload/i, 2], [/\bburn(ed|t)? ?out\b/i, 2], [/\bcapacity\b/i, 1], [/\bmore (work|pressure|of my time|of our time)\b/i, 2],
   [/\boverwhelm/i, 2], [/\btoo (much|many)\b/i, 2], [/\bso many\b/i, 1], [/\bkeep(ing)? up\b/i, 2], [/\bconstant(ly)?\b/i, 1],
   [/\bhard(er)?\b/i, 2], [/\bdifficult/i, 2], [/\btough\b/i, 2], [/\bslow(s|er|ly)?\b/i, 2], [/\bdelay/i, 2], [/\bstall/i, 2], [/\brework\b/i, 2],
   [/\bgap\b/i, 2], [/\bdisconnect/i, 2], [/\binconsisten/i, 2], [/\blimit(s|ed|ation|ations|ing)?\b/i, 2], [/\bmissing\b/i, 2],
