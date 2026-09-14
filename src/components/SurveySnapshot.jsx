@@ -647,6 +647,7 @@ function HumanContribCard({ human, label, question, color = C.teal }) {
 }
 
 // ─── Visual 7c: Open text list (Wave 4's single open question) ───────────────
+const QUOTE_COLUMN_MAX_HEIGHT = 380; // about five quotes; the column scrolls past that
 function OpenTextCard({ quotes, label, question, themes, split }) {
   if (!quotes?.length) return null;
   const HELP = '#2EA84A', HINDER = '#E5554F';
@@ -686,17 +687,15 @@ function OpenTextCard({ quotes, label, question, themes, split }) {
         </div>
       )}
       {groups ? (
+        // Each column scrolls inside a fixed height, so the card stays the same size as answers
+        // land instead of stretching the page (Mike, 2026-09-14). Every answer is in the list.
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 14 }}>
-          {groups.filter(g => g.key === 'helping' || g.key === 'hindering').map(g => (
-            <div key={g.key} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {groups.map(g => (
+            <div key={g.key} style={{ display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0 }}>
               <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: g.color }}>{g.title} · {g.n}</span>
-              {g.items.slice(0, 8).map((q, i) => <Quote key={i} q={q} color={g.color} />)}
-            </div>
-          ))}
-          {groups.filter(g => g.key === 'mixed' || g.key === 'none').map(g => (
-            <div key={g.key} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: g.color }}>{g.title} · {g.n}</span>
-              {g.items.slice(0, 4).map((q, i) => <Quote key={i} q={q} color={g.color} />)}
+              <div style={{ maxHeight: QUOTE_COLUMN_MAX_HEIGHT, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 8, paddingRight: 6, scrollbarWidth: 'thin' }}>
+                {g.items.map((q, i) => <Quote key={i} q={q} color={g.color} />)}
+              </div>
             </div>
           ))}
         </div>

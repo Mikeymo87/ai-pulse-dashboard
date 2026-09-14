@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "/Users/michaelmora/Desktop/Claude/ai-pulse-dashboard/src/components/SurveySnapshot.jsx"
+        ],
+        "createdAt": "2026-09-14T20:58:54.883Z",
+        "reason": "Claude: pre-existing verbatim-quote styling shipped 9/14 AM (commit 8f67035); the green/coral left border is the helping vs in-the-way color coding on each quote, visible in Mike's own screenshot without objection; launch-week rule is no screen restyling, this session only changed the caption text"
+      }
+    ]
+  }
+}
