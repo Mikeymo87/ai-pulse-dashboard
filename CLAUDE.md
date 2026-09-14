@@ -151,6 +151,8 @@ React + Vite · Tailwind CSS · Recharts · Framer Motion · Papa Parse · Claud
 ---
 
 ## Key Engineering Rules (don't violate)
+- **Never add rounded percentages together.** Distribution entries carry `count`; combine with `sharePct(distribution, predicate)` and trend rows with `waveSharePct(trend, waveKey, predicate)` (both in `transforms.js`), which round ONCE from counts. Adding per-level `pct` values produced a 101% "Confident or Above" tile on launch day 2026-09-14 with 6 responses. All 20 former call sites were converted; do not reintroduce `.reduce((s, d) => s + d.pct, 0)`.
+- **Desktop Nav is a true flex row** (brand / tabs / actions). The tab row is a flex item, never absolutely centered. Collapse steps by viewport width: the "AI Engagement Pulse Survey" label hides under 1280px, button labels become icons under 1040px, spacing tightens under 1140px; mobile (under 768px) keeps its own two-row layout.
 - Coral (`#E5554F`) is ONLY for negative/dropping metrics — never use for decoration
 - S1 open text = future-tense hoping; S3 = present-tense conviction (the gap is the story)
 - Claude API: `anthropic-dangerous-direct-browser-access: true` header required; strip markdown fences before JSON.parse()

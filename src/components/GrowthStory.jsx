@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { sharePct } from '../data/transforms';
 import { useTheme } from '../hooks/useTheme';
 import { useIsMobile } from '../hooks/useIsMobile';
 
@@ -44,7 +45,7 @@ const CHAPTERS = [
       }
       const daily   = t?.frequencyTrend?.[3]?.distribution?.find(d => d.label === 'Daily')?.pct ?? 0;
       const team    = t?.teamUseS4?.topTwoPct ?? 0;
-      const build   = (t?.builderS4?.distribution ?? []).filter(d => d.score >= 3).reduce((a, d) => a + d.pct, 0);
+      const build   = sharePct((t?.builderS4?.distribution ?? []), d => d.score >= 3);
       const top     = t?.humanS4?.distribution?.[0];
       const human   = top && top.pct > 0 ? `${top.label.toLowerCase()} (${top.pct}%)` : null;
       const pocket  = t?.ownPocketS4?.yesPct ?? 0;
@@ -67,9 +68,7 @@ function hexToRgb(hex) {
 const CONFIDENCE_THRESHOLD = [4, 3, 3, 3];
 
 function getConfidentOrAbovePct(distribution, threshold) {
-  return distribution
-    .filter(d => d.score >= threshold)
-    .reduce((sum, d) => sum + d.pct, 0);
+  return sharePct(distribution, d => d.score >= threshold);
 }
 
 // ── Mini sentiment distribution bar ──────────────────────────────────────────
@@ -339,7 +338,7 @@ export default function GrowthStory({ transforms, presentationWave }) {
 
   // Wave 4 new-question metrics (live)
   const teamPct4    = transforms.teamUseS4?.topTwoPct ?? 0;
-  const builderPct4 = (transforms.builderS4?.distribution ?? []).filter(d => d.score >= 3).reduce((a, d) => a + d.pct, 0);
+  const builderPct4 = sharePct((transforms.builderS4?.distribution ?? []), d => d.score >= 3);
   const pocketPct4  = transforms.ownPocketS4?.yesPct ?? 0;
 
   function getStats(i) {

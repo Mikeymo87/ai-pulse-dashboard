@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { sharePct } from '../../data/transforms';
 
 const MONO = "'JetBrains Mono', 'Fira Code', monospace";
 const SANS = "'Plus Jakarta Sans', DM Sans, sans-serif";
@@ -46,7 +47,7 @@ function hexToRgb(hex) {
 }
 
 function getConfPct(distribution, threshold) {
-  return distribution.filter(d => d.score >= threshold).reduce((sum, d) => sum + d.pct, 0);
+  return sharePct(distribution, d => d.score >= threshold);
 }
 
 function SentimentBar({ sentimentTrend, surveyKey }) {

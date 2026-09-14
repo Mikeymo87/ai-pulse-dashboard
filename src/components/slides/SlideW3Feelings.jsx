@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { sharePct } from '../../data/transforms';
 import { BarChart, Bar, XAxis, YAxis, Cell, LabelList, ResponsiveContainer, Tooltip } from 'recharts';
 
 const MONO = "'JetBrains Mono', 'Fira Code', monospace";
@@ -22,7 +23,7 @@ function getChartData(sentimentTrend) {
 
 function getImportanceVals(importanceTrend) {
   return (importanceTrend ?? []).map((wave, i) => {
-    const pct = (wave.distribution ?? []).filter(d => d.score >= 4).reduce((s, d) => s + d.pct, 0);
+    const pct = sharePct((wave.distribution ?? []), d => d.score >= 4);
     return { pct: Math.round(pct), color: ['#2EA84A', '#59BEC9', '#1a4a5e'][i], label: `Wave ${i + 1}` };
   });
 }

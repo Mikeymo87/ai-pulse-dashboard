@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
+import { sharePct } from '../../data/transforms';
 import { motion } from 'framer-motion';
 
 const CATEGORY_CONFIG = {
@@ -185,7 +186,7 @@ export default function SlideSpotlight({ transforms }) {
     const s3Never = getFreqPct(2, 'Never');
 
     const confPct = (idx) =>
-      (confidenceTrend[idx]?.distribution ?? []).filter(d => d.score >= 3).reduce((sum, d) => sum + d.pct, 0);
+      sharePct((confidenceTrend[idx]?.distribution ?? []), d => d.score >= 3);
 
     const ADVANCED = ['Experimentation', 'Integration', 'Transformation'];
     const s2AdvPct = stageTrend.filter(e => ADVANCED.includes(e.stage)).reduce((sum, e) => sum + e.s2.pct, 0);

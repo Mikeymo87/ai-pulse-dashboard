@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { sharePct } from '../data/transforms';
 import { useIsMobile } from '../hooks/useIsMobile';
 
 const BEATS = [
@@ -58,7 +59,7 @@ function dailyPct(t, idx) {
 }
 function builderPct(t) {
   const d = t?.builderS4?.distribution ?? [];
-  return d.filter(x => x.score >= 3).reduce((s, x) => s + x.pct, 0);
+  return sharePct(d, x => x.score >= 3);
 }
 
 export default function StoryNarrative({ transforms }) {

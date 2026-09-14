@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { sharePct } from '../data/transforms';
 import { motion } from 'framer-motion';
 import { Unlock, TrendingUp, AlertTriangle, Rocket, ClipboardCheck } from './Icons';
 
@@ -221,10 +222,7 @@ export default function OpportunitySpotlight({ transforms }) {
       const s1Never = getFreqPct(0, 'Never');
       const s3Never = getFreqPct(2, 'Never');
 
-      const confPct = (idx) =>
-        (confidenceTrend[idx]?.distribution ?? [])
-          .filter(d => d.score >= 3)
-          .reduce((sum, d) => sum + d.pct, 0);
+      const confPct = (idx) => sharePct(confidenceTrend[idx]?.distribution ?? [], d => d.score >= 3);
       const s1ConfPct = confPct(0);
       const s2ConfPct = confPct(1);
       const s3ConfPct = confPct(2);

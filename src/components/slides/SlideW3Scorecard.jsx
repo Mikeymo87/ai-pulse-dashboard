@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { sharePct, waveSharePct } from '../../data/transforms';
 
 const MONO = "'JetBrains Mono', 'Fira Code', monospace";
 const SANS = "'Plus Jakarta Sans', DM Sans, sans-serif";
@@ -7,11 +8,11 @@ const SANS = "'Plus Jakarta Sans', DM Sans, sans-serif";
 const SCORECARD_ROWS = [
   { metric: 'Integration + Transformation', target: 'Move above 80%', getW3: (t) => {
     const adv = ['Integration', 'Transformation'];
-    const pct = (t.stageTrend ?? []).filter(e => adv.includes(e.stage)).reduce((s, e) => s + (e.s3?.pct ?? 0), 0);
+    const pct = waveSharePct(t.stageTrend, 's3', e => adv.includes(e.stage));
     return { val: `${Math.round(pct)}%`, meets: Math.round(pct) >= 74 };
   }},
   { metric: 'Very / extremely confident', target: 'Move above 75%', getW3: (t) => {
-    const pct = (t.confidenceTrend?.[2]?.distribution ?? []).filter(d => d.score >= 4).reduce((s, d) => s + d.pct, 0);
+    const pct = sharePct((t.confidenceTrend?.[2]?.distribution ?? []), d => d.score >= 4);
     return { val: `${Math.round(pct)}%`, meets: Math.round(pct) >= 60 };
   }},
   { metric: 'Time / priorities as a barrier', target: 'Pull below 25%', getW3: (t) => {

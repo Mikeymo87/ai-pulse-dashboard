@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { sharePct, waveSharePct } from '../../data/transforms';
 
 const MONO = "'JetBrains Mono', 'Fira Code', monospace";
 const SANS = "'Plus Jakarta Sans', DM Sans, sans-serif";
@@ -26,10 +27,8 @@ const STAT_CARDS = [
     color: '#7DE69B',
     getVal: (t) => {
       const adv = ['Integration', 'Transformation'];
-      const pct = (t.stageTrend ?? [])
-        .filter(e => adv.includes(e.stage))
-        .reduce((sum, e) => sum + (e.s3?.pct ?? 0), 0);
-      return `${Math.round(pct)}%`;
+      const pct = waveSharePct(t.stageTrend, 's3', e => adv.includes(e.stage));
+      return `${pct}%`;
     },
     label: 'At integration or transformation',
     sub: 'up from 60% in Wave 2',
@@ -39,7 +38,7 @@ const STAT_CARDS = [
     getVal: (t) => {
       const imp = t.importanceTrend?.[2];
       if (!imp) return '87%';
-      const high = (imp.distribution ?? []).filter(d => d.score >= 4).reduce((s, d) => s + d.pct, 0);
+      const high = sharePct((imp.distribution ?? []), d => d.score >= 4);
       return `${Math.round(high)}%`;
     },
     label: 'Say AI is highly important',

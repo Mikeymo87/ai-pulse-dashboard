@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { sharePct } from '../../data/transforms';
 
 const MONO = "'JetBrains Mono', 'Fira Code', monospace";
 const SANS = "'Plus Jakarta Sans', DM Sans, sans-serif";
@@ -6,7 +7,7 @@ const SANS = "'Plus Jakarta Sans', DM Sans, sans-serif";
 function getFamVals(familiarityTrend) {
   const colors = ['#2EA84A', '#59BEC9', '#7DE69B'];
   return (familiarityTrend ?? []).map((wave, i) => {
-    const top2 = (wave.distribution ?? []).filter(d => d.score >= 4).reduce((s, d) => s + d.pct, 0);
+    const top2 = sharePct((wave.distribution ?? []), d => d.score >= 4);
     return { val: Math.round(top2), color: colors[i], label: `Wave ${i + 1}` };
   });
 }
@@ -14,7 +15,7 @@ function getFamVals(familiarityTrend) {
 function getConfVals(confidenceTrend) {
   const colors = ['#E5554F', '#FFCD00', '#2EA84A'];
   return (confidenceTrend ?? []).map((wave, i) => {
-    const veryConf = (wave.distribution ?? []).filter(d => d.score >= 4).reduce((s, d) => s + d.pct, 0);
+    const veryConf = sharePct((wave.distribution ?? []), d => d.score >= 4);
     return { val: Math.round(veryConf), color: colors[i], label: `Wave ${i + 1}` };
   });
 }

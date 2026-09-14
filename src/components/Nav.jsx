@@ -10,6 +10,17 @@ const TABS = [
   { id: 'playbook',   label: 'The Playbook', mobileLabel: 'Playbook' },
 ];
 
+// Viewport width for the desktop header's collapse steps (label, button text, spacing)
+function useViewportWidth() {
+  const [vw, setVw] = useState(() => (typeof window !== 'undefined' ? window.innerWidth : 1440));
+  useEffect(() => {
+    const onResize = () => setVw(window.innerWidth);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+  return vw;
+}
+
 // ── Theme toggle helpers ──────────────────────────────────────────────────────
 function getInitialTheme() {
   try {
@@ -59,7 +70,12 @@ function MoonIcon() {
 export default function Nav({ onOpenChat, onPresent, activeTab, onTabChange }) {
   const [theme, setTheme] = useState(getInitialTheme);
   const isMobile = useIsMobile();
+  const vw = useViewportWidth();
   const tabRowRef = useRef(null);
+  // Desktop collapse steps: the survey label goes first, then button text, then tab spacing
+  const showLabel   = vw >= 1280;
+  const showBtnText = vw >= 1040;
+  const tight       = vw < 1140;
 
   // Scroll active tab into view whenever it changes on mobile
   useEffect(() => {
@@ -220,7 +236,8 @@ export default function Nav({ onOpenChat, onPresent, activeTab, onTabChange }) {
       borderBottom: '1px solid var(--nav-border)',
       display: 'flex',
       alignItems: 'center',
-      padding: '0 40px',
+      gap: tight ? 12 : 24,
+      padding: tight ? '0 20px' : '0 40px',
       boxSizing: 'border-box',
     }}>
       {/* Left — brand */}
@@ -262,14 +279,15 @@ export default function Nav({ onOpenChat, onPresent, activeTab, onTabChange }) {
         </span>
       </div>
 
-      {/* Center — tab navigation */}
+      {/* Center — tab navigation (a flex item, so it can never overlap the brand or the buttons) */}
       <div style={{
-        position: 'absolute',
-        left: '50%',
-        transform: 'translateX(-50%)',
+        flex: 1,
+        minWidth: 0,
         display: 'flex',
         alignItems: 'center',
-        gap: 4,
+        justifyContent: 'center',
+        gap: tight ? 0 : 4,
+        overflow: 'hidden',
       }}>
         {TABS.map(tab => {
           const isActive = activeTab === tab.id;
@@ -279,12 +297,14 @@ export default function Nav({ onOpenChat, onPresent, activeTab, onTabChange }) {
               onClick={() => handleTabChange(tab.id)}
               style={{
                 position: 'relative',
-                padding: '6px 16px',
+                padding: tight ? '6px 10px' : '6px 16px',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
                 fontFamily: 'DM Sans, sans-serif',
-                fontSize: 13,
+                fontSize: tight ? 12 : 13,
                 fontWeight: isActive ? 600 : 400,
                 color: isActive ? 'var(--accent-mint)' : 'var(--text-support)',
                 letterSpacing: isActive ? '0.025em' : '0.01em',
@@ -316,16 +336,19 @@ export default function Nav({ onOpenChat, onPresent, activeTab, onTabChange }) {
       </div>
 
       {/* Right — theme toggle + Ask AI + Present */}
-      <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
-        <span style={{
-          fontSize: 11,
-          color: 'var(--text-support)',
-          letterSpacing: '0.08em',
-          textTransform: 'uppercase',
-          fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
-        }}>
-          AI Engagement Pulse Survey
-        </span>
+      <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: tight ? 8 : 12, flexShrink: 0 }}>
+        {showLabel && (
+          <span style={{
+            fontSize: 11,
+            color: 'var(--text-support)',
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            whiteSpace: 'nowrap',
+            fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+          }}>
+            AI Engagement Pulse Survey
+          </span>
+        )}
 
         {/* Theme toggle */}
         <motion.button
@@ -356,11 +379,13 @@ export default function Nav({ onOpenChat, onPresent, activeTab, onTabChange }) {
           onClick={onPresent}
           whileHover={{ scale: 1.04 }}
           whileTap={{ scale: 0.96 }}
+          title="Present"
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 6,
-            padding: '6px 14px',
+            gap: showBtnText ? 6 : 0,
+            padding: showBtnText ? '6px 14px' : '6px 10px',
+            whiteSpace: 'nowrap',
             background: 'rgba(99,102,241,0.12)',
             border: '1px solid rgba(99,102,241,0.3)',
             borderRadius: 20,
@@ -376,18 +401,20 @@ export default function Nav({ onOpenChat, onPresent, activeTab, onTabChange }) {
           onMouseLeave={e => e.currentTarget.style.background = 'rgba(99,102,241,0.12)'}
         >
           <span style={{ fontSize: 11 }}>⊞</span>
-          Present
+          {showBtnText && 'Present'}
         </motion.button>
 
         <motion.button
           onClick={onOpenChat}
           whileHover={{ scale: 1.04 }}
           whileTap={{ scale: 0.96 }}
+          title="Ask AI"
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 7,
-            padding: '6px 14px',
+            gap: showBtnText ? 7 : 0,
+            padding: showBtnText ? '6px 14px' : '6px 10px',
+            whiteSpace: 'nowrap',
             background: 'rgba(46,168,74,0.15)',
             border: '1px solid rgba(125,230,155,0.35)',
             borderRadius: 20,
@@ -409,7 +436,7 @@ export default function Nav({ onOpenChat, onPresent, activeTab, onTabChange }) {
           >
             ●
           </motion.span>
-          Ask AI
+          {showBtnText && 'Ask AI'}
         </motion.button>
       </div>
     </div>

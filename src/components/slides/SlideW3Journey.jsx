@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { waveSharePct } from '../../data/transforms';
 import { BarChart, Bar, XAxis, YAxis, LabelList, ResponsiveContainer, Tooltip } from 'recharts';
 
 const MONO = "'JetBrains Mono', 'Fira Code', monospace";
@@ -25,8 +26,8 @@ function getMaturityData(stageTrend) {
 
 function getIntTrans(stageTrend) {
   const adv = ['Integration', 'Transformation'];
-  const s2 = (stageTrend ?? []).filter(e => adv.includes(e.stage)).reduce((s, e) => s + (e.s2?.pct ?? 0), 0);
-  const s3 = (stageTrend ?? []).filter(e => adv.includes(e.stage)).reduce((s, e) => s + (e.s3?.pct ?? 0), 0);
+  const s2 = waveSharePct(stageTrend, 's2', e => adv.includes(e.stage));
+  const s3 = waveSharePct(stageTrend, 's3', e => adv.includes(e.stage));
   return { s2: Math.round(s2), s3: Math.round(s3) };
 }
 

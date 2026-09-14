@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { sharePct } from '../data/transforms';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useIsMobile } from '../hooks/useIsMobile';
 import {
@@ -51,8 +52,7 @@ function buildSystemPrompt(transforms, vaultUnlocked = false) {
   const negS3 = sentimentTrend.find(e => e.sentiment === 'Negative')?.s3.pct ?? 0;
 
   const confPct = (idx) =>
-    (confidenceTrend[idx]?.distribution ?? [])
-      .filter(d => d.score >= 3).reduce((s, d) => s + d.pct, 0);
+    sharePct((confidenceTrend[idx]?.distribution ?? []), d => d.score >= 3);
 
   const freqPct = (idx, label) =>
     frequencyTrend[idx]?.distribution.find(d => d.label === label)?.pct ?? 0;
@@ -146,8 +146,8 @@ IMPORTANT: The S3 question asked "Besides ChatGPT, Copilot, Firefly, Jasper — 
 ${topToolsS3 || 'No data'}
 
 ${s4?.live ? `SURVEY 4 — LIVE, ${s4.n} responses so far (Sep 2026; treat as early and moving${s4.solid ? '' : ', below the ' + s4.minN + '-response threshold for headline use'}):
-Daily use: ${freqPct(3, 'Daily')}% | Positive: ${sentimentTrend.find(e => e.sentiment === 'Positive')?.s4?.pct ?? 0}% | Confident or higher: ${confPct(3)}% | Experimentation or higher: ${stageTrend.filter(e => ADVANCED.includes(e.stage)).reduce((sum, e) => sum + (e.s4?.pct ?? 0), 0)}%
-NEW Q — Building with AI (4 rungs: 1 chat tools for one-off tasks, 2 Projects/saved prompts/Custom GPTs, 3 builds agents, 4 builds solutions others use): avg ${builderS4?.avg ?? '—'}, ${(builderS4?.distribution ?? []).filter(d => d.score >= 3).reduce((a, d) => a + d.pct, 0)}% build agents or solutions (levels 3–4). No back data; Wave 4 is the baseline.
+Daily use: ${freqPct(3, 'Daily')}% | Positive: ${sentimentTrend.find(e => e.sentiment === 'Positive')?.s4?.pct ?? 0}% | Confident or higher: ${confPct(3)}% | Experimentation or higher: ${sharePct(stageTrend.map(e => ({ count: e.s4?.count ?? 0, adv: ADVANCED.includes(e.stage) })), x => x.adv)}%
+NEW Q — Building with AI (4 rungs: 1 chat tools for one-off tasks, 2 Projects/saved prompts/Custom GPTs, 3 builds agents, 4 builds solutions others use): avg ${builderS4?.avg ?? '—'}, ${sharePct((builderS4?.distribution ?? []), d => d.score >= 3)}% build agents or solutions (levels 3–4). No back data; Wave 4 is the baseline.
 NEW Q — AI on the team (1 rarely used … 5 integrally built into several workflows): avg ${teamUseS4?.avg ?? '—'}, ${teamUseS4?.topTwoPct ?? 0}% at levels 4–5 (AI part of regular team workflows). No back data; Wave 4 is the baseline.
 NEW Q — Most important human contributions as AI takes on more tasks (up to three picks, % of respondents): ${(humanS4?.distribution ?? []).filter(d => d.pct > 0).slice(0, 5).map(d => `${d.label} (${d.pct}%)`).join(', ') || 'n/a'}${humanS4?.other?.length ? ` | write-ins: ${humanS4.other.slice(0, 4).join('; ')}` : ''}. No back data; Wave 4 is the baseline.
 Own pocket: ${ownPocketS4?.yesPct ?? 0}% | Top benefits: ${(benefitsS4 ?? []).slice(0, 4).map(b => `${b.label} (${b.pct}%)`).join(', ') || 'n/a'} | Top supplemental tools: ${(toolsS4 ?? []).slice(0, 6).map(t => `${t.label} (${t.pct}%)`).join(', ') || 'n/a'}

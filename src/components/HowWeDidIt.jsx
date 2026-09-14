@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { sharePct } from '../data/transforms';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CardChatButton } from './CardChat';
 import { useIsMobile } from '../hooks/useIsMobile';
@@ -42,10 +43,8 @@ function buildPrinciples(transforms) {
   const s3Daily = frequencyTrend[2]?.distribution?.find(d => d.label === 'Daily')?.pct ?? 90;
 
   const confidenceTrend = transforms?.confidenceTrend ?? [];
-  const s1ConfHighPct = (confidenceTrend[0]?.distribution ?? [])
-    .filter(d => d.score >= 4).reduce((s, d) => s + d.pct, 0) || 51;
-  const s3ConfHighPct = (confidenceTrend[2]?.distribution ?? [])
-    .filter(d => d.score >= 3).reduce((s, d) => s + d.pct, 0) || 94;
+  const s1ConfHighPct = sharePct((confidenceTrend[0]?.distribution ?? []), d => d.score >= 4) || 51;
+  const s3ConfHighPct = sharePct((confidenceTrend[2]?.distribution ?? []), d => d.score >= 3) || 94;
 
   const ownPocketPct = transforms?.ownPocketS3?.yesPct ?? 32;
 

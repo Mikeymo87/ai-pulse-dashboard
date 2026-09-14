@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { sharePct } from '../../data/transforms';
 import {
   LineChart, Line,
   AreaChart, Area,
@@ -99,7 +100,7 @@ function buildCharts(transforms) {
 
   const confidenceData = confidenceTrend.map(s => ({
     period: s.period,
-    'Confident or Higher': s.distribution.filter(d => d.score >= 3).reduce((sum, d) => sum + d.pct, 0),
+    'Confident or Higher': sharePct(s.distribution, d => d.score >= 3),
   }));
   const confDomain = autoDomain(confidenceData.map(d => d['Confident or Higher']), 5, 0, 100);
   const s1Conf = Math.round(confidenceData[0]?.['Confident or Higher'] ?? 0);

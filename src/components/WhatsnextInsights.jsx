@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { waveSharePct } from '../data/transforms';
 import { motion } from 'framer-motion';
 import { CardChatButton } from './CardChat';
 import { useIsMobile } from '../hooks/useIsMobile';
@@ -115,7 +116,7 @@ const W3 = { key: 's3', idx: 2 };
 const W4 = { key: 's4', idx: 3 };
 const SCORECARD_ROWS = [
   { metric: 'Integration + Transformation', targetDisplay: '>80%', targetLabel: 'Move above 80%', direction: 'above', threshold: 80, unit: '%',
-    getVal: (t, w = W3) => Math.round(['Integration','Transformation'].reduce((s, st) => s + (t.stageTrend?.find(e => e.stage === st)?.[w.key]?.pct ?? 0), 0)) },
+    getVal: (t, w = W3) => waveSharePct(t.stageTrend, w.key, e => e.stage === 'Integration' || e.stage === 'Transformation') },
   { metric: 'Very / extremely confident',   targetDisplay: '>75%', targetLabel: 'Move above 75%', direction: 'above', threshold: 75, unit: '%',
     getVal: (t, w = W3) => Math.round((t.confidenceTrend?.[w.idx]?.distribution ?? []).filter(d => d.score >= 4).reduce((s,d) => s+d.pct, 0)) },
   { metric: 'Time as a barrier',            targetDisplay: '<25%', targetLabel: 'Pull below 25%',  direction: 'below', threshold: 25, unit: '%',
@@ -495,7 +496,7 @@ export default function WhatsnextInsights({ transforms, vaultUnlocked }) {
     async function fetchInsights() {
       try {
         const t = transforms;
-        const intTransPct = Math.round(['Integration','Transformation'].reduce((s, st) => s + (t.stageTrend?.find(e => e.stage === st)?.s3?.pct ?? 0), 0));
+        const intTransPct = waveSharePct(t.stageTrend, 's3', e => e.stage === 'Integration' || e.stage === 'Transformation');
         const s3ConfHigh  = Math.round((t.confidenceTrend?.[2]?.distribution ?? []).filter(d => d.score >= 4).reduce((s,d) => s+d.pct, 0));
         const s3ConfAny   = Math.round((t.confidenceTrend?.[2]?.distribution ?? []).filter(d => d.score >= 3).reduce((s,d) => s+d.pct, 0));
         const impPct      = Math.round((t.importanceTrend?.[2]?.distribution ?? []).filter(d => d.score >= 4).reduce((s,d) => s+d.pct, 0) || 87);
@@ -524,7 +525,7 @@ export default function WhatsnextInsights({ transforms, vaultUnlocked }) {
           return acc;
         }, {});
 
-        const prompt = `You are a strategic advisor to the Baptist Health MarCom leadership team. Wave 3 AI adoption survey, n=101.
+        const prompt = `You are a strategic advisor to the Baptist Health MarCom leadership team. Wave 3 AI adoption survey, n=${t.responseCounts?.[2]?.n ?? 100}.
 
 STATS: ${intTransPct}% integration/transformation, 90% daily use, 69% positive sentiment, ${s3ConfHigh}% very/extremely confident (${s3ConfAny}% any confidence — ${s3ConfAny - s3ConfHigh}% gap), ${impPct}% rate AI highly important, ${partner}% strategic thought partner, ${ownPocket}% pay out of pocket, ${tooManyPct}% too many tools barrier, ${timePct}% time barrier, ${transPct}% at transformation stage. IMPORTANT: Always use the % symbol for all percentages and percentage-point differences. Never write "pt" or "pts" — write "%" instead.
 OPEN TEXT: aspiration-gap=${ag.pct ?? 0}% (n=${ag.count ?? 0}); leadership-voices=${lv.pct ?? 0}% (n=${lv.count ?? 0}); blocked-investors=${bi.pct ?? 0}% (n=${bi.count ?? 0}); supplemental-tool-users: ${tm.claude?.count ?? 0} respondents use Claude as a personal supplemental tool alongside the official ChatGPT stack.${vaultSection}

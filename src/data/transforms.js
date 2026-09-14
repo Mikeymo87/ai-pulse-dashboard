@@ -53,6 +53,25 @@ function toDistribution(counts, total) {
     .sort((a, b) => b.count - a.count);
 }
 
+// Share of a distribution matching a predicate, rounded ONCE from the raw counts.
+// Never add per-level `pct` values together: each is already rounded, so with a small n
+// the parts can total 99 or 101. Falls back to a clamped pct sum only if counts are absent.
+export function sharePct(distribution, predicate) {
+  const d = Array.isArray(distribution) ? distribution : [];
+  const total = d.reduce((s, x) => s + (Number.isFinite(x.count) ? x.count : 0), 0);
+  if (total > 0) return Math.round((d.filter(predicate).reduce((s, x) => s + (x.count || 0), 0) / total) * 100);
+  return Math.min(100, d.filter(predicate).reduce((s, x) => s + (x.pct || 0), 0));
+}
+
+// Same idea for trend rows ({ stage|sentiment|..., s1: {count, pct}, s2: ..., s4: ... }):
+// the share of one wave matching a predicate, rounded once from that wave's counts.
+export function waveSharePct(trend, waveKey, predicate) {
+  const rows = Array.isArray(trend) ? trend : [];
+  const total = rows.reduce((s, e) => s + (e[waveKey]?.count ?? 0), 0);
+  if (total > 0) return Math.round((rows.filter(predicate).reduce((s, e) => s + (e[waveKey]?.count ?? 0), 0) / total) * 100);
+  return Math.min(100, rows.filter(predicate).reduce((s, e) => s + (e[waveKey]?.pct ?? 0), 0));
+}
+
 // ─── Display ordering constants ───────────────────────────────────────────────
 
 const SENTIMENT_ORDER = ['Positive', 'Mixed', 'Unsure', 'Negative'];

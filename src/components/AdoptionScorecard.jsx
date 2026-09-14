@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { sharePct } from '../data/transforms';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Smile, Star, ShieldCheck, Briefcase } from './Icons';
 import {
@@ -354,9 +355,7 @@ export default function AdoptionScorecard({ transforms }) {
   // a raw score threshold (score >= 3 incorrectly pulls in S1's "Somewhat confident").
   const confidenceData = confidenceTrend.slice(0, waves.length).map(s => ({
     period: s.period,
-    'Confident or Higher': s.distribution
-      .filter(d => d.label && !d.label.toLowerCase().includes('somewhat') && !d.label.toLowerCase().startsWith('not confident'))
-      .reduce((sum, d) => sum + d.pct, 0),
+    'Confident or Higher': sharePct(s.distribution, d => d.label && !d.label.toLowerCase().includes('somewhat') && !d.label.toLowerCase().startsWith('not confident')),
   }));
   const confSeries = confidenceData.map(d => d['Confident or Higher']);
   const s1Conf = confSeries[0], s3Conf = confSeries[li];

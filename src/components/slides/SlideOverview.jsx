@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { sharePct } from '../../data/transforms';
 
 const MONO = "'JetBrains Mono', 'Fira Code', monospace";
 const SANS = "'Plus Jakarta Sans', DM Sans, sans-serif";
@@ -126,7 +127,7 @@ export default function SlideOverview({ transforms }) {
   const s1Daily  = getDaily(0);
   const s3Daily  = getDaily(2);
 
-  const confPct = (idx) => (confidenceTrend[idx]?.distribution ?? []).filter(d => d.score >= 3).reduce((sum, d) => sum + d.pct, 0);
+  const confPct = (idx) => sharePct((confidenceTrend[idx]?.distribution ?? []), d => d.score >= 3);
   const s1ConfPct = Math.round(confPct(0));
   const s3ConfPct = Math.round(confPct(2));
 
