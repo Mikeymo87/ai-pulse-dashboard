@@ -87,6 +87,7 @@ const HINDER_CUES = [
 ];
 export function classifyHelpHinder(text) {
   const s = (text || '').trim();
+  if (/^(n\/?a|none|nothing|no|nope|-+|\.+|\?+)$/i.test(s)) return 'none'; // typed a non-answer
   if (s.length <= 3) return 'unclear';
   const lead = s.slice(0, 24).toLowerCase();
   if (/^(helping|what'?s helping|helpful)/.test(lead)) return 'helping';
@@ -98,14 +99,14 @@ export function classifyHelpHinder(text) {
   return help > hinder ? 'helping' : 'hindering';
 }
 export function splitHelpHinder(texts) {
-  const out = { helping: [], hindering: [], mixed: [], unclear: [] };
+  const out = { helping: [], hindering: [], mixed: [], unclear: [], none: [] };
   for (const raw of texts || []) {
     const q = (raw || '').trim();
-    if (!q || /^(n\/?a|none|nothing|no|nope|-+|\.+|\?+)$/i.test(q)) continue; // non-answers are not counted
-    out[classifyHelpHinder(q)].push(q);
+    if (!q) continue;
+    out[classifyHelpHinder(q)].push(q); // every submitted answer is counted, N/A-style ones under "none"
   }
-  const answered = out.helping.length + out.hindering.length + out.mixed.length + out.unclear.length;
-  return { ...out, n: answered, helpingN: out.helping.length, hinderingN: out.hindering.length, mixedN: out.mixed.length, unclearN: out.unclear.length };
+  const n = out.helping.length + out.hindering.length + out.mixed.length + out.unclear.length + out.none.length;
+  return { ...out, n, helpingN: out.helping.length, hinderingN: out.hindering.length, mixedN: out.mixed.length, unclearN: out.unclear.length, noneN: out.none.length };
 }
 
 // ─── Display ordering constants ───────────────────────────────────────────────
