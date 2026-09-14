@@ -673,7 +673,7 @@ function OpenTextCard({ quotes, label, question, themes, split }) {
               {split.n > 0 && <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: 'var(--text-dim)' }}>{Math.round((g.n / split.n) * 100)}%</span>}
             </div>
           ))}
-          <span style={{ alignSelf: 'center', fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: 'var(--text-support)' }}>of {split.n} responses, sorted by what each person wrote</span>
+          <span style={{ alignSelf: 'center', fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: 'var(--text-support)' }}>of {split.n} responses, {split.source === 'claude' ? 'each answer read and sorted by Claude' : 'sorted by keyword (Claude has not read these yet)'}</span>
         </div>
       )}
       {themes?.length > 0 && (

@@ -27,3 +27,4 @@ dist-ssr
 .env
 .env.local
 scripts/dev-5010.log
+scripts/.q14-cache.json

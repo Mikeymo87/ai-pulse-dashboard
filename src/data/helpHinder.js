@@ -186,13 +186,17 @@ export function classifyHelpHinder(text) {
   return explainHelpHinder(text).verdict;
 }
 
-export function splitHelpHinder(texts) {
+// `classify` defaults to the keyword sorter; the app passes Claude's cached verdicts instead
+// (src/data/classifyOpenText.js) and falls back here per answer if a verdict is missing.
+// `source` says which one produced the buckets: 'rules' (keyword fallback) or 'claude'.
+export function splitHelpHinder(texts, classify = classifyHelpHinder, source = 'rules') {
   const out = { helping: [], hindering: [], mixed: [], none: [] };
   for (const raw of texts || []) {
     const q = (raw || '').trim();
     if (!q) continue;
-    out[classifyHelpHinder(q)].push(q); // every submitted answer is counted, N/A-style ones under "none"
+    const v = classify(q);
+    out[out[v] ? v : classifyHelpHinder(q)].push(q); // every submitted answer is counted, N/A-style ones under "none"
   }
   const n = out.helping.length + out.hindering.length + out.mixed.length + out.none.length;
-  return { ...out, n, helpingN: out.helping.length, hinderingN: out.hindering.length, mixedN: out.mixed.length, noneN: out.none.length };
+  return { ...out, n, source, helpingN: out.helping.length, hinderingN: out.hindering.length, mixedN: out.mixed.length, noneN: out.none.length };
 }

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { parseAllSurveys } from '../data/parseCSVs';
-import { buildTransforms } from '../data/transforms';
+import { buildTransforms, splitHelpHinder } from '../data/transforms';
+import { classifyWithClaude } from '../data/classifyOpenText';
 
 /**
  * Loads all 3 survey CSVs, normalizes every row, and returns
@@ -36,6 +37,7 @@ export function useSurveyData() {
           if (cancelled) return;
           const transforms = buildTransforms(surveys);
           setState({ surveys, transforms, loading: false, error: null, lastUpdated: new Date() });
+          readOpenTextWithClaude(surveys, transforms);
           // Re-arm the poll at the live cadence once we know Survey 4 is configured
           const wanted = surveys.s4Configured ? POLL_INTERVAL_LIVE_MS : POLL_INTERVAL_MS;
           if (timer && timer.interval !== wanted) {
@@ -52,6 +54,27 @@ export function useSurveyData() {
               : { surveys: null, transforms: null, loading: false, error }
           );
         });
+    }
+
+    // Survey 4's open question is read by Claude (one call per batch of new answers, cached by
+    // answer text). Until the verdicts land, and if the API is unavailable, the keyword sorter's
+    // split stands and the card says so (split.source = 'rules').
+    let reading = false;
+    function readOpenTextWithClaude(surveys, transforms) {
+      const texts = (surveys.survey4 || []).map(r => r.openEnded).filter(t => t && t.trim());
+      if (!texts.length || reading) return;
+      const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY;
+      if (!apiKey) { console.warn('[useSurveyData] no API key in the build: Survey 4 open text uses the keyword fallback'); return; }
+      reading = true;
+      classifyWithClaude(texts, { apiKey })
+        .then(({ verdictOf, asked }) => {
+          if (cancelled) return;
+          const split = splitHelpHinder(texts, verdictOf, 'claude');
+          setState(prev => prev.transforms === transforms ? { ...prev, transforms: { ...transforms, openEndedSplitS4: split } } : prev);
+          if (asked) console.info(`[useSurveyData] Claude read ${asked} new Survey 4 answer(s); split = ${split.helpingN} helping / ${split.hinderingN} in the way / ${split.mixedN} both / ${split.noneN} no answer`);
+        })
+        .catch(err => console.error('[useSurveyData] Claude could not read the Survey 4 open text; keyword fallback stays on:', err))
+        .finally(() => { reading = false; });
     }
 
     fetchData();
