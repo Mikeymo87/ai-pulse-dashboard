@@ -416,19 +416,23 @@ function normalizeFunction(v) {
 //     S4_URL below (same pattern as s2/s3). Until then S4 is off and the app renders 3 waves.
 //     Dev overrides: ?s4=sample (36 synthetic rows, past the flip), ?s4=early (14 rows, below the flip),
 //     ?s4=empty (header only, the Monday-morning state). Never deploy with any of these as the source.
-const S4_URL = '';
+const S4_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTrL_H8F6IgLLRILHWiwOuJQUHQM-8w9QNViNoWbvLPb7P0ai0tnuhIYdwxoyMw8iePib9KRr57K47t/pub?gid=1894577232&single=true&output=csv';
 
 function resolveS4Source() {
-  const env = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_S4_URL) || '';
-  if (env) return env;
-  if (S4_URL) return S4_URL;
-  if (typeof window !== 'undefined') {
+  // Dev-server only (import.meta.env.DEV): the ?s4= switches let the smoke test exercise every state
+  // regardless of what S4_URL holds. Production builds ignore the query string entirely.
+  const isDev = typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.DEV;
+  if (isDev && typeof window !== 'undefined') {
     const q = new URLSearchParams(window.location.search).get('s4');
+    if (q === 'off')    return null;                              // force the 3-wave dashboard
     if (q === 'sample') return '/data/survey4.sample.csv';        // 36 synthetic rows: past the headline flip
     if (q === 'early')  return '/data/survey4.sample-early.csv';  // 14 synthetic rows: in the field, below the flip
     if (q === 'empty')  return '/data/survey4.sample-empty.csv';  // header only: linked sheet, no responses yet
     if (q && /^https?:/.test(q)) return q;
   }
+  const env = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_S4_URL) || '';
+  if (env) return env;
+  if (S4_URL) return S4_URL;
   return null;
 }
 

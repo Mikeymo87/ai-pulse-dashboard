@@ -1,6 +1,6 @@
 // Headless UI smoke test (no API calls). Requires the dev server: npx vite --port 5010 --strictPort
 // Usage: node scripts/smoke-ui.mjs [baseUrl]
-// Loads the app in 3-wave mode and in the three Survey 4 states (empty sheet, early, past the flip), clicks through every tab,
+// Loads the app in 3-wave mode (?s4=off), the three Survey 4 sample states (empty, early, past the flip) and as configured, clicks through every tab,
 // fails on any console error / uncaught exception, and asserts key text per mode.
 import puppeteer from 'puppeteer';
 
@@ -49,7 +49,7 @@ async function run(mode, url, expects, absent) {
   return texts;
 }
 
-await run('3 waves', `${base}/`,
+await run('3 waves (?s4=off)', `${base}/?s4=off`,
   ['Three Waves, One Story', 'January 2025 to March 2026', 'Survey 3', 'By March 2026, daily usage reached 90%', '14-Month Trend', 'Adoption Scorecard — Survey 3 Snapshot', 'Leadership Vault'],
   ['Survey 4', 'Four Waves', 'NaN', 'undefined']);
 
@@ -72,6 +72,11 @@ const t = await run('S4 sample (36 responses, past the flip)', `${base}/?s4=samp
   ['NaN', 'undefined']);
 const s4tab = (t['numbers:Survey 4'] ?? '').toLowerCase();
 ok(s4tab.includes('36 responses so far') && s4tab.includes('live · in the field'), 'Survey 4 snapshot tab renders with live badge (solid)');
+
+// The real source (whatever S4_URL / VITE_S4_URL holds). Off before wiring; after wiring this is the launch-day check.
+await run('S4 as configured (no switch)', `${base}/`,
+  ['Leadership Vault'],
+  ['NaN', 'undefined']);
 
 console.log(`\n${failures ? failures + ' UI CHECK(S) FAILED' : 'ALL UI CHECKS PASSED'}\n`);
 process.exit(failures ? 1 : 0);

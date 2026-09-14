@@ -67,31 +67,35 @@ check(probe.barriers.includes('Manager support') && probe.barriers.includes('Lac
 check(T.latest.key === (withS4 && survey4.length >= LIVE_MIN_N ? 's4' : 's3'), `latest = ${T.latest.key}`);
 check(T.archetypes && Object.values(T.archetypes).reduce((s, a) => s + a.count, 0) === T.archetypesWave.n, `archetypes classify every row of ${T.archetypesWave.label}`);
 
+const sample = !s4Url; // coverage assertions (every rung seen, every row has a theme) only hold for the synthetic sample
 if (withS4 && survey4.length > 0) {
-  console.log('\n[wave 4]');
+  console.log(`\n[wave 4]${sample ? ' (sample: strict coverage checks)' : ' (real sheet: invariant checks)'}`);
   check(survey4.length > 0, `S4 rows parsed: ${survey4.length}`);
   const fields = ['sentiment', 'stage', 'familiarity', 'frequency', 'importance', 'confidence', 'builder', 'teamUse', 'ownPocket'];
   for (const f of fields) {
     const filled = survey4.filter(r => r[f] !== null && r[f] !== undefined).length;
     check(filled > 0, `S4 field "${f}" populated on ${filled}/${survey4.length} rows`);
   }
-  check(survey4.every(r => r.benefits.length > 0), 'every S4 row has at least one canonical benefit');
+  { const noBen = survey4.filter(r => r.benefits.length === 0).length; check(sample ? noBen === 0 : true, `rows with no canonical benefit: ${noBen} (Other-only is legal on the real sheet)`); }
   const canon = new Set(BENEFIT_CANON.map(b => b.label));
   check(survey4.every(r => r.benefits.every(b => canon.has(b))), 'S4 benefits are canonical labels only');
   const s4Barriers = new Set(survey4.flatMap(r => r.barriers));
   console.log('       S4 barrier categories seen: ' + [...s4Barriers].join(' | '));
   const unclassified = survey4.filter(r => r.barriers.length === 0);
-  check(unclassified.length === 0, `every S4 row has a classified barrier (unclassified: ${unclassified.length})`);
+  check(sample ? unclassified.length === 0 : true, `rows with no classified barrier: ${unclassified.length} (Other-only is legal on the real sheet)`);
   const s4Tools = new Set(survey4.flatMap(r => r.tools));
   console.log('       S4 tools seen: ' + [...s4Tools].join(' | '));
   check(!s4Tools.has('Gemini Notebook (formerly NotebookLM)') && (s4Tools.size === 0 || s4Tools.has('NotebookLM') || true), 'NotebookLM label canonical in S4');
   check(survey4.every(r => r.role === null || !/^(assistant vice president|vice president)$/i.test(r.role)), 'AVP/VP canonical in S4');
   check(T.builderS4.distribution.length === 4 && T.teamUseS4.distribution.length === 5, 'ladders: builder has 4 rungs (9/9 form), team has 5');
-  check(survey4.filter(r => r.builder !== null).length + survey4.filter(r => r.builder === null).length === survey4.length && survey4.some(r => r.builder === 1) && survey4.some(r => r.builder === 4), 'builder ladder maps the live Q5 wording (levels 1 and 4 both seen)');
-  check(survey4.some(r => r.teamUse === 5), 'team ladder maps "integrally built into" to level 5');
+  check(survey4.every(r => r.builder === null || [1, 2, 3, 4].includes(r.builder)), 'builder ladder values are null or 1..4');
+  if (sample) check(survey4.some(r => r.builder === 1) && survey4.some(r => r.builder === 4), 'sample covers builder levels 1 and 4');
+  check(survey4.every(r => r.teamUse === null || [1, 2, 3, 4, 5].includes(r.teamUse)), 'team ladder values are null or 1..5');
+  if (sample) check(survey4.some(r => r.teamUse === 5), 'sample covers team level 5');
   console.log(`       builder avg ${T.builderS4.avg} (top-two ${T.builderS4.topTwoPct}%), team avg ${T.teamUseS4.avg} (top-two ${T.teamUseS4.topTwoPct}%), not-sure builder=${T.builderS4.notSure} team=${T.teamUseS4.notSure}`);
   const humanCanon = new Set(HUMAN_CANON.map(h => h.label));
-  check(survey4.every(r => (r.humanContrib ?? []).length >= 1 && r.humanContrib.length <= 3), 'every S4 row has 1 to 3 canonical human contributions');
+  check(survey4.every(r => (r.humanContrib ?? []).length <= 3), 'no S4 row has more than 3 canonical human contributions');
+  if (sample) check(survey4.every(r => r.humanContrib.length >= 1), 'sample rows all have a human contribution');
   check(survey4.every(r => r.humanContrib.every(h => humanCanon.has(h))), 'S4 human contributions are canonical labels only');
   check(T.humanS4.distribution.length === HUMAN_CANON.length && T.humanS4.n === survey4.length, `humanS4: ${HUMAN_CANON.length} options ranked, n=${T.humanS4.n}, write-ins=${T.humanS4.other.length}`);
   console.log('       top human contributions: ' + T.humanS4.distribution.slice(0, 3).map(d => `${d.label} ${d.pct}%`).join(' | ') + (T.humanS4.other.length ? ' | write-ins: ' + T.humanS4.other.join(' / ') : ''));
@@ -101,7 +105,7 @@ if (withS4 && survey4.length > 0) {
   const daily4 = T.frequencyTrend[3].distribution.find(d => d.label === 'Daily')?.pct ?? 0;
   check(daily4 >= 0 && daily4 <= 100, `S4 daily = ${daily4}%`);
   check(T.openEndedText.s4.length === survey4.filter(r => r.openEnded).length, `S4 open text collected (${T.openEndedText.s4.length})`);
-  check(T.struggleThemesS4.length + T.excitementThemesS4.length > 0, 'S4 open text produced at least one theme');
+  if (sample) check(T.struggleThemesS4.length + T.excitementThemesS4.length > 0, 'S4 open text produced at least one theme'); else console.log(`       S4 open text themes so far: ${T.struggleThemesS4.length + T.excitementThemesS4.length}`);
   const nan = JSON.stringify(T).includes('null,null') ? 0 : 0;
   check(!JSON.stringify(T).includes('NaN'), 'no NaN anywhere in transforms');
 }
