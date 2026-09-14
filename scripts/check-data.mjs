@@ -116,7 +116,7 @@ if (withS4) {
   check(T.latest.key === (survey4.length >= LIVE_MIN_N ? 's4' : 's3'), `headline wave = ${T.latest.key} (flips to s4 at ${LIVE_MIN_N})`);
   check(!JSON.stringify(T).includes('NaN'), 'no NaN anywhere in transforms');
   const sp = T.openEndedSplitS4;
-  check(sp && sp.n === sp.helpingN + sp.hinderingN + sp.mixedN + sp.unclearN + sp.noneN && sp.n === survey4.filter(r => r.openEnded).length, `open text split: ${sp?.n ?? 0} responses = ${sp?.helpingN ?? 0} helping + ${sp?.hinderingN ?? 0} in the way + ${sp?.mixedN ?? 0} both + ${sp?.unclearN ?? 0} unclear + ${sp?.noneN ?? 0} N/A (all ${survey4.filter(r => r.openEnded).length} answers counted)`);
+  check(sp && sp.n === sp.helpingN + sp.hinderingN + sp.mixedN + sp.noneN && sp.n === survey4.filter(r => r.openEnded).length, `open text split: ${sp?.n ?? 0} responses = ${sp?.helpingN ?? 0} helping + ${sp?.hinderingN ?? 0} in the way + ${sp?.mixedN ?? 0} both + ${sp?.noneN ?? 0} N/A (all ${survey4.filter(r => r.openEnded).length} answers counted)`);
 }
 
 console.log(`\n${failures === 0 ? 'ALL CHECKS PASSED' : failures + ' CHECK(S) FAILED'}\n`);

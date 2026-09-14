@@ -654,7 +654,6 @@ function OpenTextCard({ quotes, label, question, themes, split }) {
     { key: 'helping',   title: 'Helping',        n: split.helpingN,   color: HELP,   items: split.helping },
     { key: 'hindering', title: 'In the way',     n: split.hinderingN, color: HINDER, items: split.hindering },
     { key: 'mixed',     title: 'Both',           n: split.mixedN,     color: '#59BEC9', items: split.mixed },
-    { key: 'unclear',   title: 'Not classified', n: split.unclearN,   color: 'var(--text-dim)', items: split.unclear },
     { key: 'none',      title: 'No answer',      n: split.noneN,      color: 'var(--text-dim)', items: split.none },
   ].filter(g => g.n > 0) : null;
   const shown = quotes.filter(q => q && q.trim().length > 3).slice(0, 12);
@@ -694,7 +693,7 @@ function OpenTextCard({ quotes, label, question, themes, split }) {
               {g.items.slice(0, 8).map((q, i) => <Quote key={i} q={q} color={g.color} />)}
             </div>
           ))}
-          {groups.filter(g => g.key === 'mixed' || g.key === 'unclear' || g.key === 'none').map(g => (
+          {groups.filter(g => g.key === 'mixed' || g.key === 'none').map(g => (
             <div key={g.key} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: g.color }}>{g.title} · {g.n}</span>
               {g.items.slice(0, 4).map((q, i) => <Quote key={i} q={q} color={g.color} />)}

@@ -1,5 +1,6 @@
 import { USE_CASE_THEMES, STRUGGLE_THEMES, EXCITEMENT_THEMES, USE_CASE_LABEL, STRUGGLE_LABEL, EXCITEMENT_LABEL } from './themes.js';
 import { BUILDER_LABELS, TEAM_LABELS, HUMAN_CANON } from './parseCSVs.js';
+import { classifyHelpHinder, splitHelpHinder } from './helpHinder.js';
 
 const DEV = typeof import.meta !== 'undefined' && import.meta.env ? Boolean(import.meta.env.DEV) : false;
 
@@ -72,42 +73,8 @@ export function waveSharePct(trend, waveKey, predicate) {
   return Math.min(100, rows.filter(predicate).reduce((s, e) => s + (e[waveKey]?.pct ?? 0), 0));
 }
 
-// Wave 4 Q14 classifier: is this one thing helping, or getting in the way?
-const HELP_CUES = [
-  /\bhelp(s|ing|ful|ed)?\b/i, /\bwhat'?s helping\b/i, /\baccess to\b/i, /\bbeing able to\b/i, /\bsaves?\b/i, /\btime sav/i,
-  /\buseful\b/i, /\bgreat\b/i, /\blove\b/i, /\beas(y|ier)\b/i, /\benabl/i, /\bsupport(ive|s|ed)?\b/i, /\btraining\b/i,
-  /\boffice hours\b/i, /\bposts?\b/i, /\bendorsed\b/i, /\bfaster\b/i, /\bimprov/i, /\bproductiv/i, /\bbenefi/i,
-];
-const HINDER_CUES = [
-  /\bblock(s|ed|ing)?\b/i, /\bin the way\b/i, /\bhurt(s|ing)?\b/i, /\bhinder/i, /\bbarrier/i, /\bnot enough\b/i,
-  /\black(s|ing)?\b/i, /\bno access\b/i, /\bcan'?t\b/i, /\bcannot\b/i, /\bunable\b/i, /\blimited\b/i, /\brestrict/i,
-  /\bhard to\b/i, /\bdifficult/i, /\bslow\b/i, /\btoo many\b/i, /\bdon'?t have\b/i, /\bnot allowed\b/i, /\bno time\b/i,
-  /\bbandwidth\b/i, /\bT&D\b/, /\bIT\b/, /\bpolic(y|ies)\b/i, /\bprohibit/i, /\bfear\b/i, /\bconcern/i, /\bfrustrat/i,
-  /\bnot sure\b/i, /\bunclear\b/i, /\bmissing\b/i, /\bwish\b/i, /\bneed(s)? (more|better)\b/i,
-];
-export function classifyHelpHinder(text) {
-  const s = (text || '').trim();
-  if (/^(n\/?a|none|nothing|no|nope|-+|\.+|\?+)$/i.test(s)) return 'none'; // typed a non-answer
-  if (s.length <= 3) return 'unclear';
-  const lead = s.slice(0, 24).toLowerCase();
-  if (/^(helping|what'?s helping|helpful)/.test(lead)) return 'helping';
-  if (/^(in the way|getting in the way|hurting|blocker|barrier)/.test(lead)) return 'hindering';
-  const help = HELP_CUES.filter(re => re.test(s)).length;
-  const hinder = HINDER_CUES.filter(re => re.test(s)).length;
-  if (help === 0 && hinder === 0) return 'unclear';
-  if (help > 0 && hinder > 0 && Math.abs(help - hinder) <= 1) return 'mixed';
-  return help > hinder ? 'helping' : 'hindering';
-}
-export function splitHelpHinder(texts) {
-  const out = { helping: [], hindering: [], mixed: [], unclear: [], none: [] };
-  for (const raw of texts || []) {
-    const q = (raw || '').trim();
-    if (!q) continue;
-    out[classifyHelpHinder(q)].push(q); // every submitted answer is counted, N/A-style ones under "none"
-  }
-  const n = out.helping.length + out.hindering.length + out.mixed.length + out.unclear.length + out.none.length;
-  return { ...out, n, helpingN: out.helping.length, hinderingN: out.hindering.length, mixedN: out.mixed.length, unclearN: out.unclear.length, noneN: out.none.length };
-}
+// Wave 4 Q14 classifier (helping vs in the way) lives in helpHinder.js; re-exported for the scripts.
+export { classifyHelpHinder, splitHelpHinder };
 
 // ─── Display ordering constants ───────────────────────────────────────────────
 
@@ -472,9 +439,9 @@ export function buildTransforms({ survey1, survey2, survey3, survey4 = [], s4Con
   const excitementThemesS4 = themesFor4(EXCITEMENT_THEMES, 'excitementThemes');
 
   // ── Wave 4 open question: helping vs getting in the way ───────────────────
-  // Deterministic cue scoring (no API). Each answer lands in one bucket; "mixed" when both
-  // sides are clearly present, "unclear" when neither cue fires. Feeds the Survey 4 tab card,
-  // the chat prompt and check-data.
+  // Deterministic clause-level scoring (no API, see helpHinder.js). Every answer lands in
+  // helping / in the way / both / no answer; there is no "unclear". Feeds the Survey 4 tab card,
+  // the chat prompt, check-data and check-classifier.
   const openEndedSplitS4 = splitHelpHinder(survey4.map(r => r.openEnded));
 
   // ── Raw open-ended text collections (for Claude API phases 4 + 7) ────────
