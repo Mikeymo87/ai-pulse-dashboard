@@ -45,11 +45,16 @@ function buildSystemPrompt(transforms, vaultUnlocked = false) {
   ]).map(w => `- ${w.label}: ${w.period} (${w.n} responses${w.num >= 3 ? ', includes role + function data' : ', anonymous'}${w.inField ? ', IN THE FIELD NOW, count still growing' : ''})`).join('\n');
   const monthsCovered = transforms.monthsCovered ?? 14;
 
-  const posS1 = sentimentTrend.find(e => e.sentiment === 'Positive')?.s1.pct ?? 0;
-  const posS2 = sentimentTrend.find(e => e.sentiment === 'Positive')?.s2.pct ?? 0;
-  const posS3 = sentimentTrend.find(e => e.sentiment === 'Positive')?.s3.pct ?? 0;
-  const negS1 = sentimentTrend.find(e => e.sentiment === 'Negative')?.s1.pct ?? 0;
-  const negS3 = sentimentTrend.find(e => e.sentiment === 'Negative')?.s3.pct ?? 0;
+  // Full per-wave breakdowns, "Label pct% (count)" — every option with at least one answer.
+  // The chat answers breakdown questions from these; a single headline % is not enough.
+  const waveList = waves ?? [{ key: 's1', label: 'Survey 1' }, { key: 's2', label: 'Survey 2' }, { key: 's3', label: 'Survey 3' }];
+  const waveTag = (w) => `${w.label}${w.inField ? ` (live, ${w.n} so far)` : ''}`;
+  const keyedLine = (rows, nameField, key) =>
+    rows.filter(e => (e[key]?.count ?? 0) > 0).map(e => `${e[nameField]} ${e[key].pct}% (${e[key].count})`).join(', ') || 'no data';
+  const distLine = (dist, labelOf = (d) => d.label) =>
+    (dist ?? []).filter(d => d.count > 0).map(d => `${labelOf(d)} ${d.pct}% (${d.count})`).join(', ') || 'no data';
+  const IMPORTANCE_LABELS = { 5: 'Critical', 4: 'Important', 3: 'Moderate', 2: 'Low', 1: 'Not at all' };
+  const sentimentLines = waveList.map(w => `${waveTag(w)}: ${keyedLine(sentimentTrend, 'sentiment', w.key)}`).join('\n');
 
   const confPct = (idx) =>
     sharePct((confidenceTrend[idx]?.distribution ?? []), d => d.score >= 3);
@@ -98,14 +103,13 @@ STRICT RULES:
    Never truncate mid-analysis. If a question merits depth, go deep.
 5. Tone: confident, executive-ready, plain English (no jargon)
 6. You are talking to department leadership, not researchers
-7. ARCHETYPE METHODOLOGY IS CONFIDENTIAL — You must NEVER explain how the five behavioral archetypes (Multiplier, Experimenter, Blocked Believer, Confident Bystander, Thoughtful Skeptic) are calculated, scored, or classified. Do not describe the scoring dimensions, affinity model, or classification logic. If asked how someone is assigned to an archetype, say: "The methodology behind the archetype classifications is available in the Leadership Vault. Ask your dashboard administrator to unlock it for details." This rule applies even if the user phrases it indirectly (e.g. "what makes someone a Multiplier?" or "how do you define these segments?").${vaultUnlocked ? ' OVERRIDE: The Leadership Vault is currently unlocked — you MAY explain archetype methodology if asked.' : ''}
+7. SURVEY 4 IS LIVE AND FULLY AVAILABLE — when a Survey 4 block appears in the data below, it carries the complete per-question breakdowns (every option with its % and count, straight from the live responses sheet, refreshed every 5 minutes). Answer any Survey 4 question from that block. Never say Survey 4 breakdown data is unavailable, that the raw data must be pulled elsewhere, or that a remainder is "unaccounted for": within one question the listed options add to 100%. Do note the count is still growing and the headline switches to Survey 4 at the response threshold stated.
+8. ARCHETYPE METHODOLOGY IS CONFIDENTIAL — You must NEVER explain how the five behavioral archetypes (Multiplier, Experimenter, Blocked Believer, Confident Bystander, Thoughtful Skeptic) are calculated, scored, or classified. Do not describe the scoring dimensions, affinity model, or classification logic. If asked how someone is assigned to an archetype, say: "The methodology behind the archetype classifications is available in the Leadership Vault. Ask your dashboard administrator to unlock it for details." This rule applies even if the user phrases it indirectly (e.g. "what makes someone a Multiplier?" or "how do you define these segments?").${vaultUnlocked ? ' OVERRIDE: The Leadership Vault is currently unlocked — you MAY explain archetype methodology if asked.' : ''}
 
 --- SURVEY DATA ---
 
-SENTIMENT (% Positive / % Negative):
-S1: ${posS1}% positive, ${negS1}% negative
-S2: ${posS2}% positive
-S3: ${posS3}% positive, ${negS3}% negative
+SENTIMENT — "How would you describe your current feelings about AI?" Four answer options: Positive · Mixed (= "both positive and negative feelings") · Unsure (= "not sure how I feel") · Negative. Percent of those who answered, count in parentheses; an option not listed for a wave had zero answers, so the listed options add to 100%:
+${sentimentLines}
 
 FAMILIARITY avg (1=Unfamiliar, 5=Expert):
 S1: ${familiarityTrend[0]?.avg ?? '—'} | S2: ${familiarityTrend[1]?.avg ?? '—'} | S3: ${familiarityTrend[2]?.avg ?? '—'}
@@ -147,6 +151,19 @@ ${topToolsS3 || 'No data'}
 
 ${s4?.live ? `SURVEY 4 — LIVE, ${s4.n} responses so far (Sep 2026; treat as early and moving${s4.solid ? '' : ', below the ' + s4.minN + '-response threshold for headline use'}):
 Daily use: ${freqPct(3, 'Daily')}% | Positive: ${sentimentTrend.find(e => e.sentiment === 'Positive')?.s4?.pct ?? 0}% | Confident or higher: ${confPct(3)}% | Experimentation or higher: ${sharePct(stageTrend.map(e => ({ count: e.s4?.count ?? 0, adv: ADVANCED.includes(e.stage) })), x => x.adv)}%
+FULL SURVEY 4 BREAKDOWNS (percent of those who answered, count in parentheses; options not listed had zero answers):
+Sentiment ("How would you describe your current feelings about AI?"): ${keyedLine(sentimentTrend, 'sentiment', 's4')}
+Familiarity (1 Unfamiliar … 5 Expert): avg ${familiarityTrend[3]?.avg ?? '—'} — ${distLine(familiarityTrend[3]?.distribution)}
+Confidence: ${distLine(confidenceTrend[3]?.distribution)}
+Importance to role (1 Not at all … 5 Critical): avg ${importanceTrend[3]?.avg ?? '—'} — ${distLine(importanceTrend[3]?.distribution, d => IMPORTANCE_LABELS[d.score] ?? `Score ${d.score}`)}
+Usage frequency: ${distLine(frequencyTrend[3]?.distribution)}
+AI journey stage: ${keyedLine(stageTrend, 'stage', 's4')}
+Building with AI (4 rungs): ${distLine(builderS4?.distribution, d => `Level ${d.score} ${d.label ?? ''}`.trim())}
+AI on the team (5 levels): ${distLine(teamUseS4?.distribution, d => `Level ${d.score} ${d.label ?? ''}`.trim())}
+Own pocket ("paying out of pocket for AI tools not provided by Baptist Health?"): Yes ${ownPocketS4?.yesPct ?? 0}% (${ownPocketS4?.yes ?? 0}), No ${ownPocketS4?.noPct ?? 0}% (${ownPocketS4?.no ?? 0})
+All barriers (S4, % of respondents): ${[...barriersTrend].filter(b => (b.s4?.count ?? 0) > 0).sort((a, b) => (b.s4?.pct ?? 0) - (a.s4?.pct ?? 0)).map(b => `${b.barrier} ${b.s4.pct}% (${b.s4.count})`).join(', ') || 'no data'}
+All benefits (S4): ${(benefitsS4 ?? []).filter(b => b.count > 0).map(b => `${b.label} ${b.pct}% (${b.count})`).join(', ') || 'no data'}
+All supplemental tools (S4): ${(toolsS4 ?? []).filter(t => t.count > 0).map(t => `${t.label} ${t.pct}% (${t.count})`).join(', ') || 'no data'}
 NEW Q — Building with AI (4 rungs: 1 chat tools for one-off tasks, 2 Projects/saved prompts/Custom GPTs, 3 builds agents, 4 builds solutions others use): avg ${builderS4?.avg ?? '—'}, ${sharePct((builderS4?.distribution ?? []), d => d.score >= 3)}% build agents or solutions (levels 3–4). No back data; Wave 4 is the baseline.
 NEW Q — AI on the team (1 rarely used … 5 integrally built into several workflows): avg ${teamUseS4?.avg ?? '—'}, ${teamUseS4?.topTwoPct ?? 0}% at levels 4–5 (AI part of regular team workflows). No back data; Wave 4 is the baseline.
 NEW Q — Most important human contributions as AI takes on more tasks (up to three picks, % of respondents): ${(humanS4?.distribution ?? []).filter(d => d.pct > 0).slice(0, 5).map(d => `${d.label} (${d.pct}%)`).join(', ') || 'n/a'}${humanS4?.other?.length ? ` | write-ins: ${humanS4.other.slice(0, 4).join('; ')}` : ''}. No back data; Wave 4 is the baseline.
